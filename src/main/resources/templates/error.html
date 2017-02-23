@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Error</title>
+</head>
+<body>
+    <div class="logo">
+            <h1 th:text="${errors.status}"></h1>
+    </div>
+    <p class="lead text-muted" th:text="${errors.message}">Unauthorized</p>
+    <p class="trace" th:if="${errors.trace}" th:text="${errors.trace}">trace</p>
+    <a href="/" class="btn btn primary">Go Home</a>
+</body>
+</html>
