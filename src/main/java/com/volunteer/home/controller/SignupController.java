@@ -48,7 +48,7 @@ public class SignupController {
         logger.debug(String.format("User created %s", user.toString()));
         user.setRole(myRoleRepository.findOne(2l));//ROLE_USER
         myUserRepository.save(user);
-        securityService.autologin(Long.toString(user.getId()), user.getPassword());
+        securityService.autologin(user.getEmail(), user.getPassword());
         return "redirect:/result";
     }
 
