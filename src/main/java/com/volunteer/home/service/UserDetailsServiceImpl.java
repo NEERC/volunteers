@@ -1,7 +1,9 @@
 package com.volunteer.home.service;
 
-import com.volunteer.home.entity.User;
-import com.volunteer.home.repository.MyUserRepository;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,9 +11,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.volunteer.home.entity.User;
+import com.volunteer.home.repository.MyUserRepository;
 
 /**
  * Created by Алексей on 22.02.2017.
@@ -23,16 +24,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private MyUserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
         UserDetails userDetails;
         try {
-            long id;
-            id = Long.parseLong(username);
-            User user = userRepository.findOne(id);
+            final User user = userRepository.findByEmailIgnoreCase(username);
             userDetails = new org.springframework.security.core.userdetails.User(
                     username, user.getPassword(), user.getAuth()
             );
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new UsernameNotFoundException(e.getMessage(), e);
         }
 
@@ -41,7 +40,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     static class DummyAuthority implements GrantedAuthority {
         static Collection<GrantedAuthority> getAuth() {
-            List<GrantedAuthority> res = new ArrayList<>();
+            final List<GrantedAuthority> res = new ArrayList<>();
             res.add(new DummyAuthority());
             return res;
         }

@@ -1,10 +1,11 @@
 package com.volunteer.home.repository;
 
-import com.volunteer.home.entity.User;
+import java.util.List;
+
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.volunteer.home.entity.User;
 
 /**
  * Created by Алексей on 21.02.2017.
@@ -13,4 +14,5 @@ import java.util.List;
 public interface MyUserRepository extends CrudRepository<User, Long> {
 
     List<User> findByName(String name);
+    User findByEmailIgnoreCase(String name);
 }
