@@ -1,6 +1,7 @@
 package com.volunteer.home.controller;
 
 import com.volunteer.home.entity.User;
+import com.volunteer.home.repository.MyRoleRepository;
 import com.volunteer.home.repository.MyUserRepository;
 import com.volunteer.home.service.SecurityService;
 import org.slf4j.Logger;
@@ -28,6 +29,9 @@ public class SignupController {
     MyUserRepository myUserRepository;
 
     @Autowired
+    MyRoleRepository myRoleRepository;
+
+    @Autowired
     SecurityService securityService;
 
     @GetMapping("/signup")
@@ -42,7 +46,7 @@ public class SignupController {
         }
 
         logger.debug(String.format("User created %s", user.toString()));
-
+        user.setRole(myRoleRepository.findOne(2l));//ROLE_USER
         myUserRepository.save(user);
         securityService.autologin(Long.toString(user.getId()), user.getPassword());
         return "redirect:/result";

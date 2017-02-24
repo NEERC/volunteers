@@ -30,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             id = Long.parseLong(username);
             User user = userRepository.findOne(id);
             userDetails = new org.springframework.security.core.userdetails.User(
-                    username, user.getPassword(), DummyAuthority.getAuth()
+                    username, user.getPassword(), user.getAuth()
             );
         } catch (Exception e) {
             throw new UsernameNotFoundException(e.getMessage(), e);

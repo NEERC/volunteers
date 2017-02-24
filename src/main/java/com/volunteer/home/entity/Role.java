@@ -1,5 +1,7 @@
 package com.volunteer.home.entity;
 
+import org.springframework.security.core.GrantedAuthority;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,7 +12,7 @@ import java.io.Serializable;
  * Created by Алексей on 23.02.2017.
  */
 @Entity
-public class Role implements Serializable {
+public class Role implements Serializable, GrantedAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -18,11 +20,6 @@ public class Role implements Serializable {
 
     private String name;
 
-    /*
-        @ManyToMany(cascade = CascadeType.ALL)
-        @JoinTable
-        private Set<User> users;
-    */
     public Role() {
     }
 
@@ -42,15 +39,11 @@ public class Role implements Serializable {
         this.name = name;
     }
 
-    /*
-        public Set<User> getUsers() {
-            return users;
-        }
+    @Override
+    public String getAuthority() {
+        return getName();
+    }
 
-        public void setUsers(Set<User> users) {
-            this.users = users;
-        }
-    */
     @Override
     public String toString() {
         return "Role{" +

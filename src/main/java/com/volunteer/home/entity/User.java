@@ -3,13 +3,13 @@ package com.volunteer.home.entity;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Алексей on 21.02.2017.
@@ -21,34 +21,38 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    long id;
+    private long id;
 
     @NotEmpty(message = "надо написать имя")
     @Size(max = 50)
-    String name;
+    private String name;
 
     @NotEmpty(message = "надо написать фамилию")
     @Size(max = 50)
-    String surname;
+    private String surname;
 
     @NotEmpty(message = "надо придумать пароль")
     @Size(max = 250)
-    String password;
+    private String password;
 
     @NotNull(message = "надо подтвердить пароль")
     @Size(max = 250)
-    transient String confirmPassword;
+    transient private String confirmPassword;
 
     @NotEmpty(message = "надо придумать badge name")
     @Size(max = 50)
-    String badge;
+    private String badge;
 
     @NotEmpty(message = "надо указать email")
     @Size(max = 250)
     @Email
-    String email;
+    private String email;
 
-    boolean passwordEquals;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE,CascadeType.PERSIST})
+    //@Column(name = "role_id", nullable = false)
+    private Role role;
+
+    transient private boolean passwordEquals;
 /*
     @ManyToMany(mappedBy = "user_roles")
     private Set<Role> roles;*/
@@ -117,14 +121,20 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
-/*
-    public Set<Role> getRoles() {
-        return roles;
+
+    public Role getRole() {
+        return role;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }*/
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public Collection<Role> getAuth() {
+        List<Role> roles=new ArrayList<>(1);
+        roles.add(getRole());
+        return roles;
+    }
 
     @Override
     public String toString() {
