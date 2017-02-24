@@ -2,7 +2,9 @@ package com.volunteer.home.config;
 
 import com.volunteer.home.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,14 +26,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/result","/").hasAnyRole("USER","ADMIN")
                 .antMatchers( "/login", "/signup").permitAll()
                 .and()
-                .formLogin().failureForwardUrl("/login?error")
+                .formLogin().failureUrl("/login?error")
                 .defaultSuccessUrl("/result")
-                .loginProcessingUrl("/login")
                 .loginPage("/login")
+                .loginProcessingUrl("/login")
                 .usernameParameter("username")
                 .passwordParameter("password").permitAll()
                 .and()
                 .logout().logoutSuccessUrl("/login?logout").permitAll()
+                .and().csrf()
                 .and().exceptionHandling().accessDeniedPage("/403");
     }
 

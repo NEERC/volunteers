@@ -15,8 +15,6 @@ import java.util.List;
  * Created by Алексей on 21.02.2017.
  */
 @Entity
-/*@FieldMatch.List(value =
-        {@FieldMatch(first = "password",second = "confirmPassword",message = "Пароли не совпадают")})*/
 public class User {
 
     @Id
