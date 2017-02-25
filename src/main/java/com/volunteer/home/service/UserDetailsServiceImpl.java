@@ -1,9 +1,7 @@
 package com.volunteer.home.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import com.volunteer.home.entity.User;
+import com.volunteer.home.repository.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,8 +9,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.volunteer.home.entity.User;
-import com.volunteer.home.repository.MyUserRepository;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Алексей on 22.02.2017.

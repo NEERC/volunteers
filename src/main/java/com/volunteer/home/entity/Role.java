@@ -1,14 +1,12 @@
 package com.volunteer.home.entity;
 
-import java.io.Serializable;
+import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-
-import org.springframework.security.core.GrantedAuthority;
-
-import lombok.Data;
+import java.io.Serializable;
 
 /**
  * Created by Алексей on 23.02.2017.

@@ -9,6 +9,9 @@
     <form th:action="@{/logout}" method="post">
         <button type="submit">Log out</button>
     </form>
+    <table>
+        <tr>
+            <td>
 
     <ul>
         <th:block th:each="year : ${current_years}">
@@ -17,6 +20,26 @@
             </li>
         </th:block>
     </ul>
+            </td>
+            <td>
+                <ul>
+                    <th:block th:each="position:${positions}">
+                        <li th:text="${position}">
+
+                        </li>
+                    </th:block>
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    <th:block th:each="hall:${halls}">
+                        <li th:text="${hall}"></li>
+                    </th:block>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>
     <form th:action="@{/admin/year/add}" method="post" th:object="${year}">
         <table>
             <tr>
@@ -36,6 +59,52 @@
             </tr>
         </table>
     </form>
+            </td>
+            <td>
+                <form th:action="@{/admin/position/add}" method="post" th:object="${position}">
+                    <table>
+                        <tr>
+                            <td>
+                                Имя должности:
+                            </td>
+                            <td>
+                                <input type="text" th:field="*{name}" />
+                            </td>
+                            <td th:if="${#fields.hasErrors('name')}" th:error="${name}">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button type="submit">Add</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+            <td>
+                <form th:action="@{/admin/hall/add}" method="post" th:object="${hall}">
+                    <table>
+                        <tr>
+                            <td>
+                                Имя подразделения:
+                            </td>
+                            <td>
+                                <input type="text" th:field="*{name}" />
+                            </td>
+                            <td th:if="${#fields.hasErrors('name')}" th:error="${name}">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button type="submit">Add</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+        </tr>
+    </table>
+
 
 <!--
 todo: menu for admin:

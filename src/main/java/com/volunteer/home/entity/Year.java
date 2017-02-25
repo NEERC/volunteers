@@ -1,6 +1,8 @@
 package com.volunteer.home.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
@@ -12,6 +14,8 @@ import java.util.Set;
  */
 @Data
 @Entity
+@EqualsAndHashCode(exclude = {"users"})
+@ToString(exclude = {"users"})
 public class Year {
 
     @Id
@@ -26,7 +30,10 @@ public class Year {
 
     private boolean current;
 
-    @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL,mappedBy = "year")
-    @OrderBy("name ASC")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year")
+    @OrderBy("id ASC")
     private Set<Event> events;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year")
+    private Set<UserYear> users;
 }

@@ -1,32 +1,25 @@
 package com.volunteer.home.entity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
+import lombok.Data;
+import lombok.ToString;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import lombok.Data;
+import javax.persistence.*;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Алексей on 21.02.2017.
  */
 @Entity
 @Data
-@Table(indexes={@Index(columnList="email", unique=true)})
+@ToString(exclude = {"password","confirmPassword","role","passwordEquals","id"})
+@Table(indexes = {@Index(columnList = "email", unique = true)})
 public class User {
 
     @Id
@@ -58,7 +51,7 @@ public class User {
     @Email
     private String email;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE,CascadeType.PERSIST})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     //@Column(name = "role_id", nullable = false)
     private Role role;
 
@@ -74,7 +67,7 @@ public class User {
     }
 
     public Collection<Role> getAuth() {
-        final List<Role> roles=new ArrayList<>(1);
+        final List<Role> roles = new ArrayList<>(1);
         roles.add(getRole());
         return roles;
     }
