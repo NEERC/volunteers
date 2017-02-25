@@ -1,5 +1,6 @@
 package com.volunteer.home.config;
 
+import com.volunteer.home.service.SecuritySuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -19,18 +20,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
+    @Autowired
+    SecuritySuccessHandler successHandler;
+
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         // @formatter:off
         http
             .authorizeRequests()
-                .antMatchers("/admin", "/users").hasAnyRole("ADMIN")
+                .antMatchers("/admin/**", "/users/**").hasAnyRole("ADMIN")
                 .antMatchers("/result","/").hasAnyRole("USER","ADMIN")
                 .antMatchers( "/login", "/signup").permitAll()
         .and()
             .formLogin()
                 .failureUrl("/login?error")
-                .defaultSuccessUrl("/result")
+                .successHandler(successHandler)
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
                 .usernameParameter("username")

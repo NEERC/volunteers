@@ -1,10 +1,16 @@
 package com.volunteer.home.controller;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.validation.constraints.AssertTrue;
+import java.util.Collection;
 
 /**
  * Created by Алексей on 17.02.2017.
@@ -17,6 +23,7 @@ public class LoginController {
                         @RequestParam(value = "signup", required = false) String signup,
                         @RequestParam(value = "logout", required = false) String logout,
                         Model model) {
+
         if (error != null) {
             model.addAttribute("error", "Invalid UserId or Password");
 
