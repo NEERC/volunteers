@@ -6,6 +6,7 @@ import com.volunteer.home.repository.MyHallRepository;
 import com.volunteer.home.repository.MyPositionRepository;
 import com.volunteer.home.repository.MyYearRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,7 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.net.HttpRetryException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -98,10 +104,43 @@ public class AdminController {
         return "redirect:/admin/year?id=" + event.getYear().getId();
     }
 
-    @RequestMapping(value = "/event")
+    @RequestMapping(value = "event")
     public String showEvent(@RequestParam(value = "id") long id, Model model) {
+        Event event=eventRepository.findOne(id);
+        Set<UserEvent> users=event.getUsers();
+        HashMap<Hall,List<UserEvent>> hallUser=new HashMap<>();
+        for(UserEvent user:users) {
+            if(!hallUser.containsKey(user.getHall()))
+                hallUser.put(user.getHall(),new ArrayList<>());
+            hallUser.get(user.getHall()).add(user);
+        }
+        Set<Hall> halls=hallRepository.findAll();
+        for(Hall hall:halls) {
+            if(!hallUser.containsKey(hall))
+                hallUser.put(hall,new ArrayList<>());
+        }
+        model.addAttribute("hallUser",hallUser);
+        model.addAttribute("event",event);
+        model.addAttribute("halls",hallRepository.findAll());
+        return "showEvent";
+    }
+
+    @RequestMapping(value = "/event/edit")
+    public String editEvent(@RequestParam(value = "id") long id, Model model) {
         Event event = eventRepository.findOne(id);
         model.addAttribute("event", event);
+        model.addAttribute("users", event.getYear().getUsers());
+        model.addAttribute("positions",positionRepository.findAll());
+        model.addAttribute("halls", hallRepository.findAll());
+        //todo: edit event, when some volunteers already chosen
         return "event";
+    }
+
+    @RequestMapping(value = "/event/save")
+    public String save(HttpServletRequest request) {
+
+        String str=request.getParameter("p1");
+        //todo: save event
+        return "redirect:/admin/";
     }
 }

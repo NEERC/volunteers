@@ -6,14 +6,15 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Set;
 
 /**
  * Created by Lapenok Akesej on 25.02.2017.
  */
 @Data
 @Entity
-@EqualsAndHashCode(exclude = "year")
-@ToString(exclude = "year")
+@EqualsAndHashCode(exclude = {"year","users"})
+@ToString(exclude = {"year","users"})
 public class Event {
 
     @Id
@@ -29,4 +30,7 @@ public class Event {
 
     @NotNull
     private String information;
+
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "event")
+    Set<UserEvent> users;
 }

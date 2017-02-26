@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+</head>
+<body>
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Log out</button>
+    <a th:href="'/admin/year?id='+${event.year.id}" >Back</a>
+</form>
+<a th:href="'/admin/event/edit?id='+${event.id}">Edit</a>
+<table>
+    <th:block th:each="hall:${halls}">
+        <tr>
+            <td th:text="${hall}"></td>
+            <td>
+                <ul>
+                    <th:block th:each="user:${hallUser.get(hall)}">
+                        <li th:text="${user}"></li>
+                    </th:block>
+                </ul>
+            </td>
+        </tr>
+    </th:block>
+</table>
+</body>
+</html>

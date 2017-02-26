@@ -1,10 +1,42 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8" />
     <title th:text="${event.name}">Title</title>
 </head>
 <body>
-    <a th:href="'/admin/year?id='+${event.year.id}" >Back</a>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Log out</button>
+        <a th:href="'/admin/year?id='+${event.year.id}" >Back</a>
+    </form>
+    <form th:action="@{/admin/event/save}" method="post">
+        <input type="hidden" th:name="event" th:value="${event.id}"/>
+        <table>
+        <th:block th:each="user:${users}">
+            <tr>
+                <td th:text="${user}"></td>
+                <td>
+                    <ul>
+                    <th:block th:each="position:${positions}">
+                        <li>
+                            <input type="radio" th:name="p+${user.id}" th:value="${position.id}" /><span th:text="${position}"></span>
+                        </li>
+                    </th:block>
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        <th:block th:each="hall:${halls}">
+                            <li>
+                                <input type="radio" th:name="h+${user.id}" th:value="${hall.id}" /><span th:text="${hall}"></span>
+                            </li>
+                        </th:block>
+                    </ul>
+                </td>
+            </tr>
+        </th:block>
+        </table>
+        <button type="submit" >save</button>
+    </form>
 </body>
 </html>
