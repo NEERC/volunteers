@@ -1,10 +1,7 @@
 package com.volunteer.home.controller;
 
 import com.volunteer.home.entity.*;
-import com.volunteer.home.repository.MyEventRepository;
-import com.volunteer.home.repository.MyHallRepository;
-import com.volunteer.home.repository.MyPositionRepository;
-import com.volunteer.home.repository.MyYearRepository;
+import com.volunteer.home.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
@@ -18,10 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.net.HttpRetryException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Lapenok Akesej on 25.02.2017.
@@ -41,6 +35,9 @@ public class AdminController {
 
     @Autowired
     MyHallRepository hallRepository;
+
+    @Autowired
+    UserEventRepository userEventRepository;
 
     @RequestMapping(method = RequestMethod.GET)
     public String admin(Year year, Position position, Hall hall, Model model) {
@@ -97,10 +94,24 @@ public class AdminController {
     public String addEvent(@Valid @ModelAttribute("event") Event event, BindingResult result) {
         Year year = event.getYear();
         if (result.hasErrors()) {
-            return "/admin/year?id=" + year.getId();
+            if(year!=null)
+                return "/admin/year?id=" + year.getId();
+            else
+                return "redirect:/admin";
         }
         eventRepository.save(event);
         year.getEvents().add(event);
+        Set<UserYear> users=year.getUsers();
+        Position position=positionRepository.findOne(1l);//default position
+        Hall hall=hallRepository.findOne(1l);//default hall
+        for (UserYear user : users) {
+            UserEvent userEvent=new UserEvent();
+            userEvent.setEvent(event);
+            userEvent.setHall(hall);
+            userEvent.setPosition(position);
+            userEvent.setUserYear(user);
+            userEventRepository.save(userEvent);//save new user
+        }
         return "redirect:/admin/year?id=" + event.getYear().getId();
     }
 
@@ -129,18 +140,25 @@ public class AdminController {
     public String editEvent(@RequestParam(value = "id") long id, Model model) {
         Event event = eventRepository.findOne(id);
         model.addAttribute("event", event);
-        model.addAttribute("users", event.getYear().getUsers());
+        model.addAttribute("users", event.getUsers());
         model.addAttribute("positions",positionRepository.findAll());
         model.addAttribute("halls", hallRepository.findAll());
-        //todo: edit event, when some volunteers already chosen
         return "event";
     }
 
     @RequestMapping(value = "/event/save")
     public String save(HttpServletRequest request) {
-
-        String str=request.getParameter("p1");
+        Event event=eventRepository.findOne(Long.parseLong(request.getParameter("event")));
+        Set<UserEvent> users=event.getUsers();
+        for(UserEvent user : users) {
+            user.setPosition(positionRepository.findOne(
+                    Long.parseLong(request.getParameter("p"+user.getId()))));
+            user.setHall(hallRepository.findOne(
+                    Long.parseLong(request.getParameter("h"+user.getId()))
+            ));
+            userEventRepository.save(user);
+        }
         //todo: save event
-        return "redirect:/admin/";
+        return "redirect:/admin/event?id="+event.getId();
     }
 }

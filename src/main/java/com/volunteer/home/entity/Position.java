@@ -23,4 +23,7 @@ public class Position {
     @NotNull
     @NotEmpty
     private String name;
+
+    @NotNull
+    private boolean def=false;
 }

@@ -14,12 +14,12 @@
         <table>
         <th:block th:each="user:${users}">
             <tr>
-                <td th:text="${user}"></td>
+                <td th:text="${user.userYear}"></td>
                 <td>
                     <ul>
                     <th:block th:each="position:${positions}">
                         <li>
-                            <input type="radio" th:name="p+${user.id}" th:value="${position.id}" /><span th:text="${position}"></span>
+                            <input type="radio" th:name="p+${user.id}" th:value="${position.id}" th:checked="${position.id}==${user.position.id}" /><span th:text="${position}"></span>
                         </li>
                     </th:block>
                     </ul>
@@ -28,7 +28,7 @@
                     <ul>
                         <th:block th:each="hall:${halls}">
                             <li>
-                                <input type="radio" th:name="h+${user.id}" th:value="${hall.id}" /><span th:text="${hall}"></span>
+                                <input type="radio" th:name="h+${user.id}" th:value="${hall.id}" th:checked="${hall.id}==${user.hall.id}" /><span th:text="${hall}"></span>
                             </li>
                         </th:block>
                     </ul>

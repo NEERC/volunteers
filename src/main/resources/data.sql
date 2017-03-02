@@ -5,4 +5,12 @@ INSERT IGNORE INTO role VALUES
 
 -- admin
 INSERT IGNORE INTO user VALUE
-  (1, 'lapenok', 'lapenok.aleksej@gmail.com', 'aleksej', '123', 'lapenok', 1);
+  (1, 'Lapenok Aleksej', 'lapenok.aleksej@gmail.com', 'Алексей', '123', 'Лапенок', 1);
+
+-- default positions
+INSERT IGNORE INTO position VALUE
+  (1,'replacement',TRUE );
+
+-- default hall
+INSERT IGNORE INTO hall VALUE
+  (1,'replacement');
