@@ -31,6 +31,6 @@ public class Event {
     @NotNull
     private String information;
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "event")
+    @OneToMany(fetch = FetchType.LAZY)
     Set<UserEvent> users;
 }

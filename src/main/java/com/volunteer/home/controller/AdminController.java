@@ -101,7 +101,9 @@ public class AdminController {
         }
         eventRepository.save(event);
         year.getEvents().add(event);
+        yearRepository.save(year);
         Set<UserYear> users=year.getUsers();
+        event.setUsers(new HashSet<>());
         Position position=positionRepository.findOne(1l);//default position
         Hall hall=hallRepository.findOne(1l);//default hall
         for (UserYear user : users) {
@@ -111,7 +113,9 @@ public class AdminController {
             userEvent.setPosition(position);
             userEvent.setUserYear(user);
             userEventRepository.save(userEvent);//save new user
+            event.getUsers().add(userEvent);
         }
+        eventRepository.save(event);
         return "redirect:/admin/year?id=" + event.getYear().getId();
     }
 
