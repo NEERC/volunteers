@@ -1,14 +1,73 @@
+
 @startuml
 
-package "Some Group" {
-HTTP - [First Component]
-[Another Component]
+class Event {
+    long id
+    Year year
+    String name
+    String information
+    Set<UserEvent> users
 }
 
-package "Other Groups" {
-FTP - [Second Component]
-
-[First Component] --> FTP
+class Hall {
+    long id
+    String name
 }
+
+class Position {
+    long id
+    String name
+}
+
+class Role {
+    long id
+    String name
+}
+
+class User {
+    long id
+    String name
+    String surname
+    String password
+    String badge
+    String email
+    Role role
+}
+
+class UserEvent {
+    long id
+    UserYear userYear
+    Event event
+    Position position
+    Hall hall
+}
+
+class UserYear {
+    long id
+    User user
+    Year year
+    Set<Position> positions //желаемые позиции
+    String suggestions
+}
+
+class Year {
+    long id
+    String name
+    Set<UserYear> users
+}
+
+User --> Role : role
+UserYear "one" --> "many" Position : positions
+UserYear --> User : user
+Year "one" --> "many" UserYear : users
+
+UserYear --> Year : year
+
+UserEvent --> UserYear : userYear
+UserEvent --> Hall : hall
+UserEvent --> Position : position
+UserEvent --> Event : event
+
+Event "one" --> "many" UserEvent : users
 
 @enduml
