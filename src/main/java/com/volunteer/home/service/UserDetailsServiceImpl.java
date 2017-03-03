@@ -36,17 +36,4 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         return userDetails;
     }
-
-    static class DummyAuthority implements GrantedAuthority {
-        static Collection<GrantedAuthority> getAuth() {
-            final List<GrantedAuthority> res = new ArrayList<>();
-            res.add(new DummyAuthority());
-            return res;
-        }
-
-        @Override
-        public String getAuthority() {
-            return "ROLE_USER";
-        }
-    }
 }

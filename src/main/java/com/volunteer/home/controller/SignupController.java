@@ -7,6 +7,7 @@ import com.volunteer.home.service.SecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,6 +35,9 @@ public class SignupController {
     @Autowired
     SecurityService securityService;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     @GetMapping("/signup")
     public String signup(User user) {
         return "signup";
@@ -45,10 +49,13 @@ public class SignupController {
             return "signup";
         }
 
+        String password = user.getPassword();
+        user.setPassword(passwordEncoder.encode(password));
+        user.setConfirmPassword(user.getPassword());
         logger.debug(String.format("User created %s", user.toString()));
         user.setRole(myRoleRepository.findOne(2l));//ROLE_USER
         myUserRepository.save(user);
-        securityService.autologin(user.getEmail(), user.getPassword());
+        securityService.autologin(user.getEmail(), password);
         return "redirect:/result";
     }
 

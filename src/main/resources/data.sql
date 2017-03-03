@@ -3,9 +3,10 @@ INSERT IGNORE INTO role VALUES
   (1, 'ROLE_ADMIN'),
   (2, 'ROLE_USER');
 
--- admin
+-- admin: login 'lapenok.aleksej@gmail.com', password='123'
 INSERT IGNORE INTO user VALUE
-  (1, 'Lapenok Aleksej', 'lapenok.aleksej@gmail.com', 'Алексей', '123', 'Лапенок', 1);
+  (1, 'Lapenok Aleksej', 'lapenok.aleksej@gmail.com', 'Алексей', '$2a$10$jw5JfVPuTYmVl6WpxCT0R.NcMxHr9Z1HZf445oSebT0VmRg72Tcxq', 'Лапенок', 1);
+
 
 -- default positions
 INSERT IGNORE INTO position VALUE
