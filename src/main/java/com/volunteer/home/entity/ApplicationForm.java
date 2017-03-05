@@ -1,7 +1,6 @@
 package com.volunteer.home.entity;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -13,7 +12,7 @@ import java.util.Set;
 @Entity
 @Data
 @ToString(exclude = {"id","year"},includeFieldNames = false)
-public class UserYear {
+public class ApplicationForm {
 
     @Id
     @GeneratedValue
@@ -30,4 +29,7 @@ public class UserYear {
     private Set<Position> position;
 
     private String suggestions;
+
+    @Column(name = "`group`")
+    private String group;
 }

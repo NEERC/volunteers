@@ -1,7 +1,6 @@
 package com.volunteer.home.entity;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -19,7 +18,7 @@ public class UserEvent {
 
     @JoinColumn(name = "userYear")
     @ManyToOne(fetch = FetchType.LAZY)
-    UserYear userYear;
+    ApplicationForm userYear;
 
     @JoinColumn(name = "event")
     @ManyToOne(fetch = FetchType.LAZY)

@@ -36,5 +36,5 @@ public class Year {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @OrderBy(value = "id ASC ")
-    private Set<UserYear> users;
+    private Set<ApplicationForm> users;
 }

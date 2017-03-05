@@ -28,11 +28,17 @@ public class User {
 
     @NotEmpty(message = "надо написать имя")
     @Size(max = 50)
-    private String name;
+    private String firstName;
 
     @NotEmpty(message = "надо написать фамилию")
     @Size(max = 50)
-    private String surname;
+    private String lastName;
+
+    @NotEmpty
+    private String firstNameCyr;
+
+    @NotEmpty
+    private String lastNameCyr;
 
     @NotEmpty(message = "надо придумать пароль")
     @Size(max = 250)
@@ -42,9 +48,12 @@ public class User {
     @Size(max = 250)
     transient private String confirmPassword;
 
-    @NotEmpty(message = "надо придумать badge name")
+    @NotEmpty(message = "надо придумать badgeName firstName")
     @Size(max = 50)
-    private String badge;
+    private String badgeName;
+
+    @NotEmpty
+    private String badgeNameCyr;
 
     @NotEmpty(message = "надо указать email")
     @Size(max = 250)
@@ -52,13 +61,10 @@ public class User {
     private String email;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    //@Column(name = "role_id", nullable = false)
+    //@Column(firstName = "role_id", nullable = false)
     private Role role;
 
     transient private boolean passwordEquals;
-/*
-    @ManyToMany(mappedBy = "user_roles")
-    private Set<Role> roles;*/
 
     @AssertTrue(message = "Пароли не совпадают")
     public boolean isPasswordEquals() {

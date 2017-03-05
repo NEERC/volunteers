@@ -3,7 +3,6 @@ package com.volunteer.home.controller;
 import com.volunteer.home.entity.*;
 import com.volunteer.home.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.net.HttpRetryException;
 import java.util.*;
 
 /**
@@ -85,7 +83,7 @@ public class AdminController {
         model.addAttribute("year", year);
         event.setYear(year);
         model.addAttribute("events", year.getEvents());
-        Set<UserYear>users=year.getUsers();
+        Set<ApplicationForm>users=year.getUsers();
         model.addAttribute("users",users);
         return "year";
     }
@@ -102,11 +100,11 @@ public class AdminController {
         eventRepository.save(event);
         year.getEvents().add(event);
         yearRepository.save(year);
-        Set<UserYear> users=year.getUsers();
+        Set<ApplicationForm> users=year.getUsers();
         event.setUsers(new HashSet<>());
         Position position=positionRepository.findOne(1l);//default position
         Hall hall=hallRepository.findOne(1l);//default hall
-        for (UserYear user : users) {
+        for (ApplicationForm user : users) {
             UserEvent userEvent=new UserEvent();
             userEvent.setEvent(event);
             userEvent.setHall(hall);

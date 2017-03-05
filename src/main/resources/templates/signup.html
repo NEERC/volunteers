@@ -9,13 +9,13 @@
         <table>
             <tr>
                 <td>Имя:</td>
-                <td><input type="text" th:field="*{name}" /></td>
-                <td th:id="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</td>
+                <td><input type="text" th:field="*{firstName}" /></td>
+                <td th:id="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Name Error</td>
             </tr>
             <tr>
                 <td>Фамилия:</td>
-                <td><input type="text" th:field="*{surname}" /></td>
-                <td th:if="${#fields.hasErrors('surname')}" th:errors="*{surname}">Surname Error</td>
+                <td><input type="text" th:field="*{lastName}" /></td>
+                <td th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Surname Error</td>
             </tr>
             <tr>
                 <td>Email:</td>
@@ -23,9 +23,9 @@
                 <td th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email Error</td>
             </tr>
             <tr>
-                <td>Badge name:</td>
-                <td><input type="text" th:field="*{badge}" /></td>
-                <td th:if="${#fields.hasErrors('badge')}" th:errors="*{badge}">BadgeName Error</td>
+                <td>Badge firstName:</td>
+                <td><input type="text" th:field="*{badgeName}" /></td>
+                <td th:if="${#fields.hasErrors('badgeName')}" th:errors="*{badgeName}">BadgeName Error</td>
             </tr>
 
             <tr>

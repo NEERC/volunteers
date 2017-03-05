@@ -12,7 +12,5 @@ import java.util.List;
 @Repository
 public interface MyUserRepository extends CrudRepository<User, Long> {
 
-    List<User> findByName(String name);
-
     User findByEmailIgnoreCase(String name);
 }

@@ -26,44 +26,49 @@ class Role {
 
 class User {
     long id
-    String name
-    String surname
+    String firstName
+    String lastName
+    String firstNameCyr
+    String lastNameCyr
     String password
-    String badge
+    String badgeName
+    String badgeNameCyr
     String email
     Role role
 }
 
 class UserEvent {
     long id
-    UserYear userYear
+    ApplicationForm
+    userYear
     Event event
     Position position
     Hall hall
 }
 
-class UserYear {
+class ApplicationForm {
     long id
     User user
     Year year
     Set<Position> positions //желаемые позиции
     String suggestions
+    String group
 }
 
 class Year {
     long id
     String name
-    Set<UserYear> users
+    Set<ApplicationFrom> users
 }
 
 User --> Role : role
-UserYear "one" --> "many" Position : positions
-UserYear --> User : user
-Year "one" --> "many" UserYear : users
+ApplicationForm "one" --> "many" Position : positions
+ApplicationForm --> User : user
+Year "one" --> "many" ApplicationForm : users
 
-UserYear --> Year : year
+ApplicationForm --> Year : year
 
-UserEvent --> UserYear : userYear
+UserEvent --> ApplicationForm : userYear
 UserEvent --> Hall : hall
 UserEvent --> Position : position
 UserEvent --> Event : event
