@@ -8,14 +8,24 @@
     <form action="#" th:action="@{/signup}" th:object="${user}" method="post" >
         <table>
             <tr>
-                <td>Имя:</td>
+                <td>First name:</td>
                 <td><input type="text" th:field="*{firstName}" /></td>
                 <td th:id="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Name Error</td>
             </tr>
             <tr>
-                <td>Фамилия:</td>
+                <td>Last name:</td>
                 <td><input type="text" th:field="*{lastName}" /></td>
                 <td th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Surname Error</td>
+            </tr>
+            <tr>
+                <td>Имя:</td>
+                <td><input type="text" th:field="*{firstNameCyr}" /></td>
+                <td th:id="${#fields.hasErrors('firstNameCyr')}" th:errors="*{firstNameCyr}">Name Error</td>
+            </tr>
+            <tr>
+                <td>Фамилия:</td>
+                <td><input type="text" th:field="*{lastNameCyr}" /></td>
+                <td th:if="${#fields.hasErrors('lastNameCyr')}" th:errors="*{lastNameCyr}">Surname Error</td>
             </tr>
             <tr>
                 <td>Email:</td>
@@ -23,11 +33,15 @@
                 <td th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email Error</td>
             </tr>
             <tr>
-                <td>Badge firstName:</td>
+                <td>Badge name:</td>
                 <td><input type="text" th:field="*{badgeName}" /></td>
                 <td th:if="${#fields.hasErrors('badgeName')}" th:errors="*{badgeName}">BadgeName Error</td>
             </tr>
-
+            <tr>
+                <td>Badge name cyr:</td>
+                <td><input type="text" th:field="*{badgeNameCyr}" /></td>
+                <td th:if="${#fields.hasErrors('badgeNameCyr')}" th:errors="*{badgeNameCyr}">BadgeName Error</td>
+            </tr>
             <tr>
                 <td>Пароль</td>
                 <td><input type="password" th:field="*{password}" /> </td>
