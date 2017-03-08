@@ -1,5 +1,5 @@
 spring:
   jpa:
-    database: hsql
+    database: HSQL
   datasource:
     initialize: false

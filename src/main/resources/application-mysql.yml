@@ -13,7 +13,3 @@ spring:
     password: root
     driver-class-name: com.mysql.jdbc.Driver
     initialize: true
-server:
-  context-path: /volunteers
-
-

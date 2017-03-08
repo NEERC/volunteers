@@ -1,4 +1,6 @@
 spring:
   profiles:
-    active: dev
-
+    active:
+      mysql
+server:
+  context-path: /volunteers
