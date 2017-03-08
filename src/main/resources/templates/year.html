@@ -7,7 +7,7 @@
 <body>
     <form th:action="@{/logout}" method="post">
         <button type="submit">Log out</button>
-        <a href="/admin">Back</a><br/>
+        <a th:href="@{/admin}">Back</a><br/>
     </form>
 
     <table>

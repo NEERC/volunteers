@@ -54,11 +54,6 @@
                 <td th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Confirm password Error</td>
                 <td th:if="${#fields.hasErrors('passwordEquals')}" th:errors="*{passwordEquals}">Confirm password Error</td>
             </tr>
-
-            <!--
-            todo: write other inputs
-            -->
-
             <tr>
                 <td><button type="submit">Submit</button> </td>
             </tr>

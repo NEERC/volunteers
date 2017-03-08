@@ -8,10 +8,13 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5Dialect
   datasource:
-    url: jdbc:mysql://localhost:3306/volunteers
-    username: volunteers
-    password: volunteers
+    url: jdbc:mysql://localhost:3306/volonteer
+    username: root
+    password: root
     driver-class-name: com.mysql.jdbc.Driver
-    initialize: false
+    initialize: true
+server:
+  context-path: /volunteers
+
     
  

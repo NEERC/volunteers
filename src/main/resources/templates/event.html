@@ -7,8 +7,22 @@
 <body>
     <form th:action="@{/logout}" method="post">
         <button type="submit">Log out</button>
-        <a th:href="'/admin/year?id='+${event.year.id}" >Back</a>
+        <a th:href="@{'/admin/event?id='+${event.id}}" >Back</a>
     </form>
+
+    <th:block th:if="${!events.isEmpty()}">
+
+    <form th:action="@{/admin/event/copy}" method="post">
+        <input type="hidden" th:name="event" th:value="${event.id}" />
+            <select name="baseEvent">
+                <th:block th:each="e:${events}">
+                    <option th:value="${e.id}" th:text="${e.name}"></option>
+                </th:block>
+            </select>
+        <input type="submit" th:value="copy" />
+    </form>
+
+    </th:block>
     <form th:action="@{/admin/event/save}" method="post">
         <input type="hidden" th:name="event" th:value="${event.id}"/>
         <table>
