@@ -1,6 +1,13 @@
 spring:
   profiles:
     active:
-      mysql
+      - mysql
+
+  thymeleaf:
+    prefix:  /WEB-INF/view/
+    suffix: .html
+    cache: false
+      
 server:
   context-path: /volunteers
+  

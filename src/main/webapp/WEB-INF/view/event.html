@@ -5,10 +5,8 @@
     <title th:text="${event.name}">Title</title>
 </head>
 <body>
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">Log out</button>
+<div th:fragment="content">
         <a th:href="@{'/admin/event?id='+${event.id}}" >Back</a>
-    </form>
 
     <th:block th:if="${!events.isEmpty()}">
 
@@ -52,5 +50,6 @@
         </table>
         <button type="submit" >save</button>
     </form>
+    </div>
 </body>
 </html>

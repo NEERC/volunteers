@@ -5,10 +5,8 @@
     <title>Title</title>
 </head>
 <body>
-
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">Log out</button>
-    </form>
+<div th:fragment="content">
+    
     <table>
         <tr>
             <td>
@@ -104,6 +102,6 @@
             </td>
         </tr>
     </table>
-
+</div>
 </body>
 </html>

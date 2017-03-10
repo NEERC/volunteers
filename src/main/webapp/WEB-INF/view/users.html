@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-    <ul>
+    <ul th:fragment="content">
         <th:block th:each="user : ${users}">
             <li th:text="${user}"></li>
         </th:block>

@@ -1,0 +1,27 @@
+
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login</title>
+</head>
+<body>
+    <form th:action="@{/login}" method="post" th:fragment="content" class="sign-in-form col-sm-offset-3 col-sm-6">
+        <h2 class=""> Log into Volunteers </h2>
+        <div th:if="${error!=null}" th:text="${error}"></div>
+        <div th:if="${message!=null}" th:text="${message}"></div>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <div class="form-group">
+            <label for="inputEmail" >Email address</label>
+            <input type="email" class="form-control" id="inputEmail" placeholder="Email" name="username" />
+        </div>
+        <div class="form-group">
+            <label for="inputPass">Password</label>
+                <input type="password" class="form-control" id="inputPass" placeholder="Password" name="password" />
+        </div>
+        <div class="form-group">
+                <button type="submit" class="btn btn-default">Log In</button>
+                <a th:href="@{/signup}" class="btn btn-link" role="button">Sign Up</a>
+        </div>
+    </form>
+</body>
+</html>

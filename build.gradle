@@ -9,13 +9,16 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "com.moowork.gradle:gradle-node-plugin:1.0.0"
 	}
 }
 
 apply plugin: 'java'
-apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+apply plugin: "com.moowork.node"
 
 jar {
 	baseName = 'volunteer'
@@ -47,3 +50,28 @@ dependencies {
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.hsqldb:hsqldb')
 }
+
+
+task copyjs(type:Sync) {
+    
+    group 'help'
+    description 'updates JS libraries from package.json and syncs with components folder'
+
+    def nodeExt = project.extensions.findByName("node")
+
+    nodeExt.with {
+        version = '0.12.2'
+        npmVersion = '2.7.5'
+        download = true
+    }
+
+    from fileTree('node_modules').files
+    into "src/main/webapp/components"
+    include '**/*.min.js'
+    include '*/fonts/*'
+
+    includeEmptyDirs false
+    dependsOn 'npmInstall'
+    
+}
+
