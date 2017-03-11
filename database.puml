@@ -7,6 +7,7 @@ class Event {
     String name
     String information
     Set<UserEvent> users
+    int attendanceValue
 }
 
 class Hall {
@@ -44,6 +45,14 @@ class UserEvent {
     Event event
     Position position
     Hall hall
+    Attendance attendance
+}
+
+enum Attendance {
+    YES
+    NO
+    LATE
+    SICK
 }
 
 class ApplicationForm {
@@ -61,6 +70,25 @@ class Year {
     Set<ApplicationFrom> users
 }
 
+class Medal {
+    int id
+    string name
+    int value
+}
+
+class PositionValue {
+    int id
+    Position position
+    int value
+    Year year
+}
+
+class UserEventAssessment {
+    int id
+    String comment
+    int value
+}
+
 User --> Role : role
 ApplicationForm "one" --> "many" Position : positions
 ApplicationForm --> User : user
@@ -72,6 +100,9 @@ UserEvent --> ApplicationForm : userYear
 UserEvent --> Hall : hall
 UserEvent --> Position : position
 UserEvent --> Event : event
+UserEvent --> Attendance : attendance
+
+PositionValue --> Position : position
 
 Event "one" --> "many" UserEvent : users
 
