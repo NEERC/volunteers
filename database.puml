@@ -41,7 +41,6 @@ class User {
 class UserEvent {
     long id
     ApplicationForm
-    userYear
     Event event
     Position position
     Hall hall
@@ -67,7 +66,10 @@ class ApplicationForm {
 class Year {
     long id
     String name
-    Set<ApplicationFrom> users
+    Set<ApplicationFrom> users // who signed up for this year
+    Set<Event> events
+    boolean current // if true then user can sign up for this year
+    boolean open // if true then user can see information about this year
 }
 
 class Medal {
@@ -93,6 +95,8 @@ User --> Role : role
 ApplicationForm "one" --> "many" Position : positions
 ApplicationForm --> User : user
 Year "one" --> "many" ApplicationForm : users
+Year "one" --> "many" Event : events
+
 
 ApplicationForm --> Year : year
 
@@ -105,5 +109,7 @@ UserEvent --> Attendance : attendance
 PositionValue --> Position : position
 
 Event "one" --> "many" UserEvent : users
+Event "many" --> "one" Year : year
+
 
 @enduml
