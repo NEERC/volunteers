@@ -3,6 +3,7 @@ package ru.ifmo.neerc.volunteers.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -26,6 +27,7 @@ public class Event {
     private Year year;
 
     @NotNull
+    @NotEmpty(message = "надо указать название мероприятия")
     private String name;
 
     @NotNull

@@ -1,7 +1,6 @@
 package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.Entity;
@@ -21,7 +20,7 @@ public class Position {
     private long id;
 
     @NotNull
-    @NotEmpty
+    @NotEmpty(message = "надо указать имя")
     private String name;
 
     @NotNull

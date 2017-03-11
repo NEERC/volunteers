@@ -34,12 +34,12 @@
                             <tr>
                                 <td>Имя:</td>
                                 <td><input type="text" th:field="*{name}" /></td>
-                                <td th:if="${#fields.hasErrors('name')}" th:error="${name}"></td>
+                                <td th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></td>
                             </tr>
                             <tr>
                                 <td>Информация:</td>
                                 <td><textarea th:field="*{information}" multiple="multiple"></textarea></td>
-                                <td th:if="${#fields.hasErrors('information')}" th:error="${information}"></td>
+                                <td th:if="${#fields.hasErrors('information')}" th:errors="*{information}"></td>
                             </tr>
                             <tr>
                                 <td>

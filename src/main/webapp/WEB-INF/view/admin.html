@@ -47,7 +47,9 @@
                 <td>
                     <input type="text" th:field="*{name}" />
                 </td>
-                <td th:if="${#fields.hasErrors('name')}" th:error="${name}">
+            </tr>
+            <tr th:if="${#fields.hasErrors('name')}">
+                <td th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
                 </td>
             </tr>
             <tr>
@@ -68,7 +70,9 @@
                             <td>
                                 <input type="text" th:field="*{name}" />
                             </td>
-                            <td th:if="${#fields.hasErrors('name')}" th:error="${name}">
+                        </tr>
+                        <tr th:if="${#fields.hasErrors('name')}">
+                            <td th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
                             </td>
                         </tr>
                         <tr>
@@ -89,7 +93,9 @@
                             <td>
                                 <input type="text" th:field="*{name}" />
                             </td>
-                            <td th:if="${#fields.hasErrors('name')}" th:error="${name}">
+                        </tr>
+                        <tr th:if="${#fields.hasErrors('name')}">
+                            <td th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
                             </td>
                         </tr>
                         <tr>

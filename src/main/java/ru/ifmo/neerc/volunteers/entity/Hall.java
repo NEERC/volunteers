@@ -2,6 +2,7 @@ package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,5 +20,6 @@ public class Hall {
     @GeneratedValue
     long id;
 
+    @NotEmpty(message = "Надо указать имя")
     String name;
 }

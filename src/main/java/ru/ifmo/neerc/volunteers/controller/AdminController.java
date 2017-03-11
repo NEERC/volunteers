@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.repository.*;
 
@@ -38,39 +39,53 @@ public class AdminController {
     UserEventRepository userEventRepository;
 
     @RequestMapping(method = RequestMethod.GET)
-    public String admin(Year year, Position position, Hall hall, Model model) {
+    public String admin(Model model) {
         Set<Year> years = yearRepository.findByCurrentOrderByIdAsc(true);
         model.addAttribute("current_years", years);
         Set<Position> positions = positionRepository.findAll();
         model.addAttribute("positions", positions);
-        model.addAttribute("halls",hallRepository.findAll());
+        model.addAttribute("halls", hallRepository.findAll());
+        if (!model.containsAttribute("position")) {
+            model.addAttribute("position", new Position());
+        }
+        if (!model.containsAttribute("year")) {
+            model.addAttribute("year", new Year());
+        }
+        if (!model.containsAttribute("hall")) {
+            model.addAttribute("hall", new Hall());
+        }
         return "admin";
     }
 
     @RequestMapping(value = "/position/add", method = RequestMethod.POST)
-    public String addPosition(@Valid @ModelAttribute("position") Position position, BindingResult result) {
-        if(result.hasErrors()) {
-            return "admin";
+    public String addPosition(@Valid @ModelAttribute("position") final Position position, final BindingResult result, RedirectAttributes attributes) {
+        if (result.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.position", result);
+            attributes.addFlashAttribute("position", position);
+            return "redirect:/admin";
         }
         positionRepository.save(position);
         return "redirect:/admin";
     }
 
-    @RequestMapping(value = "/hall/add",method = RequestMethod.POST)
-    public String addHall(@Valid @ModelAttribute("hall") Hall hall, BindingResult result) {
-        if(result.hasErrors()) {
-            return "admin";
+    @RequestMapping(value = "/hall/add", method = RequestMethod.POST)
+    public String addHall(@Valid @ModelAttribute("hall") Hall hall, BindingResult result, RedirectAttributes attributes) {
+        if (result.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.hall", result);
+            attributes.addFlashAttribute("hall", hall);
+            return "redirect:/admin";
         }
         hallRepository.save(hall);
         return "redirect:/admin";
     }
 
     @RequestMapping(value = "/year/add", method = RequestMethod.POST)
-    public String addYear(@Valid @ModelAttribute("year") Year year, BindingResult result) {
+    public String addYear(@Valid @ModelAttribute("year") Year year, BindingResult result, RedirectAttributes attributes) {
         if (result.hasErrors()) {
-            return "admin";
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.year", result);
+            attributes.addFlashAttribute("year", year);
+            return "redirect:/admin";
         }
-
         year.setCurrent(true);
         year.setOpen(true);
         yearRepository.save(year);
@@ -78,34 +93,40 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/year")
-    public String showYear(@RequestParam(value = "id") long id, Event event, Model model) {
+    public String showYear(@RequestParam(value = "id") long id, Model model) {
         Year year = yearRepository.findOne(id);
         model.addAttribute("year", year);
-        event.setYear(year);
         model.addAttribute("events", year.getEvents());
-        Set<ApplicationForm>users=year.getUsers();
-        model.addAttribute("users",users);
+        Set<ApplicationForm> users = year.getUsers();
+        model.addAttribute("users", users);
+        if (!model.containsAttribute("event")) {
+            Event event = new Event();
+            event.setYear(year);
+            model.addAttribute("event", event);
+        }
         return "year";
     }
 
     @RequestMapping(value = "/event/add")
-    public String addEvent(@Valid @ModelAttribute("event") Event event, BindingResult result) {
+    public String addEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, RedirectAttributes attributes) {
         Year year = event.getYear();
         if (result.hasErrors()) {
-            if(year!=null)
-                return "/admin/year?id=" + year.getId();
-            else
+            if (year != null) {
+                attributes.addFlashAttribute("org.springframework.validation.BindingResult.event", result);
+                attributes.addFlashAttribute("event", event);
+                return "redirect:/admin/year?id=" + year.getId();
+            } else
                 return "redirect:/admin";
         }
         eventRepository.save(event);
         year.getEvents().add(event);
         yearRepository.save(year);
-        Set<ApplicationForm> users=year.getUsers();
+        Set<ApplicationForm> users = year.getUsers();
         event.setUsers(new HashSet<>());
-        Position position=positionRepository.findOne(1l);//default position
-        Hall hall=hallRepository.findOne(1l);//default hall
+        Position position = positionRepository.findOne(1l);//default position
+        Hall hall = hallRepository.findOne(1l);//default hall
         for (ApplicationForm user : users) {
-            UserEvent userEvent=new UserEvent();
+            UserEvent userEvent = new UserEvent();
             userEvent.setEvent(event);
             userEvent.setHall(hall);
             userEvent.setPosition(position);
@@ -119,22 +140,22 @@ public class AdminController {
 
     @RequestMapping(value = "event")
     public String showEvent(@RequestParam(value = "id") long id, Model model) {
-        Event event=eventRepository.findOne(id);
-        Set<UserEvent> users=event.getUsers();
-        HashMap<Hall,List<UserEvent>> hallUser=new HashMap<>();
-        for(UserEvent user:users) {
-            if(!hallUser.containsKey(user.getHall()))
-                hallUser.put(user.getHall(),new ArrayList<>());
+        Event event = eventRepository.findOne(id);
+        Set<UserEvent> users = event.getUsers();
+        HashMap<Hall, List<UserEvent>> hallUser = new HashMap<>();
+        for (UserEvent user : users) {
+            if (!hallUser.containsKey(user.getHall()))
+                hallUser.put(user.getHall(), new ArrayList<>());
             hallUser.get(user.getHall()).add(user);
         }
-        Set<Hall> halls=hallRepository.findAll();
-        for(Hall hall:halls) {
-            if(!hallUser.containsKey(hall))
-                hallUser.put(hall,new ArrayList<>());
+        Set<Hall> halls = hallRepository.findAll();
+        for (Hall hall : halls) {
+            if (!hallUser.containsKey(hall))
+                hallUser.put(hall, new ArrayList<>());
         }
-        model.addAttribute("hallUser",hallUser);
-        model.addAttribute("event",event);
-        model.addAttribute("halls",hallRepository.findAll());
+        model.addAttribute("hallUser", hallUser);
+        model.addAttribute("event", event);
+        model.addAttribute("halls", hallRepository.findAll());
         return "showEvent";
     }
 
@@ -143,45 +164,45 @@ public class AdminController {
         Event event = eventRepository.findOne(id);
         model.addAttribute("event", event);
         model.addAttribute("users", event.getUsers());
-        model.addAttribute("positions",positionRepository.findAll());
+        model.addAttribute("positions", positionRepository.findAll());
         model.addAttribute("halls", hallRepository.findAll());
-        Set<Event> events=event.getYear().getEvents();
+        Set<Event> events = event.getYear().getEvents();
         events.remove(event);
 
-        model.addAttribute("events",events);
+        model.addAttribute("events", events);
         return "event";
     }
 
     @RequestMapping(value = "/event/save")
     public String save(HttpServletRequest request) {
-        Event event=eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        Set<UserEvent> users=event.getUsers();
-        for(UserEvent user : users) {
+        Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
+        Set<UserEvent> users = event.getUsers();
+        for (UserEvent user : users) {
             user.setPosition(positionRepository.findOne(
-                    Long.parseLong(request.getParameter("p"+user.getId()))));
+                    Long.parseLong(request.getParameter("p" + user.getId()))));
             user.setHall(hallRepository.findOne(
-                    Long.parseLong(request.getParameter("h"+user.getId()))
+                    Long.parseLong(request.getParameter("h" + user.getId()))
             ));
             userEventRepository.save(user);
         }
-        return "redirect:/admin/event?id="+event.getId();
+        return "redirect:/admin/event?id=" + event.getId();
     }
 
     @RequestMapping(value = "/event/copy")
     public String copy(HttpServletRequest request) {
-        Event event=eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        Event baseEvent=eventRepository.findOne(Long.parseLong(request.getParameter("baseEvent")));
-        Map<Long,UserEvent> userEventBase=new HashMap<>();
-        for(UserEvent userEvent:baseEvent.getUsers()) {
-            userEventBase.put(userEvent.getUserYear().getId(),userEvent);
+        Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
+        Event baseEvent = eventRepository.findOne(Long.parseLong(request.getParameter("baseEvent")));
+        Map<Long, UserEvent> userEventBase = new HashMap<>();
+        for (UserEvent userEvent : baseEvent.getUsers()) {
+            userEventBase.put(userEvent.getUserYear().getId(), userEvent);
         }
-        Set<UserEvent> users=event.getUsers();
-        for(UserEvent user: users) {
-            Long form=user.getUserYear().getId();
+        Set<UserEvent> users = event.getUsers();
+        for (UserEvent user : users) {
+            Long form = user.getUserYear().getId();
             user.setHall(userEventBase.get(form).getHall());
             user.setPosition(userEventBase.get(form).getPosition());
             userEventRepository.save(user);
         }
-        return "redirect:/admin/event/?id="+event.getId();
+        return "redirect:/admin/event/?id=" + event.getId();
     }
 }
