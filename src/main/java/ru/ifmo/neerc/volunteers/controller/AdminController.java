@@ -171,7 +171,17 @@ public class AdminController {
     public String copy(HttpServletRequest request) {
         Event event=eventRepository.findOne(Long.parseLong(request.getParameter("event")));
         Event baseEvent=eventRepository.findOne(Long.parseLong(request.getParameter("baseEvent")));
-        //Set<>
+        Map<Long,UserEvent> userEventBase=new HashMap<>();
+        for(UserEvent userEvent:baseEvent.getUsers()) {
+            userEventBase.put(userEvent.getUserYear().getId(),userEvent);
+        }
+        Set<UserEvent> users=event.getUsers();
+        for(UserEvent user: users) {
+            Long form=user.getUserYear().getId();
+            user.setHall(userEventBase.get(form).getHall());
+            user.setPosition(userEventBase.get(form).getPosition());
+            userEventRepository.save(user);
+        }
         return "redirect:/admin/event/?id="+event.getId();
     }
 }
