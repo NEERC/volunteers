@@ -36,8 +36,4 @@ public class UserEvent {
     Hall hall;
 
     Attendance attendance;
-
-    enum Attendance {
-        YES, NO, LATE,SICK
-    }
 }
