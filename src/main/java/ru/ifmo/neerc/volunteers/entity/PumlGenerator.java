@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
  */
 public class PumlGenerator {
 
+    private static final String INDENT = "    ";
     private static final String ONE = " \"1\"";
     private static final String MANY = " \"∞\"";
 
@@ -75,7 +76,7 @@ public class PumlGenerator {
                         field.getName()));
             }
 
-            printWriter.println(String.format("%s %s", typeStr, field.getName()));
+            printWriter.println(String.format("%s%s %s", INDENT, typeStr, field.getName()));
         }
         printWriter.println("}");
         printWriter.println();
@@ -84,7 +85,7 @@ public class PumlGenerator {
     private static void processEnum(Class<?> aClass, PrintWriter printWriter) {
         printWriter.println(String.format("enum %s {", aClass.getSimpleName()));
         for (Object value : aClass.getEnumConstants()) {
-            printWriter.println(value.toString());
+            printWriter.println(INDENT + value.toString());
         }
         printWriter.println("}");
         printWriter.println();
