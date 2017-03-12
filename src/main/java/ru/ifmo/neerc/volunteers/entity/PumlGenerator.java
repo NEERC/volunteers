@@ -1,11 +1,10 @@
 package ru.ifmo.neerc.volunteers.entity;
 
 import javax.persistence.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -120,7 +119,9 @@ public class PumlGenerator {
 
         List<String> connections = new ArrayList<>();
 
-        try (PrintWriter printWriter = new PrintWriter(Paths.get(args[0] + ".puml").toFile())) {
+        try (PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(
+                Paths.get(args[0] + ".puml").toFile()),
+                StandardCharsets.UTF_8))) {
 
             printWriter.println("@startuml");
             printWriter.println();
