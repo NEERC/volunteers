@@ -14,6 +14,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Generates .puml file with database diagram.
+ */
 public class PumlGenerator {
 
     private static final String ONE = " \"1\"";
@@ -87,6 +90,10 @@ public class PumlGenerator {
         printWriter.println();
     }
 
+    /**
+     * Entry point.
+     * @param args array of one output file name.
+     */
     public static void main(String[] args) {
         Path packagePath = Paths.get("src", "main", "java");
         String packageName = PumlGenerator.class.getPackage().getName();
