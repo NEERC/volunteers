@@ -3,3 +3,5 @@ spring:
     database: HSQL
   datasource:
     initialize: false
+  thymeleaf:
+    prefix: classpath:/templates/

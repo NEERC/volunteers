@@ -15,6 +15,7 @@ public class ThymeleafLayoutInterceptor extends HandlerInterceptorAdapter {
     private static final String DEFAULT_VIEW_ATTRIBUTE_NAME = "view";
 
     private String defaultLayout = DEFAULT_LAYOUT;
+    private String layoutPrefix = LAYOUT_PREFIX;
     private String viewAttributeName = DEFAULT_VIEW_ATTRIBUTE_NAME;
 
     public void setDefaultLayout(final String defaultLayout) {
@@ -22,9 +23,44 @@ public class ThymeleafLayoutInterceptor extends HandlerInterceptorAdapter {
         this.defaultLayout = defaultLayout;
     }
 
+    public void setLayoutPrefix(final String layoutPrefix) {
+        Assert.notNull(layoutPrefix);
+        this.layoutPrefix = layoutPrefix;
+    }
+
     public void setViewAttributeName(final String viewAttributeName) {
-        Assert.hasLength(defaultLayout);
+        Assert.hasLength(viewAttributeName);
         this.viewAttributeName = viewAttributeName;
+    }
+
+    /**
+     * Builder method to {@link #setViewAttributeName(String)}
+     * @param viewAttributeName view attribute name
+     * @return this
+     */
+    public ThymeleafLayoutInterceptor viewAttributeName(final String viewAttributeName) {
+        setViewAttributeName(viewAttributeName);
+        return this;
+    }
+
+    /**
+     * Builder method to {@link #setLayoutPrefix(String)}
+     * @param layoutPrefix layouts prefix name
+     * @return this
+     */
+    public ThymeleafLayoutInterceptor layoutPrefix(final String layoutPrefix) {
+        setLayoutPrefix(layoutPrefix);
+        return this;
+    }
+
+    /**
+     * Builder method to {@link #setDefaultLayout(String)}
+     * @param defaultLayout default layout name
+     * @return this
+     */
+    public ThymeleafLayoutInterceptor defaultLayout(final String defaultLayout) {
+        setDefaultLayout(defaultLayout);
+        return this;
     }
 
     @Override
@@ -41,7 +77,7 @@ public class ThymeleafLayoutInterceptor extends HandlerInterceptorAdapter {
         if (Layout.NONE.equals(layoutName)) {
             return;
         }
-        modelAndView.setViewName(LAYOUT_PREFIX + layoutName);
+        modelAndView.setViewName(layoutPrefix + layoutName);
         modelAndView.addObject(this.viewAttributeName, originalViewName);
     }
 

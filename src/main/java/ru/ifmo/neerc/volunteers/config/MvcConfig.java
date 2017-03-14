@@ -30,6 +30,6 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
-        registry.addInterceptor(new ThymeleafLayoutInterceptor());
+        registry.addInterceptor(new ThymeleafLayoutInterceptor().layoutPrefix("layouts/").viewAttributeName("view").defaultLayout("public"));
     }
 }
