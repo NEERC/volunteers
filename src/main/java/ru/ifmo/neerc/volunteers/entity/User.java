@@ -64,6 +64,9 @@ public class User {
     //@Column(firstName = "role_id", nullable = false)
     private Role role;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Year year;
+
     transient private boolean passwordEquals;
 
     @AssertTrue(message = "Пароли не совпадают")

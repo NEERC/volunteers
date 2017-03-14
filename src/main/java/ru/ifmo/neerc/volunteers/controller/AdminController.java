@@ -1,6 +1,8 @@
 package ru.ifmo.neerc.volunteers.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,22 +26,29 @@ import java.util.*;
 public class AdminController {
 
     @Autowired
-    MyYearRepository yearRepository;
+    YearRepository yearRepository;
 
     @Autowired
-    MyEventRepository eventRepository;
+    EventRepository eventRepository;
 
     @Autowired
-    MyPositionRepository positionRepository;
+    PositionRepository positionRepository;
 
     @Autowired
-    MyHallRepository hallRepository;
+    HallRepository hallRepository;
 
     @Autowired
     UserEventRepository userEventRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     @RequestMapping(method = RequestMethod.GET)
-    public String admin(Model model) {
+    public String admin(Model model, Authentication authentication) {
+        User user = getUser(authentication);
+        if (user.getYear() != null) {
+            return "redirect:/admin/year?id=" + user.getYear().getId();
+        }
         Set<Year> years = yearRepository.findByCurrentOrderByIdAsc(true);
         model.addAttribute("current_years", years);
         Set<Position> positions = positionRepository.findAll();
@@ -93,12 +102,23 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/year")
-    public String showYear(@RequestParam(value = "id") long id, Model model) {
+    public String showYear(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
+        User user=getUser(authentication);
+
         Year year = yearRepository.findOne(id);
+        if(user.getYear().getId()!=id) {
+            user.setYear(year);
+            user.setConfirmPassword(user.getPassword()); //todo: delete validation, when update
+            userRepository.save(user);
+        }
+
         model.addAttribute("year", year);
         model.addAttribute("events", year.getEvents());
         Set<ApplicationForm> users = year.getUsers();
         model.addAttribute("users", users);
+        Set<Year> years=yearRepository.findByCurrentOrderByIdAsc(true);
+        years.remove(year);
+        model.addAttribute("years",years);
         if (!model.containsAttribute("event")) {
             Event event = new Event();
             event.setYear(year);
@@ -204,5 +224,9 @@ public class AdminController {
             userEventRepository.save(user);
         }
         return "redirect:/admin/event/?id=" + event.getId();
+    }
+
+    private User getUser(Authentication authentication) {
+        return userRepository.findByEmailIgnoreCase(authentication.getName());
     }
 }

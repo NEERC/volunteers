@@ -1,8 +1,8 @@
 package ru.ifmo.neerc.volunteers.controller;
 
 import ru.ifmo.neerc.volunteers.entity.User;
-import ru.ifmo.neerc.volunteers.repository.MyRoleRepository;
-import ru.ifmo.neerc.volunteers.repository.MyUserRepository;
+import ru.ifmo.neerc.volunteers.repository.RoleRepository;
+import ru.ifmo.neerc.volunteers.repository.UserRepository;
 import ru.ifmo.neerc.volunteers.service.SecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +27,10 @@ public class SignupController {
     private static final Logger logger = LoggerFactory.getLogger(SignupController.class);
 
     @Autowired
-    MyUserRepository myUserRepository;
+    UserRepository userRepository;
 
     @Autowired
-    MyRoleRepository myRoleRepository;
+    RoleRepository roleRepository;
 
     @Autowired
     SecurityService securityService;
@@ -53,15 +53,15 @@ public class SignupController {
         user.setPassword(passwordEncoder.encode(password));
         user.setConfirmPassword(user.getPassword());
         logger.debug(String.format("User created %s", user.toString()));
-        user.setRole(myRoleRepository.findOne(2l));//ROLE_USER
-        myUserRepository.save(user);
+        user.setRole(roleRepository.findOne(2l));//ROLE_USER
+        userRepository.save(user);
         securityService.autologin(user.getEmail(), password);
         return "redirect:/result";
     }
 
     @RequestMapping("/users")
     public String showUsers(Model model) {
-        model.addAttribute("users", myUserRepository.findAll());
+        model.addAttribute("users", userRepository.findAll());
         return "users";
     }
 }
