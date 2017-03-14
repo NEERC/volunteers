@@ -1,4 +1,4 @@
-package ru.ifmo.neerc.volunteers.entity;
+package ru.ifmo.neerc.dev;
 
 import javax.persistence.*;
 import java.io.*;

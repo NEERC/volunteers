@@ -35,5 +35,6 @@ public class UserEvent {
     @ManyToOne
     Hall hall;
 
+    @Enumerated(EnumType.STRING)
     Attendance attendance;
 }

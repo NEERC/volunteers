@@ -78,7 +78,7 @@ task copyjs(type:Sync) {
 task generateDbPuml(type:JavaExec) {
 	group 'documentation'
 
-	main = "ru.ifmo.neerc.volunteers.entity.PumlGenerator"
+	main = "ru.ifmo.neerc.dev.PumlGenerator"
 	classpath = sourceSets.main.runtimeClasspath
 	//noinspection GroovyAssignabilityCheck
 	args "database"
