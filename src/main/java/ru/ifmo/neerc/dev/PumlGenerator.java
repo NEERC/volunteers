@@ -21,6 +21,7 @@ public class PumlGenerator {
     private static final String INDENT = "    ";
     private static final String ONE = " \"1\"";
     private static final String MANY = " \"∞\"";
+    private static final String PACKAGE = "ru.ifmo.neerc.volunteers.entity";
 
     private static void processClass(
             Class<?> aClass,
@@ -96,7 +97,7 @@ public class PumlGenerator {
      */
     public static void main(String[] args) {
         Path packagePath = Paths.get("src", "main", "java");
-        String packageName = PumlGenerator.class.getPackage().getName();
+        String packageName = PACKAGE;
         packagePath = packagePath.resolve(
                 Arrays.stream(packageName.split("\\."))
                         .collect(Collectors.joining("" + File.separator)));
