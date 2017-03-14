@@ -26,9 +26,9 @@ public class Year {
     @Size(max = 255)
     private String name;
 
-    private boolean open;
+   /* private boolean open;
 
-    private boolean current;
+    private boolean current;*/
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @OrderBy("id ASC")
@@ -37,4 +37,13 @@ public class Year {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @OrderBy(value = "id ASC ")
     private Set<ApplicationForm> users;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Hall> halls;
+
+    public Year(String name) {
+        this.name = name;
+    }
+
+    public Year() {}
 }

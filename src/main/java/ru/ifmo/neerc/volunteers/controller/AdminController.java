@@ -49,11 +49,9 @@ public class AdminController {
         if (user.getYear() != null) {
             return "redirect:/admin/year?id=" + user.getYear().getId();
         }
-        Set<Year> years = yearRepository.findByCurrentOrderByIdAsc(true);
+        Iterable<Year> years = yearRepository.findAll();
         model.addAttribute("current_years", years);
-        Set<Position> positions = positionRepository.findAll();
-        model.addAttribute("positions", positions);
-        model.addAttribute("halls", hallRepository.findAll());
+        setModel(model,new Year("Year"));
         if (!model.containsAttribute("position")) {
             model.addAttribute("position", new Position());
         }
@@ -95,30 +93,23 @@ public class AdminController {
             attributes.addFlashAttribute("year", year);
             return "redirect:/admin";
         }
-        year.setCurrent(true);
-        year.setOpen(true);
         yearRepository.save(year);
         return "redirect:/admin/year?id=" + year.getId();
     }
 
     @RequestMapping(value = "/year")
     public String showYear(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
-        User user=getUser(authentication);
+        User user = getUser(authentication);
 
         Year year = yearRepository.findOne(id);
-        if(user.getYear().getId()!=id) {
+        if (user.getYear() == null || user.getYear().getId() != id) {
             user.setYear(year);
             user.setConfirmPassword(user.getPassword()); //todo: delete validation, when update
             userRepository.save(user);
         }
-
-        model.addAttribute("year", year);
-        model.addAttribute("events", year.getEvents());
+        setModel(model, year);
         Set<ApplicationForm> users = year.getUsers();
         model.addAttribute("users", users);
-        Set<Year> years=yearRepository.findByCurrentOrderByIdAsc(true);
-        years.remove(year);
-        model.addAttribute("years",years);
         if (!model.containsAttribute("event")) {
             Event event = new Event();
             event.setYear(year);
@@ -161,6 +152,7 @@ public class AdminController {
     @RequestMapping(value = "event")
     public String showEvent(@RequestParam(value = "id") long id, Model model) {
         Event event = eventRepository.findOne(id);
+        setModel(model,event.getYear());
         Set<UserEvent> users = event.getUsers();
         HashMap<Hall, List<UserEvent>> hallUser = new HashMap<>();
         for (UserEvent user : users) {
@@ -228,5 +220,13 @@ public class AdminController {
 
     private User getUser(Authentication authentication) {
         return userRepository.findByEmailIgnoreCase(authentication.getName());
+    }
+
+    private void setModel(Model model, Year year) {
+        model.addAttribute("year",year);
+        model.addAttribute("events", year.getEvents());
+        model.addAttribute("positions", positionRepository.findAll());
+        model.addAttribute("halls", year.getHalls());
+        model.addAttribute("years", yearRepository.findAll());
     }
 }

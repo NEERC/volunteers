@@ -4,9 +4,7 @@ import lombok.Data;
 import lombok.ToString;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 /**
  * Created by Lapenok Akesej on 26.02.2017.
@@ -22,4 +20,9 @@ public class Hall {
 
     @NotEmpty(message = "Надо указать имя")
     String name;
+
+    String decryption;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    Year year;
 }
