@@ -59,19 +59,33 @@ task copyjs(type:Sync) {
 
     def nodeExt = project.extensions.findByName("node")
 
-    nodeExt.with {
-        version = '0.12.2'
-        npmVersion = '2.7.5'
-        download = true
-    }
-
     from fileTree('node_modules').files
     into "src/main/webapp/components"
     include '**/*.min.js'
-    include '*/fonts/*'
+    include '**/fonts/**'
 
     includeEmptyDirs false
-    dependsOn 'npmInstall'
+    dependsOn 'copyfonts'
     
+}
+
+task copyfonts(type:Sync) {
+
+	group 'other'
+
+	def nodeExt = project.extensions.findByName("node")
+
+	nodeExt.with {
+		version = '0.12.2'
+		npmVersion = '2.7.5'
+		download = true
+	}
+
+	from 'node_modules/bootstrap-sass/assets/fonts'
+	into "src/main/webapp/fonts"
+
+	includeEmptyDirs false
+	dependsOn 'npmInstall'
+
 }
 
