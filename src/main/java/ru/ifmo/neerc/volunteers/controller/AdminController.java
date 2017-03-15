@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.repository.*;
 
@@ -23,6 +24,7 @@ import java.util.*;
  */
 @RequestMapping("/admin")
 @Controller
+@Layout("publicAdmin")
 public class AdminController {
 
     @Autowired
@@ -104,7 +106,7 @@ public class AdminController {
         Year year = yearRepository.findOne(id);
         if (user.getYear() == null || user.getYear().getId() != id) {
             user.setYear(year);
-            user.setConfirmPassword(user.getPassword()); //todo: delete validation, when update
+            //user.setConfirmPassword(user.getPassword()); //todo: delete validation, when update
             userRepository.save(user);
         }
         setModel(model, year);
