@@ -18,9 +18,10 @@ public class Hall {
     @GeneratedValue
     long id;
 
-    @NotEmpty(message = "Надо указать имя")
+    @NotEmpty
     String name;
 
+    @NotEmpty
     String decryption;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -21,9 +21,9 @@
                     </a>
 
                     <ul class="dropdown-menu">
-                        <th:block th:each="year : ${years}">
-                            <li>
-                                <a th:href="@{'/admin/year?id='+${year.id}}" th:text="${year.name}"></a>
+                        <th:block th:each="y : ${years}">
+                            <li th:class="${year.id==y.id} ? 'active'">
+                                <a th:href="@{'/admin/year?id='+${y.id}}" th:text="${y.name}"></a>
                             </li>
 
                         </th:block>

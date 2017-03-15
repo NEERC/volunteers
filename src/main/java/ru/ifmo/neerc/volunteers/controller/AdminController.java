@@ -226,9 +226,13 @@ public class AdminController {
 
     private void setModel(Model model, Year year) {
         model.addAttribute("year",year);
-        model.addAttribute("events", year.getEvents());
-        model.addAttribute("positions", positionRepository.findAll());
-        model.addAttribute("halls", year.getHalls());
+        model.addAttribute("newYear",new Year());
         model.addAttribute("years", yearRepository.findAll());
+        model.addAttribute("events", year.getEvents());
+        model.addAttribute("newEvent",new Event());
+        model.addAttribute("positions", positionRepository.findAll());
+        model.addAttribute("newPosition",new Position());
+        model.addAttribute("halls", year.getHalls());
+        model.addAttribute("newHall",new Hall());
     }
 }
