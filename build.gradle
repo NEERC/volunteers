@@ -9,7 +9,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath "com.moowork.gradle:gradle-node-plugin:1.0.0"
+		classpath "com.moowork.gradle:gradle-node-plugin:1.0.0"
 	}
 }
 
@@ -46,27 +46,27 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-security')
 	runtime('mysql:mysql-connector-java')
-    compileOnly('org.projectlombok:lombok')
+	compileOnly('org.projectlombok:lombok')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.hsqldb:hsqldb')
 }
 
 
 task copyjs(type:Sync) {
-    
-    group 'help'
-    description 'updates JS libraries from package.json and syncs with components folder'
 
-    def nodeExt = project.extensions.findByName("node")
+	group 'help'
+	description 'updates JS libraries from package.json and syncs with components folder'
 
-    from fileTree('node_modules').files
-    into "src/main/webapp/components"
-    include '**/*.min.js'
-    include '**/fonts/**'
+	def nodeExt = project.extensions.findByName("node")
 
-    includeEmptyDirs false
-    dependsOn 'copyfonts'
-    
+	from fileTree('node_modules').files
+	into "src/main/webapp/components"
+	include '**/*.min.js'
+	include '**/fonts/**'
+
+	includeEmptyDirs false
+	dependsOn 'copyfonts'
+
 }
 
 task copyfonts(type:Sync) {
@@ -88,4 +88,3 @@ task copyfonts(type:Sync) {
 	dependsOn 'npmInstall'
 
 }
-
