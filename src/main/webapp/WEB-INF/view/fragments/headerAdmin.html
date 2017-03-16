@@ -25,9 +25,36 @@
                             <li th:class="${year.id==y.id} ? 'active'">
                                 <a th:href="@{'/admin/year?id='+${y.id}}" th:text="${y.name}"></a>
                             </li>
-
                         </th:block>
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#yearForm">
+                                Add
+                            </a>
+                        </li>
                     </ul>
+                    <div class="modal fade" id="yearForm" tabindex="-1" role="dialog" aria-labelledby="yearLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <form method="post" th:action="@{/admin/year/add}" th:object="${newYear}">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title" id="yearLabel">Add new year</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
+                                            <label for="positionName">Year name</label>
+                                            <input type="text" class="form-control" id="positionName" th:field="*{name}" />
+                                            <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Add</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
