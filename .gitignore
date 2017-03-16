@@ -29,3 +29,5 @@ nbdist/
 node_modules
 .sass-cache
 **/webapp/components
+
+database.puml

@@ -35,9 +35,6 @@ public class UserEvent {
     @ManyToOne
     Hall hall;
 
+    @Enumerated(EnumType.STRING)
     Attendance attendance;
-
-    enum Attendance {
-        YES, NO, LATE,SICK
-    }
 }
