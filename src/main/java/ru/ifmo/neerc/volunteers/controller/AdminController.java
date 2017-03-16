@@ -53,7 +53,7 @@ public class AdminController {
         }
         Iterable<Year> years = yearRepository.findAll();
         model.addAttribute("current_years", years);
-        setModel(model,new Year("Year"));
+        setModel(model, new Year("Year"));
         if (!model.containsAttribute("position")) {
             model.addAttribute("position", new Position());
         }
@@ -68,32 +68,30 @@ public class AdminController {
 
     @RequestMapping(value = "/position/add", method = RequestMethod.POST)
     public String addPosition(@Valid @ModelAttribute("newPosition") final Position position, final BindingResult result, RedirectAttributes attributes, Authentication authentication) {
-        User user=getUser(authentication);
-        Year year=user.getYear();
+        User user = getUser(authentication);
+        Year year = user.getYear();
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.position", result);
             attributes.addFlashAttribute("newPosition", position);
-        }
-        else
+        } else
             positionRepository.save(position);
-        return "redirect:/admin/year?id="+year.getId();
+        return "redirect:/admin/year?id=" + year.getId();
     }
 
     @RequestMapping(value = "/hall/add", method = RequestMethod.POST)
     public String addHall(@Valid @ModelAttribute("newHall") Hall hall, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
-        User user=getUser(authentication);
-        Year year=user.getYear();
+        User user = getUser(authentication);
+        Year year = user.getYear();
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.hall", result);
             attributes.addFlashAttribute("newHall", hall);
-        }
-        else {
+        } else {
             hall.setYear(year);
             hallRepository.save(hall);
             year.getHalls().add(hall);
             yearRepository.save(year);
         }
-        return "redirect:/admin/year?id="+year.getId();
+        return "redirect:/admin/year?id=" + year.getId();
     }
 
     @RequestMapping(value = "/year/add", method = RequestMethod.POST)
@@ -101,8 +99,8 @@ public class AdminController {
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.year", result);
             attributes.addFlashAttribute("newYear", year);
-            Year year1=getUser(authentication).getYear();
-            return "redirect:/admin/year?id="+year1.getId();
+            Year year1 = getUser(authentication).getYear();
+            return "redirect:/admin/year?id=" + year1.getId();
         }
         yearRepository.save(year);
         return "redirect:/admin/year?id=" + year.getId();
@@ -130,10 +128,10 @@ public class AdminController {
 
     @RequestMapping(value = "/event/add")
     public String addEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
-        User user=getUser(authentication);
+        User user = getUser(authentication);
         Year year = event.getYear();
-        if(year==null) {
-            year=user.getYear();
+        if (year == null) {
+            year = user.getYear();
             event.setYear(year);
         }
         if (result.hasErrors()) {
@@ -151,7 +149,7 @@ public class AdminController {
         event.setUsers(new HashSet<>());
         Position position = positionRepository.findOne(1l);//default position
         Hall hall = hallRepository.findOne(1l);//default hall
-        for (ApplicationForm applicationForm: users) {
+        for (ApplicationForm applicationForm : users) {
             UserEvent userEvent = new UserEvent();
             userEvent.setEvent(event);
             userEvent.setHall(hall);
@@ -166,9 +164,9 @@ public class AdminController {
 
     @RequestMapping(value = "event")
     public String showEvent(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
-        Year year=getUser(authentication).getYear();
+        Year year = getUser(authentication).getYear();
         Event event = eventRepository.findOne(id);
-        setModel(model,year);
+        setModel(model, year);
         Set<UserEvent> users = event.getUsers();
         HashMap<Hall, List<UserEvent>> hallUser = new HashMap<>();
         for (UserEvent user : users) {
@@ -189,9 +187,9 @@ public class AdminController {
 
     @RequestMapping(value = "/event/edit")
     public String editEvent(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
-        Year year=getUser(authentication).getYear();
+        Year year = getUser(authentication).getYear();
         Event event = eventRepository.findOne(id);
-        setModel(model,year);
+        setModel(model, year);
         model.addAttribute("event", event);
         model.addAttribute("users", event.getUsers());
         model.addAttribute("positions", positionRepository.findAll());
@@ -208,12 +206,19 @@ public class AdminController {
         Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
         Set<UserEvent> users = event.getUsers();
         for (UserEvent user : users) {
-            user.setPosition(positionRepository.findOne(
-                    Long.parseLong(request.getParameter("p" + user.getId()))));
-            user.setHall(hallRepository.findOne(
-                    Long.parseLong(request.getParameter("h" + user.getId()))
-            ));
-            userEventRepository.save(user);
+            boolean flage = false;
+            long newIdPosition = Long.parseLong(request.getParameter("p" + user.getId()));
+            long newIdHall = Long.parseLong(request.getParameter("h" + user.getId()));
+            if (user.getPosition().getId() != newIdPosition) {
+                user.setPosition(positionRepository.findOne(newIdPosition));
+                flage = true;
+            }
+            if (user.getHall().getId() != newIdHall) {
+                user.setHall(hallRepository.findOne(newIdHall));
+                flage = true;
+            }
+            if (flage)
+                userEventRepository.save(user);
         }
         return "redirect:/admin/event?id=" + event.getId();
     }
@@ -241,21 +246,21 @@ public class AdminController {
     }
 
     private void setModel(Model model, Year year) {
-        model.addAttribute("year",year);
-        if(!model.containsAttribute("newYear"))
-            model.addAttribute("newYear",new Year());
+        model.addAttribute("year", year);
+        if (!model.containsAttribute("newYear"))
+            model.addAttribute("newYear", new Year());
         model.addAttribute("years", yearRepository.findAll());
         model.addAttribute("events", year.getEvents());
-        if(!model.containsAttribute("newEvent")) {
+        if (!model.containsAttribute("newEvent")) {
             Event newEvent = new Event();
             newEvent.setYear(year);
             model.addAttribute("newEvent", newEvent);
         }
         model.addAttribute("positions", positionRepository.findAll());
-        if(!model.containsAttribute("newPosition"))
-            model.addAttribute("newPosition",new Position());
+        if (!model.containsAttribute("newPosition"))
+            model.addAttribute("newPosition", new Position());
         model.addAttribute("halls", year.getHalls());
-        if(!model.containsAttribute("newHall")) {
+        if (!model.containsAttribute("newHall")) {
             Hall newHall = new Hall();
             newHall.setYear(year);
             model.addAttribute("newHall", newHall);

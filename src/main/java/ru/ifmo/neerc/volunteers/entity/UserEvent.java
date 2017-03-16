@@ -18,14 +18,14 @@ public class UserEvent {
     long id;
 
     @JoinColumn(name = "userYear")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     ApplicationForm userYear;
 
     @JoinColumn(name = "event")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     Event event;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "position")
     Position position;
 
