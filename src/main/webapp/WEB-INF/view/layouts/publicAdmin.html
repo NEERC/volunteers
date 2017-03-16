@@ -8,7 +8,7 @@
     <title>Volunteers</title>
 
     <!-- Bootstrap -->
-    <link href="css/main.css" th:href="@{/css/main.css}" rel="stylesheet" />
+    <link href="../../../css/main.css" th:href="@{/css/main.css}" rel="stylesheet" />
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -23,20 +23,57 @@
 
     <div class="row">
         <div class="col-md-2">
-            <div id="sidebar" class="well sidebar-nav">
-                <h5>
-                    <small><b>Events</b></small>
+            <ul id="sidebar" class="nav nav-pills nav-stacked admin-sidebar well well-sm">
+                <li><a href="#eventsList" data-toggle="collapse" aria-expanded="true" aria-controls="eventsList">
+                    <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                    Events</a>
                     <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm">
-                    Add
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                     </button>
-                </h5>
-                <ul class="nav nav-pills nav-stacked">
-                    <th:block th:each="event : ${events}">
-                        <li>
-                            <a th:href="@{'/admin/event?id='+${event.id}}" th:text="${event.name}"></a>
-                        </li>
-                    </th:block>
-                </ul>
+                    <ul class="collapse in" id="eventsList">
+                        <th:block th:each="event : ${events}">
+                            <li>
+                                <a th:href="@{'/admin/event?id='+${event.id}}" th:text="${event.name}"></a>
+                            </li>
+                        </th:block>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#positionsList" data-toggle="collapse" aria-expanded="false" aria-controls="positionsList" class="collapsed">
+                        <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                        <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                        Positions</a>
+                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#positionForm">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    </button>
+                    <ul class="collapse" id="positionsList">
+                        <th:block th:each="position:${positions}">
+                            <li>
+                                <a href="#" th:text="${position.name}"></a>
+                            </li>
+                        </th:block>
+                    </ul>
+
+                </li>
+                <li>
+                    <a href="#hallsList" data-toggle="collapse" aria-expanded="false" aria-controls="hallsList" class="collapsed">
+                        <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                        <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                        Halls</a>
+                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#hallForm">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    </button>
+                    <ul class="collapse" id="hallsList">
+                        <th:block th:each="hall : ${halls}">
+                            <li>
+                                <a href="#" th:text="${hall.name}"></a>
+                            </li>
+                        </th:block>
+                    </ul>
+                </li>
+            </ul>
+
                 <!-- Modal -->
                 <div class="modal fade" id="eventForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel">
                     <div class="modal-dialog" role="document">
@@ -67,19 +104,6 @@
                     </div>
                 </div>
 
-                <h5>
-                    <small><b>Positions</b></small>
-                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#positionForm">
-                        Add
-                    </button>
-                </h5>
-                <ul class="nav nav-pills nav-stacked">
-                    <th:block th:each="position:${positions}">
-                        <li>
-                            <a href="#" th:text="${position.name}"></a>
-                        </li>
-                    </th:block>
-                </ul>
                 <!-- Modal -->
                 <div class="modal fade" id="positionForm" tabindex="-1" role="dialog" aria-labelledby="positionLabel">
                     <div class="modal-dialog" role="document">
@@ -105,19 +129,6 @@
                     </div>
                 </div>
 
-                <h5>
-                    <small><b>Halls</b></small>
-                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#hallForm">
-                        Add
-                    </button>
-                </h5>
-                <ul class="nav nav-pills nav-stacked">
-                    <th:block th:each="hall : ${halls}">
-                        <li>
-                            <a href="#" th:text="${hall.name}"></a>
-                        </li>
-                    </th:block>
-                </ul>
                 <!-- Modal -->
                 <div class="modal fade" id="hallForm" tabindex="-1" role="dialog" aria-labelledby="hallLabel">
                     <div class="modal-dialog" role="document">
@@ -148,7 +159,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
 
         <div th:replace="${view} :: content" class="col-md-8">Content goes here!</div>
@@ -162,8 +172,8 @@
 </footer>
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="components/jquery.min.js" th:src="@{/components/jquery.min.js}"></script>
+<script src="../../../components/jquery.min.js" th:src="@{/components/jquery.min.js}"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="components/bootstrap.min.js" th:src="@{/components/bootstrap.min.js}"></script>
+<script src="../../../components/bootstrap.min.js" th:src="@{/components/bootstrap.min.js}"></script>
 </body>
 </html>
