@@ -69,6 +69,7 @@ task copyjs(type:Sync) {
 
 }
 
+
 task copyfonts(type:Sync) {
 
 	group 'other'
@@ -87,4 +88,13 @@ task copyfonts(type:Sync) {
 	includeEmptyDirs false
 	dependsOn 'npmInstall'
 
+}
+
+task generateDbPuml(type:JavaExec) {
+	group 'documentation'
+
+	main = "ru.ifmo.neerc.dev.PumlGenerator"
+	classpath = sourceSets.main.runtimeClasspath
+	//noinspection GroovyAssignabilityCheck
+	args "database"
 }
