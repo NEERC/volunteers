@@ -40,23 +40,23 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="#positionsList" data-toggle="collapse" aria-expanded="false" aria-controls="positionsList" class="collapsed">
-                        <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
-                        <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                    <a th:href="@{/admin/position}" class="collapsed">
+                        <!--<span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                        <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>-->
                         Positions</a>
-                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#positionForm">
+                    <!--<a th:href="@{/admin/positions}" type="button" class="btn btn-primary btn-xs">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                    </button>
-                    <ul class="collapse" id="positionsList">
+                    </a>-->
+                    <!--<ul class="collapse" id="positionsList">
                         <th:block th:each="position:${positions}">
                             <li>
                                 <a href="#" th:text="${position.name}"></a>
                             </li>
                         </th:block>
-                    </ul>
+                    </ul>-->
 
                 </li>
-                <li>
+                <!--<li>
                     <a href="#hallsList" data-toggle="collapse" aria-expanded="false" aria-controls="hallsList" class="collapsed">
                         <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
                         <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
@@ -71,7 +71,7 @@
                             </li>
                         </th:block>
                     </ul>
-                </li>
+                </li>-->
             </ul>
 
                 <!-- Modal -->
@@ -104,30 +104,6 @@
                     </div>
                 </div>
 
-                <!-- Modal -->
-                <div class="modal fade" id="positionForm" tabindex="-1" role="dialog" aria-labelledby="positionLabel">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <form method="post" th:action="@{/admin/position/add}" th:object="${newPosition}">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title" id="positionLabel">Add new position</h4>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
-                                        <label for="positionName">Hall name</label>
-                                        <input type="text" class="form-control" id="positionName" th:field="*{name}" />
-                                        <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Add</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Modal -->
                 <div class="modal fade" id="hallForm" tabindex="-1" role="dialog" aria-labelledby="hallLabel">

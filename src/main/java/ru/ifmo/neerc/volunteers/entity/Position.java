@@ -2,6 +2,7 @@ package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
+import ru.ifmo.neerc.volunteers.form.PositionForm;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,10 +20,17 @@ public class Position {
     @GeneratedValue
     private long id;
 
-    @NotNull
-    @NotEmpty(message = "надо указать имя")
     private String name;
 
     @NotNull
     private boolean def=false;
+
+    public Position() {
+
+    }
+
+    public Position(PositionForm name) {
+        this.name=name.getName();
+
+    }
 }

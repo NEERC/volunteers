@@ -14,8 +14,8 @@ import java.util.Set;
  */
 @Data
 @Entity
-@EqualsAndHashCode(exclude = {"users"})
-@ToString(exclude = {"users"})
+@EqualsAndHashCode(exclude = {"users","positionValues"})
+@ToString(exclude = {"users","positionValues"})
 public class Year {
 
     @Id
@@ -40,6 +40,9 @@ public class Year {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Hall> halls;
+
+    @OneToMany
+    private Set<PositionValue> positionValues;
 
     public Year(String name) {
         this.name = name;

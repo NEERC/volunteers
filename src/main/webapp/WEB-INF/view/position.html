@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Positions</title>
+</head>
+<body>
+    <div th:fragment="content"  class="col-md-8">
+    <div class="container">
+        <div class="row show-grid">
+            <div class="col-md-4">
+                Position
+            </div>
+            <div class="col-md-4">
+                Value Position
+            </div>
+        </div>
+        <form th:action="@{/admin/position/values}" method="post">
+            <th:block th:each="position : ${positions}">
+                <div class="row show-grid">
+                    <div class="col-md-4"  >
+                        <label th:text="${position.position}" th:for="position+${position.id}">
+
+                        </label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="number" class="form-control" th:value="${position.value}" th:id="position+${position.id}" th:name="v+${position.id}"/>
+                    </div>
+                </div>
+            </th:block>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <a href="#" data-toggle="modal" data-target="#positionForm" class="btn btn-default" role="button">Add</a>
+                <button type="submit" class="btn btn-primary" th:text="save"></button>
+            </div>
+        </form>
+    </div>
+        <!-- Modal -->
+        <div class="modal fade" id="positionForm" tabindex="-1" role="dialog" aria-labelledby="positionLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" th:action="@{/admin/position/add}" th:object="${newPosition}">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="positionLabel">Add new position</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
+                                <label for="positionName">Position name</label>
+                                <input type="text" class="form-control" id="positionName" th:field="*{name}" />
+                                <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                            </div>
+                            <div class="form-group" th:class="${#fields.hasErrors('value')}? 'has error form-group':'form-group'">
+                                <label for="positionValue">Position value</label>
+                                <input type="number" class="form-control" id="positionValue" th:field="*{value}" value="0" />
+                                <span class="help-block"  th:if="${#fields.hasErrors('value')}">Error</span>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#" class="btn btn-link" data-dismiss="modal">Close</a>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

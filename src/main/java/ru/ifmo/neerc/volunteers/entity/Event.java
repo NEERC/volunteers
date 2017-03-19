@@ -27,7 +27,7 @@ public class Event {
     private Year year;
 
     @NotNull
-    @NotEmpty(message = "надо указать название мероприятия")
+    @NotEmpty
     private String name;
 
     @NotNull

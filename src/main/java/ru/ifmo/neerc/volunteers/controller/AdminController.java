@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.*;
+import ru.ifmo.neerc.volunteers.form.PositionForm;
 import ru.ifmo.neerc.volunteers.repository.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,6 +46,9 @@ public class AdminController {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    PositionValueRepository positionValueRepository;
+
     @RequestMapping(method = RequestMethod.GET)
     public String admin(Model model, Authentication authentication) {
         User user = getUser(authentication);
@@ -66,16 +70,42 @@ public class AdminController {
         return "admin";
     }
 
+    @RequestMapping(value="/position", method = RequestMethod.GET)
+    public String positions(Model model, Authentication authentication) {
+        setModel(model,getUser(authentication).getYear());
+        return "position";
+    }
+
     @RequestMapping(value = "/position/add", method = RequestMethod.POST)
-    public String addPosition(@Valid @ModelAttribute("newPosition") final Position position, final BindingResult result, RedirectAttributes attributes, Authentication authentication) {
+    public String addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, RedirectAttributes attributes, Authentication authentication) {
         User user = getUser(authentication);
         Year year = user.getYear();
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.position", result);
-            attributes.addFlashAttribute("newPosition", position);
-        } else
+            attributes.addFlashAttribute("newPosition", positionForm);
+        } else {
+            Position position=new Position(positionForm);
             positionRepository.save(position);
-        return "redirect:/admin/year?id=" + year.getId();
+            PositionValue positionValue=new PositionValue(position,year,positionForm.getValue());
+            positionValueRepository.save(positionValue);
+            year.getPositionValues().add(positionValue);
+            yearRepository.save(year);
+        }
+        return "redirect:/admin/position";
+    }
+
+    @RequestMapping(value = "/position/values", method = RequestMethod.POST)
+    public String setPositionValues(HttpServletRequest request, Authentication authentication) {
+        Year year=getUser(authentication).getYear();
+        Set<PositionValue> positionValues=year.getPositionValues();
+        for(PositionValue positionValue : positionValues) {
+            int value=Integer.parseInt(request.getParameter("v"+positionValue.getId()));
+            if(positionValue.getValue()!=value) {
+                positionValue.setValue(value);
+                positionValueRepository.save(positionValue);
+            }
+        }
+        return "redirect:/admin/year?id="+year.getId();
     }
 
     @RequestMapping(value = "/hall/add", method = RequestMethod.POST)
@@ -96,12 +126,30 @@ public class AdminController {
 
     @RequestMapping(value = "/year/add", method = RequestMethod.POST)
     public String addYear(@Valid @ModelAttribute("newYear") Year year, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
+        Year yearOld = getUser(authentication).getYear();
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.year", result);
             attributes.addFlashAttribute("newYear", year);
-            Year year1 = getUser(authentication).getYear();
-            return "redirect:/admin/year?id=" + year1.getId();
+            return "redirect:/admin/year?id=" + yearOld.getId();
         }
+        Set<Position> positions = positionRepository.findAll();
+        Set<PositionValue> positionValuesOld = yearOld.getPositionValues();
+        Map<Long, Integer> positionValueMap = new HashMap<>();
+        for (PositionValue positionValue : positionValuesOld) {
+            positionValueMap.put(positionValue.getPosition().getId(), positionValue.getValue());
+        }
+        yearRepository.save(year);
+        Set<PositionValue> positionValues = new HashSet<>();
+        for (Position position : positions) {
+            PositionValue positionValue;
+            if (positionValueMap.containsKey(position.getId()))
+                positionValue = new PositionValue(position, year, positionValueMap.get(position.getId()));
+            else
+                positionValue = new PositionValue(position, year, 0);
+            positionValues.add(positionValue);
+        }
+        positionValueRepository.save(positionValues);
+        year.setPositionValues(positionValues);
         yearRepository.save(year);
         return "redirect:/admin/year?id=" + year.getId();
     }
@@ -256,9 +304,9 @@ public class AdminController {
             newEvent.setYear(year);
             model.addAttribute("newEvent", newEvent);
         }
-        model.addAttribute("positions", positionRepository.findAll());
+        model.addAttribute("positions", year.getPositionValues());
         if (!model.containsAttribute("newPosition"))
-            model.addAttribute("newPosition", new Position());
+            model.addAttribute("newPosition", new PositionForm());
         model.addAttribute("halls", year.getHalls());
         if (!model.containsAttribute("newHall")) {
             Hall newHall = new Hall();
