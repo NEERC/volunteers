@@ -2216,3 +2216,5 @@ body { /* Margin bottom by footer height */ margin-bottom: 60px; }
 .admin-sidebar > li > a + button { position: absolute; right: 10px; top: 8px; }
 .admin-sidebar > li > a:not(.collapsed) .expanded { display: none; }
 .admin-sidebar > li > a.collapsed .collapsed { display: none; }
+
+.show-grid {  margin-bottom: 15px; }

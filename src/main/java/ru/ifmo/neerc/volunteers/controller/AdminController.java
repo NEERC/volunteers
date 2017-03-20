@@ -70,9 +70,9 @@ public class AdminController {
         return "admin";
     }
 
-    @RequestMapping(value="/position", method = RequestMethod.GET)
+    @RequestMapping(value = "/position", method = RequestMethod.GET)
     public String positions(Model model, Authentication authentication) {
-        setModel(model,getUser(authentication).getYear());
+        setModel(model, getUser(authentication).getYear());
         return "position";
     }
 
@@ -84,9 +84,9 @@ public class AdminController {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.position", result);
             attributes.addFlashAttribute("newPosition", positionForm);
         } else {
-            Position position=new Position(positionForm);
+            Position position = new Position(positionForm);
             positionRepository.save(position);
-            PositionValue positionValue=new PositionValue(position,year,positionForm.getValue());
+            PositionValue positionValue = new PositionValue(position, year, positionForm.getValue());
             positionValueRepository.save(positionValue);
             year.getPositionValues().add(positionValue);
             yearRepository.save(year);
@@ -96,16 +96,28 @@ public class AdminController {
 
     @RequestMapping(value = "/position/values", method = RequestMethod.POST)
     public String setPositionValues(HttpServletRequest request, Authentication authentication) {
-        Year year=getUser(authentication).getYear();
-        Set<PositionValue> positionValues=year.getPositionValues();
-        for(PositionValue positionValue : positionValues) {
-            int value=Integer.parseInt(request.getParameter("v"+positionValue.getId()));
-            if(positionValue.getValue()!=value) {
+        Year year = getUser(authentication).getYear();
+        Set<PositionValue> positionValues = year.getPositionValues();
+        for (PositionValue positionValue : positionValues) {
+            int value = Integer.parseInt(request.getParameter("v" + positionValue.getId()));
+            if (positionValue.getValue() != value) {
                 positionValue.setValue(value);
                 positionValueRepository.save(positionValue);
             }
         }
-        return "redirect:/admin/year?id="+year.getId();
+        return "redirect:/admin/year?id=" + year.getId();
+    }
+
+    @RequestMapping(value="/position/delete")
+    public String deletePosition(@RequestParam("id") long id, Authentication authentication) {
+        if(id!=1) {
+            Year year = getUser(authentication).getYear();
+            PositionValue positionValue = positionValueRepository.findOne(id);
+            year.getPositionValues().remove(positionValue);
+            yearRepository.save(year);
+            positionValueRepository.delete(id);
+        }
+        return "redirect:/admin/position";
     }
 
     @RequestMapping(value = "/hall/add", method = RequestMethod.POST)
@@ -141,12 +153,10 @@ public class AdminController {
         yearRepository.save(year);
         Set<PositionValue> positionValues = new HashSet<>();
         for (Position position : positions) {
-            PositionValue positionValue;
-            if (positionValueMap.containsKey(position.getId()))
-                positionValue = new PositionValue(position, year, positionValueMap.get(position.getId()));
-            else
-                positionValue = new PositionValue(position, year, 0);
-            positionValues.add(positionValue);
+            if (positionValueMap.containsKey(position.getId())) {
+                PositionValue positionValue = new PositionValue(position, year, positionValueMap.get(position.getId()));
+                positionValues.add(positionValue);
+            }
         }
         positionValueRepository.save(positionValues);
         year.setPositionValues(positionValues);
@@ -240,8 +250,6 @@ public class AdminController {
         setModel(model, year);
         model.addAttribute("event", event);
         model.addAttribute("users", event.getUsers());
-        model.addAttribute("positions", positionRepository.findAll());
-        model.addAttribute("halls", year.getHalls());
         Set<Event> events = event.getYear().getEvents();
         events.remove(event);
 

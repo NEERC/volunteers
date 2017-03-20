@@ -1,41 +1,45 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8" />
     <title>Positions</title>
 </head>
 <body>
-    <div th:fragment="content"  class="col-md-8">
-    <div class="container">
-        <div class="row show-grid">
-            <div class="col-md-4">
-                Position
-            </div>
-            <div class="col-md-4">
-                Value Position
-            </div>
+    <div th:fragment="content"  class="col-md-10">
+        <div class="table-responsive">
+                <table class="table table-hover">
+                <thead>
+                        <th>Position</th>
+                        <th>Value Position</th>
+                    </thead>
+                    <tbody>
+                        <form th:action="@{/admin/position/values}" method="post">
+                            <th:block th:each="position : ${positions}">
+                                <tr>
+                                    <td>
+                                        <label th:text="${position.position.name}" th:for="position+${position.id}">
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control" th:value="${position.value}" th:id="position+${position.id}" th:name="v+${position.id}" min="0"/>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{'/admin/position/delete?id='+${position.id}}" class="btn btn-default" role="button">Delete</a>
+                                    </td>
+                                </tr>
+                            </th:block>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <a href="#" data-toggle="modal" data-target="#positionForm" class="btn btn-default" role="button">Add</a>
+                                    <button type="submit" class="btn btn-primary" th:text="save"></button>
+                                </td>
+                            </tr>
+                        </form>
+                    </tbody>
+                </table>
         </div>
-        <form th:action="@{/admin/position/values}" method="post">
-            <th:block th:each="position : ${positions}">
-                <div class="row show-grid">
-                    <div class="col-md-4"  >
-                        <label th:text="${position.position}" th:for="position+${position.id}">
-
-                        </label>
-                    </div>
-                    <div class="col-md-4">
-                        <input type="number" class="form-control" th:value="${position.value}" th:id="position+${position.id}" th:name="v+${position.id}"/>
-                    </div>
-                </div>
-            </th:block>
-            <div class="col-md-4"></div>
-            <div class="col-md-4">
-                <a href="#" data-toggle="modal" data-target="#positionForm" class="btn btn-default" role="button">Add</a>
-                <button type="submit" class="btn btn-primary" th:text="save"></button>
-            </div>
-        </form>
-    </div>
-        <!-- Modal -->
+            <!-- Modal -->
         <div class="modal fade" id="positionForm" tabindex="-1" role="dialog" aria-labelledby="positionLabel">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -52,7 +56,7 @@
                             </div>
                             <div class="form-group" th:class="${#fields.hasErrors('value')}? 'has error form-group':'form-group'">
                                 <label for="positionValue">Position value</label>
-                                <input type="number" class="form-control" id="positionValue" th:field="*{value}" value="0" />
+                                <input type="number" class="form-control" id="positionValue" th:field="*{value}" value="0" min="0"/>
                                 <span class="help-block"  th:if="${#fields.hasErrors('value')}">Error</span>
                             </div>
                         </div>
@@ -64,7 +68,7 @@
                 </div>
             </div>
         </div>
-
     </div>
+
 </body>
 </html>
