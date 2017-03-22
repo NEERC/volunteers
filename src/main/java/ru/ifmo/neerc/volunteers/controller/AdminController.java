@@ -15,6 +15,7 @@ import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
 import ru.ifmo.neerc.volunteers.repository.*;
 
+import javax.jws.soap.SOAPBinding;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
@@ -47,6 +48,9 @@ public class AdminController {
 
     @Autowired
     PositionValueRepository positionValueRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
 
     @RequestMapping(method = RequestMethod.GET)
     public String admin(Model model, Authentication authentication) {
@@ -312,6 +316,21 @@ public class AdminController {
         return "redirect:/admin/event/?id=" + event.getId();
     }
 
+    @RequestMapping(value = "/add")
+    public String addAdmin(HttpServletRequest request) {
+        Long id=Long.parseLong(request.getParameter("newAdmin"));
+        Role roleUser=roleRepository.findOne(2l);
+        Role roleAdmin=roleRepository.findOne(1l);
+        User user=userRepository.findOne(id);
+        roleUser.getUsers().remove(user);
+        roleAdmin.getUsers().add(user);
+        user.setRole(roleAdmin);
+        userRepository.save(user);
+        roleRepository.save(roleUser);
+        roleRepository.save(roleAdmin);
+        return "redirect:/admin";
+    }
+
     private User getUser(Authentication authentication) {
         return userRepository.findByEmailIgnoreCase(authentication.getName());
     }
@@ -336,5 +355,9 @@ public class AdminController {
             newHall.setYear(year);
             model.addAttribute("newHall", newHall);
         }
+        Role roleAdmin=roleRepository.findOne(1l);
+        Role roleUser=roleRepository.findOne(2l);
+        model.addAttribute("roleAdmin",roleAdmin.getUsers());
+        model.addAttribute("roleUsers",roleUser.getUsers());
     }
 }

@@ -1,6 +1,7 @@
 package ru.ifmo.neerc.volunteers.controller;
 
 import org.thymeleaf.spring.support.Layout;
+import ru.ifmo.neerc.volunteers.entity.Role;
 import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.form.UserForm;
 import ru.ifmo.neerc.volunteers.repository.RoleRepository;
@@ -53,9 +54,12 @@ public class SignupController {
         }
         User user=new User(userForm);
         logger.debug(String.format("User created %s", user.toString()));
-        user.setRole(roleRepository.findOne(2l));//ROLE_USER
+        Role role=roleRepository.findOne(2l);//ROLE_USER
+        user.setRole(role);
+        role.getUsers().add(user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+        roleRepository.save(role);
         securityService.autologin(user.getEmail(), userForm.getPassword());
         return "redirect:/result";
     }

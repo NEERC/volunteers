@@ -72,8 +72,24 @@
                         </th:block>
                     </ul>-->
                 </li>
+                <li>
+                    <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">
+                        <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                        <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                        Admins
+                    </a>
+                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#adminForm">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    </button>
+                    <ul class="collapse" id="adminList">
+                        <th:block th:each="admin:${roleAdmin}">
+                            <li>
+                                <a href="#" th:text="${admin.badgeName}"></a>
+                            </li>
+                        </th:block>
+                    </ul>
+                </li>
             </ul>
-
                 <!-- Modal -->
                 <div class="modal fade" id="eventForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel">
                     <div class="modal-dialog" role="document">
@@ -103,6 +119,30 @@
                         </div>
                     </div>
                 </div>
+
+            <div class="modal fade" id="adminForm" tabindex="-1" role="dialog" aria-labelledby="adminLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form method="post" th:action="@{/admin/add}">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="adminLabel">Add new admin</h4>
+                            </div>
+                            <div class="modal-body">
+                                <select class="form-control" name="newAdmin">
+                                    <th:block th:each="user : ${roleUsers}">
+                                        <option th:value="${user.id}" th:text="${user.badgeName}"></option>
+                                    </th:block>
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Add</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
 
 
