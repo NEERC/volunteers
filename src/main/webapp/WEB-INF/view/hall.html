@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+</head>
+<body>
+    <div th:fragment="content" class="col-md-10">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <th>Hall name</th>
+                    <th>Hall decryption</th>
+                </thead>
+                <tbody>
+                    <th:block th:each="hall : ${halls}">
+                        <tr>
+                            <td>
+                                <label th:text="${hall.name}" >
+                                </label>
+                            </td>
+                            <td>
+                                <label th:text="${hall.decryption}"></label>
+                            </td>
+                            <td>
+                                <a th:href="@{'/admin/hall/delete?id='+${hall.id}}" class="btn btn-default" role="button">Delete</a>
+                            </td>
+                        </tr>
+                    </th:block>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <a href="#" data-toggle="modal" data-target="#hallForm" class="btn btn-default" role="button">Add</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="hallForm" tabindex="-1" role="dialog" aria-labelledby="hallLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" th:action="@{/admin/hall/add}" th:object="${newHall}">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="hallLabel">Add new hall</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
+                                <label for="hallName">Hall name</label>
+                                <input type="text" class="form-control" id="hallName" th:field="*{name}" />
+                                <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                            </div>
+                            <div class="form-group" th:class="${#fields.hasErrors('decryption')}? 'has-error form-group' : 'form-group'">
+                                <label for="decryption">Decryption</label>
+                                <input type="text" class="form-control" id="decryption" th:field="*{decryption}" />
+                                <span class="help-block" th:if="${#fields.hasErrors('decryption')}" th:errors="*{decryption}"></span>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

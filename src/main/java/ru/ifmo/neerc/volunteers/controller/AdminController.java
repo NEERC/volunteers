@@ -2,7 +2,6 @@ package ru.ifmo.neerc.volunteers.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -55,7 +54,10 @@ public class AdminController {
         if (user.getYear() != null) {
             return "redirect:/admin/year?id=" + user.getYear().getId();
         }
-        Iterable<Year> years = yearRepository.findAll();
+        List<Year> years = yearRepository.findAll();
+        if (years.size() != 0) {
+            return "redirect:/admin/year?id=" + years.get(years.size() - 1).getId();
+        }
         model.addAttribute("current_years", years);
         setModel(model, new Year("Year"));
         if (!model.containsAttribute("position")) {
@@ -73,6 +75,7 @@ public class AdminController {
     @RequestMapping(value = "/position", method = RequestMethod.GET)
     public String positions(Model model, Authentication authentication) {
         setModel(model, getUser(authentication).getYear());
+        model.addAttribute("title","Positions");
         return "position";
     }
 
@@ -108,9 +111,9 @@ public class AdminController {
         return "redirect:/admin/year?id=" + year.getId();
     }
 
-    @RequestMapping(value="/position/delete")
+    @RequestMapping(value = "/position/delete")
     public String deletePosition(@RequestParam("id") long id, Authentication authentication) {
-        if(id!=1) {
+        if (id != 1) {
             Year year = getUser(authentication).getYear();
             PositionValue positionValue = positionValueRepository.findOne(id);
             year.getPositionValues().remove(positionValue);
@@ -118,6 +121,13 @@ public class AdminController {
             positionValueRepository.delete(id);
         }
         return "redirect:/admin/position";
+    }
+
+    @RequestMapping(value = "/hall")
+    public String hall(Model model, Authentication authentication) {
+        setModel(model,getUser(authentication).getYear());
+        model.addAttribute("title","Halls");
+        return "hall";
     }
 
     @RequestMapping(value = "/hall/add", method = RequestMethod.POST)
@@ -133,7 +143,7 @@ public class AdminController {
             year.getHalls().add(hall);
             yearRepository.save(year);
         }
-        return "redirect:/admin/year?id=" + year.getId();
+        return "redirect:/admin/hall";
     }
 
     @RequestMapping(value = "/year/add", method = RequestMethod.POST)
@@ -181,6 +191,7 @@ public class AdminController {
             event.setYear(year);
             model.addAttribute("event", event);
         }
+        model.addAttribute("title",year.getName());
         return "year";
     }
 
@@ -228,8 +239,9 @@ public class AdminController {
         Set<UserEvent> users = event.getUsers();
         HashMap<Hall, List<UserEvent>> hallUser = new HashMap<>();
         for (UserEvent user : users) {
-            if (!hallUser.containsKey(user.getHall()))
+            if (!hallUser.containsKey(user.getHall())) {
                 hallUser.put(user.getHall(), new ArrayList<>());
+            }
             hallUser.get(user.getHall()).add(user);
         }
         Set<Hall> halls = year.getHalls();
@@ -240,6 +252,7 @@ public class AdminController {
         model.addAttribute("hallUser", hallUser);
         model.addAttribute("event", event);
         model.addAttribute("halls", halls);
+        model.addAttribute("title",event.getName());
         return "showEvent";
     }
 
@@ -266,7 +279,7 @@ public class AdminController {
             long newIdPosition = Long.parseLong(request.getParameter("p" + user.getId()));
             long newIdHall = Long.parseLong(request.getParameter("h" + user.getId()));
             if (user.getPosition().getId() != newIdPosition) {
-                user.setPosition(positionRepository.findOne(newIdPosition));
+                user.setPosition(positionValueRepository.findOne(newIdPosition).getPosition());
                 flage = true;
             }
             if (user.getHall().getId() != newIdHall) {
@@ -282,17 +295,19 @@ public class AdminController {
     @RequestMapping(value = "/event/copy")
     public String copy(HttpServletRequest request) {
         Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        Event baseEvent = eventRepository.findOne(Long.parseLong(request.getParameter("baseEvent")));
-        Map<Long, UserEvent> userEventBase = new HashMap<>();
-        for (UserEvent userEvent : baseEvent.getUsers()) {
-            userEventBase.put(userEvent.getUserYear().getId(), userEvent);
-        }
-        Set<UserEvent> users = event.getUsers();
-        for (UserEvent user : users) {
-            Long form = user.getUserYear().getId();
-            user.setHall(userEventBase.get(form).getHall());
-            user.setPosition(userEventBase.get(form).getPosition());
-            userEventRepository.save(user);
+        if(Long.parseLong(request.getParameter("baseEvent"))!=-1) {
+            Event baseEvent = eventRepository.findOne(Long.parseLong(request.getParameter("baseEvent")));
+            Map<Long, UserEvent> userEventBase = new HashMap<>();
+            for (UserEvent userEvent : baseEvent.getUsers()) {
+                userEventBase.put(userEvent.getUserYear().getId(), userEvent);
+            }
+            Set<UserEvent> users = event.getUsers();
+            for (UserEvent user : users) {
+                Long form = user.getUserYear().getId();
+                user.setHall(userEventBase.get(form).getHall());
+                user.setPosition(userEventBase.get(form).getPosition());
+                userEventRepository.save(user);
+            }
         }
         return "redirect:/admin/event/?id=" + event.getId();
     }

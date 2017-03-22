@@ -39,6 +39,7 @@ public class Year {
     private Set<ApplicationForm> users;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OrderBy(value = "name ASC")
     private Set<Hall> halls;
 
     @OneToMany
