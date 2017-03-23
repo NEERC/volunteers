@@ -62,9 +62,8 @@ public class AdminController {
         if (years.size() != 0) {
             return "redirect:/admin/year?id=" + years.get(years.size() - 1).getId();
         }
-        model.addAttribute("current_years", years);
-        setModel(model, new Year("Year"));
-        if (!model.containsAttribute("position")) {
+        setModel(model, null);
+        /*if (!model.containsAttribute("position")) {
             model.addAttribute("position", new Position());
         }
         if (!model.containsAttribute("year")) {
@@ -72,7 +71,7 @@ public class AdminController {
         }
         if (!model.containsAttribute("hall")) {
             model.addAttribute("hall", new Hall());
-        }
+        }*/
         return "admin";
     }
 
@@ -156,24 +155,38 @@ public class AdminController {
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.year", result);
             attributes.addFlashAttribute("newYear", year);
-            return "redirect:/admin/year?id=" + yearOld.getId();
+            if(yearOld!=null)
+                return "redirect:/admin/year?id=" + yearOld.getId();
+            else
+                return "redirect:/admin";
         }
         Set<Position> positions = positionRepository.findAll();
-        Set<PositionValue> positionValuesOld = yearOld.getPositionValues();
-        Map<Long, Integer> positionValueMap = new HashMap<>();
-        for (PositionValue positionValue : positionValuesOld) {
-            positionValueMap.put(positionValue.getPosition().getId(), positionValue.getValue());
-        }
         yearRepository.save(year);
-        Set<PositionValue> positionValues = new HashSet<>();
-        for (Position position : positions) {
-            if (positionValueMap.containsKey(position.getId())) {
-                PositionValue positionValue = new PositionValue(position, year, positionValueMap.get(position.getId()));
-                positionValues.add(positionValue);
+        if(yearOld!=null) {
+            Set<PositionValue> positionValuesOld = yearOld.getPositionValues();
+            Map<Long, Integer> positionValueMap = new HashMap<>();
+            for (PositionValue positionValue : positionValuesOld) {
+                positionValueMap.put(positionValue.getPosition().getId(), positionValue.getValue());
             }
+
+            Set<PositionValue> positionValues = new HashSet<>();
+            for (Position position : positions) {
+                if (positionValueMap.containsKey(position.getId())) {
+                    PositionValue positionValue = new PositionValue(position, year, positionValueMap.get(position.getId()));
+                    positionValues.add(positionValue);
+                }
+            }
+
+            positionValueRepository.save(positionValues);
+            year.setPositionValues(positionValues);
         }
-        positionValueRepository.save(positionValues);
-        year.setPositionValues(positionValues);
+        else {
+            year.setPositionValues(new HashSet<>());
+            for(Position position:positions) {
+                year.getPositionValues().add(new PositionValue(position,year,0));
+            }
+            positionValueRepository.save(year.getPositionValues());
+        }
         yearRepository.save(year);
         return "redirect:/admin/year?id=" + year.getId();
     }
@@ -340,16 +353,23 @@ public class AdminController {
         if (!model.containsAttribute("newYear"))
             model.addAttribute("newYear", new Year());
         model.addAttribute("years", yearRepository.findAll());
-        model.addAttribute("events", year.getEvents());
+        if(year!=null) {
+            model.addAttribute("events", year.getEvents());
+            model.addAttribute("positions", year.getPositionValues());
+            model.addAttribute("halls", year.getHalls());
+        }
+        else {
+            model.addAttribute("events", Collections.EMPTY_LIST);
+            model.addAttribute("positions", Collections.EMPTY_LIST);
+            model.addAttribute("halls", Collections.EMPTY_LIST);
+        }
         if (!model.containsAttribute("newEvent")) {
             Event newEvent = new Event();
             newEvent.setYear(year);
             model.addAttribute("newEvent", newEvent);
         }
-        model.addAttribute("positions", year.getPositionValues());
         if (!model.containsAttribute("newPosition"))
             model.addAttribute("newPosition", new PositionForm());
-        model.addAttribute("halls", year.getHalls());
         if (!model.containsAttribute("newHall")) {
             Hall newHall = new Hall();
             newHall.setYear(year);

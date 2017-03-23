@@ -19,138 +19,47 @@
 </head>
 <body>
 <div class="container">
-    <div class="page-header" th:replace="fragments/headerAdmin :: header">Header goes here!</div>
 
-    <div class="row">
-        <div class="col-md-2">
-            <ul id="sidebar" class="nav nav-pills nav-stacked admin-sidebar well well-sm">
-                <li><a href="#eventsList" data-toggle="collapse" aria-expanded="true" aria-controls="eventsList">
-                    <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
-                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
-                    Events</a>
-                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                    </button>
-                    <ul class="collapse in" id="eventsList">
-                        <th:block th:each="event : ${events}">
-                            <li>
-                                <a th:href="@{'/admin/event?id='+${event.id}}" th:text="${event.name}"></a>
-                            </li>
-                        </th:block>
-                    </ul>
-                </li>
-                <li>
-                    <a th:href="@{/admin/position}" class="collapsed">
-                        <!--<span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
-                        <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>-->
-                        Positions</a>
-                    <!--<a th:href="@{/admin/positions}" type="button" class="btn btn-primary btn-xs">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                    </a>-->
-                    <!--<ul class="collapse" id="positionsList">
-                        <th:block th:each="position:${positions}">
-                            <li>
-                                <a href="#" th:text="${position.name}"></a>
-                            </li>
-                        </th:block>
-                    </ul>-->
+    <th:block th:if="${year}!=null">
+        <div class="page-header" th:replace="fragments/headerAdmin :: header">Header goes here!</div>
 
-                </li>
-                <li>
-                    <a th:href="@{/admin/hall}" class="collapsed">
-                        <!--<span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
-                        <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>-->
-                        Halls</a>
-                    <!--<button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#hallForm">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                    </button>
-                    <ul class="collapse" id="hallsList">
-                        <th:block th:each="hall : ${halls}">
-                            <li>
-                                <a href="#" th:text="${hall.name}"></a>
-                            </li>
-                        </th:block>
-                    </ul>-->
-                </li>
-                <li>
-                    <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">
-                        <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
-                        <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
-                        Admins
-                    </a>
-                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#adminForm">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                    </button>
-                    <ul class="collapse" id="adminList">
-                        <th:block th:each="admin:${roleAdmin}">
-                            <li>
-                                <a href="#" th:text="${admin.badgeName}"></a>
-                            </li>
-                        </th:block>
-                    </ul>
-                </li>
-            </ul>
-                <!-- Modal -->
-                <div class="modal fade" id="eventForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <form method="post" th:action="@{/admin/event/add}" th:object="${newEvent}">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title" id="eventLabel">Add new position</h4>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
-                                        <label for="eventName">Event name</label>
-                                        <input type="text" class="form-control" id="eventName" th:field="*{name}" />
-                                        <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
-                                    </div>
-                                    <div class="form-group" th:class="${#fields.hasErrors('information')}? 'has-error form-group' : 'form-group'">
-                                        <label for="information">Information</label>
-                                        <input type="text" class="form-control" id="information" th:field="*{information}" />
-                                        <span class="help-block" th:if="${#fields.hasErrors('information')}" th:errors="*{information}"></span>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Add</button>
-                                </div>
-                            </form>
+
+        <div class="row">
+            <th:block th:if="${year}!=null">
+                <div class="col-md-2" th:replace="fragments/menuAdmin :: menu">Meny goes here!</div>
+                <div th:replace="${view} :: content" class="col-md-8">Content goes here!</div>
+            </th:block>
+    </div>
+
+    </th:block>
+    <th:block th:unless="${year}!=null">
+        <div class="page-header" th:replace="fragments/header :: header">Header goes here, if no year in database</div>
+        <!-- Model-->
+        <div class="modal fade" id="yearForm" tabindex="-1" role="dialog" aria-labelledby="yearLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" th:action="@{/admin/year/add}" th:object="${newYear}">
+                        <div class="modal-header">
+                            <button type="button" class="close disabled" data-dismiss="modal" aria-label="Close" disabled="disabled"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="yearLabel">Add new year</h4>
                         </div>
-                    </div>
-                </div>
-
-            <div class="modal fade" id="adminForm" tabindex="-1" role="dialog" aria-labelledby="adminLabel">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <form method="post" th:action="@{/admin/add}">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title" id="adminLabel">Add new admin</h4>
+                        <div class="modal-body">
+                            <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
+                                <label for="positionName">Year name</label>
+                                <input type="text" class="form-control" id="positionName" th:field="*{name}" />
+                                <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
                             </div>
-                            <div class="modal-body">
-                                <select class="form-control" name="newAdmin">
-                                    <th:block th:each="user : ${roleUsers}">
-                                        <option th:value="${user.id}" th:text="${user.badgeName}"></option>
-                                    </th:block>
-                                </select>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Add</button>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default disabled" data-dismiss="modal" disabled="disabled">Close</button>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-
-
         </div>
 
-        <div th:replace="${view} :: content" class="col-md-8">Content goes here!</div>
-
-    </div>
+    </th:block>
 </div>
 <footer class="footer">
     <div class="container">
@@ -162,5 +71,11 @@
 <script src="../../../components/jquery.min.js" th:src="@{/components/jquery.min.js}"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="../../../components/bootstrap.min.js" th:src="@{/components/bootstrap.min.js}"></script>
+
+<th:block th:if="${year==null}">
+    <script type="text/javascript">
+            $('#yearForm').modal('show');
+    </script>
+</th:block>
 </body>
 </html>

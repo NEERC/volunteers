@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+    <div th:fragment="menu" class="col-md-2">
+        <ul id="sidebar" class="nav nav-pills nav-stacked admin-sidebar well well-sm">
+            <li><a href="#eventsList" data-toggle="collapse" aria-expanded="true" aria-controls="eventsList">
+                <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                Events</a>
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </button>
+                <ul class="collapse in" id="eventsList">
+                    <th:block th:each="event : ${events}">
+                        <li>
+                            <a th:href="@{'/admin/event?id='+${event.id}}" th:text="${event.name}"></a>
+                        </li>
+                    </th:block>
+                </ul>
+            </li>
+            <li>
+                <a th:href="@{/admin/position}" class="collapsed">
+                    <!--<span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>-->
+                    Positions</a>
+                <!--<a th:href="@{/admin/positions}" type="button" class="btn btn-primary btn-xs">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </a>-->
+                <!--<ul class="collapse" id="positionsList">
+                    <th:block th:each="position:${positions}">
+                        <li>
+                            <a href="#" th:text="${position.name}"></a>
+                        </li>
+                    </th:block>
+                </ul>-->
+
+            </li>
+            <li>
+                <a th:href="@{/admin/hall}" class="collapsed">
+                    <!--<span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>-->
+                    Halls</a>
+                <!--<button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#hallForm">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </button>
+                <ul class="collapse" id="hallsList">
+                    <th:block th:each="hall : ${halls}">
+                        <li>
+                            <a href="#" th:text="${hall.name}"></a>
+                        </li>
+                    </th:block>
+                </ul>-->
+            </li>
+            <li>
+                <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">
+                    <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                    Admins
+                </a>
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#adminForm">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </button>
+                <ul class="collapse" id="adminList">
+                    <th:block th:each="admin:${roleAdmin}">
+                        <li>
+                            <a href="#" th:text="${admin.badgeName}"></a>
+                        </li>
+                    </th:block>
+                </ul>
+            </li>
+        </ul>
+        <!-- Modal -->
+        <div class="modal fade" id="eventForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" th:action="@{/admin/event/add}" th:object="${newEvent}">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="eventLabel">Add new position</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
+                                <label for="eventName">Event name</label>
+                                <input type="text" class="form-control" id="eventName" th:field="*{name}" />
+                                <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                            </div>
+                            <div class="form-group" th:class="${#fields.hasErrors('information')}? 'has-error form-group' : 'form-group'">
+                                <label for="information">Information</label>
+                                <input type="text" class="form-control" id="information" th:field="*{information}" />
+                                <span class="help-block" th:if="${#fields.hasErrors('information')}" th:errors="*{information}"></span>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="adminForm" tabindex="-1" role="dialog" aria-labelledby="adminLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" th:action="@{/admin/add}">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="adminLabel">Add new admin</h4>
+                        </div>
+                        <div class="modal-body">
+                            <select class="form-control" name="newAdmin">
+                                <th:block th:each="user : ${roleUsers}">
+                                    <option th:value="${user.id}" th:text="${user.badgeName}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
