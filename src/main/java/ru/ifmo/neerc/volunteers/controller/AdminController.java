@@ -375,8 +375,8 @@ public class AdminController {
             newHall.setYear(year);
             model.addAttribute("newHall", newHall);
         }
-        Role roleAdmin=roleRepository.findOne(1l);
-        Role roleUser=roleRepository.findOne(2l);
+        Role roleUser=roleRepository.findByName("ROLE_USER");
+        Role roleAdmin=roleRepository.findByName("ROLE_ADMIN");
         model.addAttribute("roleAdmin",roleAdmin.getUsers());
         model.addAttribute("roleUsers",roleUser.getUsers());
     }

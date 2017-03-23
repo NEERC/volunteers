@@ -54,7 +54,7 @@ public class SignupController {
         }
         User user=new User(userForm);
         logger.debug(String.format("User created %s", user.toString()));
-        Role role=roleRepository.findOne(2l);//ROLE_USER
+        Role role=roleRepository.findByName("ROLE_USER");//ROLE_USER
         user.setRole(role);
         role.getUsers().add(user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
