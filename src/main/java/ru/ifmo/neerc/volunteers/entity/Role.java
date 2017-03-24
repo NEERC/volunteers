@@ -27,7 +27,7 @@ public class Role implements Serializable, GrantedAuthority {
 
     private String name;
 
-    @OneToMany
+    @OneToMany(mappedBy = "role")
     Set<User> users;
 
     @Override

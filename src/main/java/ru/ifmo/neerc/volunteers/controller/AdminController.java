@@ -15,7 +15,6 @@ import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
 import ru.ifmo.neerc.volunteers.repository.*;
 
-import javax.jws.soap.SOAPBinding;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
@@ -94,8 +93,8 @@ public class AdminController {
             positionRepository.save(position);
             PositionValue positionValue = new PositionValue(position, year, positionForm.getValue());
             positionValueRepository.save(positionValue);
-            year.getPositionValues().add(positionValue);
-            yearRepository.save(year);
+            //year.getPositionValues().add(positionValue);
+            //yearRepository.save(year);
         }
         return "redirect:/admin/position";
     }
@@ -111,16 +110,16 @@ public class AdminController {
                 positionValueRepository.save(positionValue);
             }
         }
-        return "redirect:/admin/year?id=" + year.getId();
+        return "redirect:/admin/position";
     }
 
     @RequestMapping(value = "/position/delete")
-    public String deletePosition(@RequestParam("id") long id, Authentication authentication) {
+    public String deletePosition(@RequestParam("id") long id) {
         if (id != 1) {
-            Year year = getUser(authentication).getYear();
-            PositionValue positionValue = positionValueRepository.findOne(id);
-            year.getPositionValues().remove(positionValue);
-            yearRepository.save(year);
+            //Year year = getUser(authentication).getYear();
+            //PositionValue positionValue = positionValueRepository.findOne(id);
+            //year.getPositionValues().remove(positionValue);
+            //yearRepository.save(year);
             positionValueRepository.delete(id);
         }
         return "redirect:/admin/position";
@@ -143,8 +142,8 @@ public class AdminController {
         } else {
             hall.setYear(year);
             hallRepository.save(hall);
-            year.getHalls().add(hall);
-            yearRepository.save(year);
+            //year.getHalls().add(hall);
+            //yearRepository.save(year);
         }
         return "redirect:/admin/hall";
     }
@@ -178,16 +177,16 @@ public class AdminController {
             }
 
             positionValueRepository.save(positionValues);
-            year.setPositionValues(positionValues);
+            //year.setPositionValues(positionValues);
         }
         else {
-            year.setPositionValues(new HashSet<>());
+            Set<PositionValue> positionValues=new HashSet<>();
             for(Position position:positions) {
-                year.getPositionValues().add(new PositionValue(position,year,0));
+                positionValues.add(new PositionValue(position,year,0));
             }
-            positionValueRepository.save(year.getPositionValues());
+            positionValueRepository.save(positionValues);
         }
-        yearRepository.save(year);
+        //yearRepository.save(year);
         return "redirect:/admin/year?id=" + year.getId();
     }
 
@@ -229,22 +228,32 @@ public class AdminController {
                 return "redirect:/admin";
         }
         eventRepository.save(event);
-        year.getEvents().add(event);
-        yearRepository.save(year);
+        //year.getEvents().add(event);
+        //yearRepository.save(year);
         Set<ApplicationForm> users = year.getUsers();
         event.setUsers(new HashSet<>());
-        Position position = positionRepository.findOne(1l);//default position
-        Hall hall = hallRepository.findOne(1l);//default hall
-        for (ApplicationForm applicationForm : users) {
+        Position position = positionRepository.findOne(1L);//default position
+        Hall hall = hallRepository.findOne(1L);//default hall
+        Set<UserEvent> userEvents=new HashSet<>();
+        users.forEach(applicationForm -> {
+            UserEvent userEvent = new UserEvent();
+            userEvent.setEvent(event);
+            userEvent.setHall(hall);
+            userEvent.setPosition(position);
+            userEvent.setUserYear(applicationForm);
+            userEvents.add(userEvent);
+        });
+        userEventRepository.save(userEvents);
+        /*for (ApplicationForm applicationForm : users) {
             UserEvent userEvent = new UserEvent();
             userEvent.setEvent(event);
             userEvent.setHall(hall);
             userEvent.setPosition(position);
             userEvent.setUserYear(applicationForm);
             userEventRepository.save(userEvent);//save new user
-            event.getUsers().add(userEvent);
-        }
-        eventRepository.save(event);
+            //event.getUsers().add(userEvent);
+        }*/
+        //eventRepository.save(event);
         return "redirect:/admin/event?id=" + event.getId();
     }
 
@@ -332,15 +341,15 @@ public class AdminController {
     @RequestMapping(value = "/add")
     public String addAdmin(HttpServletRequest request) {
         Long id=Long.parseLong(request.getParameter("newAdmin"));
-        Role roleUser=roleRepository.findOne(2l);
-        Role roleAdmin=roleRepository.findOne(1l);
+//        Role roleUser=roleRepository.findByName("ROLE_USER");
+        Role roleAdmin=roleRepository.findByName("ROLE_ADMIN");
         User user=userRepository.findOne(id);
-        roleUser.getUsers().remove(user);
-        roleAdmin.getUsers().add(user);
+        //roleUser.getUsers().remove(user);
+        //roleAdmin.getUsers().add(user);
         user.setRole(roleAdmin);
         userRepository.save(user);
-        roleRepository.save(roleUser);
-        roleRepository.save(roleAdmin);
+        //roleRepository.save(roleUser);
+        //roleRepository.save(roleAdmin);
         return "redirect:/admin";
     }
 

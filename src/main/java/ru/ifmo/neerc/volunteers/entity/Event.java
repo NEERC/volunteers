@@ -36,6 +36,6 @@ public class Event {
     @NotNull
     private int attendanceValue;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "event")
     Set<UserEvent> users;
 }
