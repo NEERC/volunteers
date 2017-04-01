@@ -26,9 +26,9 @@ public class Year {
     @Size(max = 255)
     private String name;
 
-   /* private boolean open;
+   private boolean openForRegistration;
 
-    private boolean current;*/
+    /*private boolean current;*/
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year")
     @OrderBy("id ASC")
@@ -44,6 +44,8 @@ public class Year {
 
     @OneToMany(mappedBy = "year")
     private Set<PositionValue> positionValues;
+
+
 
     public Year(String name) {
         this.name = name;

@@ -143,6 +143,7 @@ public class AdminController {
                 return "redirect:/admin";
         }
         Set<Position> positions = positionRepository.findAll();
+        year.setOpenForRegistration(true);
         yearRepository.save(year);
         if (yearOld != null) {
             Set<PositionValue> positionValuesOld = yearOld.getPositionValues();
@@ -158,7 +159,6 @@ public class AdminController {
                     positionValues.add(positionValue);
                 }
             }
-
             positionValueRepository.save(positionValues);
         } else {
             Set<PositionValue> positionValues = new HashSet<>();
@@ -168,6 +168,14 @@ public class AdminController {
             positionValueRepository.save(positionValues);
         }
         return "redirect:/admin/year?id=" + year.getId();
+    }
+
+    @RequestMapping(value = "/year/close")
+    public String closeYear(Authentication authentication) {
+        Year year=getUser(authentication).getYear();
+        year.setOpenForRegistration(false);
+        yearRepository.save(year);
+        return "redirect:/admin/year?id="+year.getId();
     }
 
     @RequestMapping(value = "/year")

@@ -55,6 +55,9 @@
                     </th:block>
                 </ul>-->
             </li>
+            <li th:if="${year.openForRegistration}">
+                <a th:href="@{/admin/year/close}" class="collapsed">Close registration</a>
+            </li>
             <li>
                 <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">
                     <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
