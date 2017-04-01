@@ -21,7 +21,7 @@
                                         </label>
                                     </td>
                                     <td>
-                                        <input type="number" class="form-control" th:value="${position.value}" th:id="position+${position.id}" th:name="v+${position.id}" min="0"/>
+                                        <input type="number" step="any" class="form-control" th:value="${position.value}" th:id="position+${position.id}" th:name="v+${position.id}" min="0"/>
                                     </td>
                                     <td>
                                         <a th:href="@{'/admin/position/delete?id='+${position.id}}" class="btn btn-default" role="button">Delete</a>
@@ -56,7 +56,7 @@
                             </div>
                             <div class="form-group" th:class="${#fields.hasErrors('value')}? 'has error form-group':'form-group'">
                                 <label for="positionValue">Position value</label>
-                                <input type="number" class="form-control" id="positionValue" th:field="*{value}" value="0" min="0"/>
+                                <input type="number" step="any" class="form-control" id="positionValue" th:field="*{value}" value="0" min="0"/>
                                 <span class="help-block"  th:if="${#fields.hasErrors('value')}">Error</span>
                             </div>
                         </div>

@@ -17,5 +17,5 @@ public class PositionForm {
     String name;
 
     @Min(0)
-    int value;
+    double value;
 }

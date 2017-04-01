@@ -67,7 +67,7 @@
                 <ul class="collapse" id="adminList">
                     <th:block th:each="admin:${roleAdmin}">
                         <li>
-                            <a href="#" th:text="${admin.badgeName}"></a>
+                            <span href="#" th:text="${admin.badgeName}" style="color: #337ab7"></span>
                         </li>
                     </th:block>
                 </ul>

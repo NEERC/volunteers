@@ -17,7 +17,7 @@ public class PositionValue {
     @ManyToOne
     Position position;
 
-    int value;
+    double value;
 
     @ManyToOne
     Year year;
@@ -26,7 +26,7 @@ public class PositionValue {
 
     }
 
-    public PositionValue(Position position, Year year, int value){
+    public PositionValue(Position position, Year year, double value){
         this.position=position;
         this.year=year;
         this.value=value;
