@@ -220,7 +220,7 @@ public class AdminController {
         event.setUsers(new HashSet<>());
         Position position = positionRepository.findOne(1L);//default position
         Hall hall = hallRepository.findOne(1L);//default hall
-        Set<UserEvent> userEvents = new HashSet<>();
+        List<UserEvent> userEvents = new ArrayList<>();
         users.forEach(applicationForm -> {
             UserEvent userEvent = new UserEvent();
             userEvent.setEvent(event);
@@ -339,7 +339,6 @@ public class AdminController {
         userEventRepository.save(users);
         return "redirect:/admin/event?id=" + request.getParameter("event");
     }
-
 
     private User getUser(Authentication authentication) {
         return userRepository.findByEmailIgnoreCase(authentication.getName());

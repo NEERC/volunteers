@@ -98,3 +98,12 @@ task generateDbPuml(type:JavaExec) {
 	//noinspection GroovyAssignabilityCheck
 	args "database"
 }
+
+task generateDataSql(type:JavaExec) {
+	group 'verification'
+
+	main = "ru.ifmo.neerc.dev.DataGenerator"
+	classpath = sourceSets.main.runtimeClasspath
+
+	args "data.sql"
+}
