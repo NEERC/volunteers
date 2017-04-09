@@ -6,6 +6,7 @@ import lombok.ToString;
 import javax.persistence.*;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Lapenok Akesej on 26.02.2017.
@@ -30,8 +31,8 @@ public class UserEvent {
     @JoinColumn(name = "position")
     Position position;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    List<UserEventAssessment> assessments;
+    @ManyToMany(fetch = FetchType.LAZY)
+    Set<UserEventAssessment> assessments;
 
     @ManyToOne
     Hall hall;

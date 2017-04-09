@@ -1,5 +1,6 @@
 package ru.ifmo.neerc.volunteers.controller;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -51,6 +52,9 @@ public class AdminController {
     @Autowired
     RoleRepository roleRepository;
 
+    @Autowired
+    UserEventAssessmentRepository userEventAssessmentRepository;
+
     @RequestMapping(method = RequestMethod.GET)
     public String admin(Model model, Authentication authentication) {
         User user = getUser(authentication);
@@ -77,7 +81,7 @@ public class AdminController {
         User user = getUser(authentication);
         Year year = user.getYear();
         if (result.hasErrors()) {
-            attributes.addFlashAttribute("org.springframework.validation.BindingResult.position", result);
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newPosition", result);
             attributes.addFlashAttribute("newPosition", positionForm);
         } else {
             Position position = new Position(positionForm);
@@ -122,7 +126,7 @@ public class AdminController {
         User user = getUser(authentication);
         Year year = user.getYear();
         if (result.hasErrors()) {
-            attributes.addFlashAttribute("org.springframework.validation.BindingResult.hall", result);
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newHall", result);
             attributes.addFlashAttribute("newHall", hall);
         } else {
             hall.setYear(year);
@@ -135,7 +139,7 @@ public class AdminController {
     public String addYear(@Valid @ModelAttribute("newYear") Year year, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
         Year yearOld = getUser(authentication).getYear();
         if (result.hasErrors()) {
-            attributes.addFlashAttribute("org.springframework.validation.BindingResult.year", result);
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newYear", result);
             attributes.addFlashAttribute("newYear", year);
             if (yearOld != null)
                 return "redirect:/admin/year?id=" + yearOld.getId();
@@ -172,10 +176,10 @@ public class AdminController {
 
     @RequestMapping(value = "/year/close")
     public String closeYear(Authentication authentication) {
-        Year year=getUser(authentication).getYear();
+        Year year = getUser(authentication).getYear();
         year.setOpenForRegistration(false);
         yearRepository.save(year);
-        return "redirect:/admin/year?id="+year.getId();
+        return "redirect:/admin/year?id=" + year.getId();
     }
 
     @RequestMapping(value = "/year")
@@ -200,7 +204,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/event/add")
-    public String addEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
+    public String addEvent(@Valid @ModelAttribute("newEvent") Event event, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
         User user = getUser(authentication);
         Year year = event.getYear();
         if (year == null) {
@@ -209,7 +213,7 @@ public class AdminController {
         }
         if (result.hasErrors()) {
             if (year != null) {
-                attributes.addFlashAttribute("org.springframework.validation.BindingResult.event", result);
+                attributes.addFlashAttribute("org.springframework.validation.BindingResult.newEvent", result);
                 attributes.addFlashAttribute("newEvent", event);
                 return "redirect:/admin/year?id=" + year.getId();
             } else
@@ -257,7 +261,6 @@ public class AdminController {
         model.addAttribute("event", event);
         model.addAttribute("halls", halls);
         model.addAttribute("title", event.getName());
-        model.addAttribute("attendance", Attendance.values());
         return "showEvent";
     }
 
@@ -275,7 +278,7 @@ public class AdminController {
     public String save(HttpServletRequest request) {
         Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
         Set<UserEvent> users = event.getUsers();
-        Set<UserEvent> forSave=new HashSet<>();
+        Set<UserEvent> forSave = new HashSet<>();
         for (UserEvent user : users) {
             boolean flage = false;
             long newIdPosition = Long.parseLong(request.getParameter("p" + user.getId()));
@@ -323,6 +326,60 @@ public class AdminController {
         user.setRole(roleAdmin);
         userRepository.save(user);
         return "redirect:/admin";
+    }
+
+    @RequestMapping(value = "/event/attendance", method = RequestMethod.GET)
+    public String attendance(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
+        showEvent(id, model, authentication);
+        model.addAttribute("attendances", Attendance.values());
+        model.addAttribute("attendance", true);
+        return "showEvent";
+    }
+
+    @RequestMapping(value = "/event/assessments", method = RequestMethod.GET)
+    public String assessments(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
+        showEvent(id, model, authentication);
+        model.addAttribute("assessment", true);
+        model.addAttribute("assessments", userEventAssessmentRepository.findAll());
+        if(!model.containsAttribute("newAssessment"))
+            model.addAttribute("newAssessment",new UserEventAssessment());
+        return "showEvent";
+    }
+
+    @RequestMapping(value = "/event/assessments", method = RequestMethod.POST)
+    public String setAssessments(HttpServletRequest request) {
+        Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
+        Set<UserEvent> users=new HashSet<>();
+        Iterable<UserEventAssessment> assessments=userEventAssessmentRepository.findAll();
+        for(UserEvent user:event.getUsers()) {
+            userEventRepository.save(user);
+            Set<UserEventAssessment> assessmentSet=new HashSet<>();
+            for(UserEventAssessment assessment:assessments) {
+                boolean chosen=request.getParameter("assessment"+assessment.getId()+"user"+user.getId())!=null;
+                if(chosen) {
+                    assessmentSet.add(assessment);
+                }
+            }
+            if(!CollectionUtils.isEqualCollection(user.getAssessments(),assessmentSet)) {
+                user.getAssessments().clear();
+                user.getAssessments().addAll(assessmentSet);
+                userEventRepository.save(user);
+            }
+        }
+        if(!users.isEmpty())
+            userEventRepository.save(users);
+        return "redirect:/admin/event?id=" + request.getParameter("event");
+    }
+
+    @RequestMapping(value = "/event/assessments/add",method = RequestMethod.POST)
+    public String addAttendance(@Valid @ModelAttribute("newAssessment") UserEventAssessment assessment, BindingResult result, RedirectAttributes attributes, HttpServletRequest request) {
+        if(result.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newAssessment", result);
+            attributes.addFlashAttribute("newAssessment", assessment);
+        }
+        else
+            userEventAssessmentRepository.save(assessment);
+        return "redirect:/admin/event/assessments?id="+request.getParameter("event");
     }
 
     @RequestMapping(value = "/event/attendance", method = RequestMethod.POST)
