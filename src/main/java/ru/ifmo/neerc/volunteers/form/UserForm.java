@@ -11,7 +11,7 @@ import javax.validation.constraints.AssertTrue;
  * Created by Алексей on 21.02.2017.
  */
 @Data
-@ToString(exclude = {"password","confirmPassword","passwordEquals"})
+@ToString(exclude = {"password", "confirmPassword", "passwordEquals"})
 public class UserForm {
 
     @NotEmpty
@@ -42,9 +42,11 @@ public class UserForm {
     @Email
     private String email;
 
+    transient private boolean emailExist = false;
+
     transient private boolean passwordEquals;
 
-    @AssertTrue(message = "Пароли не совпадают")
+    @AssertTrue
     public boolean isPasswordEquals() {
         return password == null && confirmPassword == null ||
                 password != null && confirmPassword != null && password.equals(confirmPassword);

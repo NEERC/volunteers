@@ -1,12 +1,5 @@
 package ru.ifmo.neerc.volunteers.controller;
 
-import org.thymeleaf.spring.support.Layout;
-import ru.ifmo.neerc.volunteers.entity.Role;
-import ru.ifmo.neerc.volunteers.entity.User;
-import ru.ifmo.neerc.volunteers.form.UserForm;
-import ru.ifmo.neerc.volunteers.repository.RoleRepository;
-import ru.ifmo.neerc.volunteers.repository.UserRepository;
-import ru.ifmo.neerc.volunteers.service.SecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.thymeleaf.spring.support.Layout;
+import ru.ifmo.neerc.volunteers.entity.Role;
+import ru.ifmo.neerc.volunteers.entity.User;
+import ru.ifmo.neerc.volunteers.form.UserForm;
+import ru.ifmo.neerc.volunteers.repository.RoleRepository;
+import ru.ifmo.neerc.volunteers.repository.UserRepository;
+import ru.ifmo.neerc.volunteers.service.SecurityService;
 
 import javax.validation.Valid;
 
@@ -49,17 +49,18 @@ public class SignupController {
 
     @PostMapping("/signup")
     public String processSignup(@Valid @ModelAttribute("user") UserForm userForm, BindingResult result) {
+        if (userRepository.findByEmailIgnoreCase(userForm.getEmail()) != null) {
+            result.rejectValue("emailExist", "exist.user.email", "");
+        }
         if (result.hasErrors()) {
             return "signup";
         }
-        User user=new User(userForm);
+        User user = new User(userForm);
         logger.debug(String.format("User created %s", user.toString()));
-        Role role=roleRepository.findByName("ROLE_USER");//ROLE_USER
+        Role role = roleRepository.findByName("ROLE_USER");//ROLE_USER
         user.setRole(role);
-        role.getUsers().add(user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-        roleRepository.save(role);
         securityService.autologin(user.getEmail(), userForm.getPassword());
         return "redirect:/result";
     }

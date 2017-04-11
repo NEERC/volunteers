@@ -13,64 +13,65 @@
                 <label for="inputFirstName" class="col-sm-4 control-label">First name</label>
                 <div class="col-sm-8">
                     <input type="text" th:field="*{firstName}" class="form-control" id="inputFirstName" placeholder="First Name" oninput="badgeNameOnInput()"/>
-                    <span class="help-block" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+                    <span class="help-block" th:if="${#fields.hasErrors('firstName')}">Can't be empty</span>
                 </div>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('lastName')}? 'has-error form-group' : 'form-group'">
                 <label for="inputLastName" class="col-sm-4 control-label">Last name</label>
                 <div class="col-sm-8">
                     <input type="text" th:field="*{lastName}" class="form-control" id="inputLastName" placeholder="Last Name" oninput="badgeNameOnInput()"/>
-                    <span class="help-block" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+                    <span class="help-block" th:if="${#fields.hasErrors('lastName')}">Can't be empty</span>
                 </div>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('firstNameCyr')}? 'has-error form-group' : 'form-group'">
                 <label for="inputFirstNameCyr" class="col-sm-4 control-label">Имя</label>
                 <div class="col-sm-8">
                     <input type="text" th:field="*{firstNameCyr}" class="form-control" id="inputFirstNameCyr" placeholder="Имя" oninput="badgeNameCyrOnInput()"/>
-                    <span class="help-block" th:if="${#fields.hasErrors('firstNameCyr')}" th:errors="*{firstNameCyr}"></span>
+                    <span class="help-block" th:if="${#fields.hasErrors('firstNameCyr')}">Не может быть пустым</span>
                 </div>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('lastNameCyr')}? 'has-error form-group' : 'form-group'">
                 <label for="inputLastNameCyr" class="col-sm-4 control-label">Фамилия</label>
                 <div class="col-sm-8">
                     <input type="text" th:field="*{lastNameCyr}" class="form-control" id="inputLastNameCyr" placeholder="Фамилия" oninput="badgeNameCyrOnInput()"/>
-                    <span class="help-block" th:if="${#fields.hasErrors('lastNameCyr')}" th:errors="*{lastNameCyr}"></span>
+                    <span class="help-block" th:if="${#fields.hasErrors('lastNameCyr')}">Не может быть пустым</span>
                 </div>
             </div>
-            <div class="form-group" th:class="${#fields.hasErrors('email')}? 'has-error form-group' : 'form-group'">
+            <div class="form-group" th:class="(${#fields.hasErrors('email')} or ${#fields.hasErrors('emailExist')}) ? 'has-error form-group' : 'form-group'">
                 <label for="inputEmail" class="col-sm-4 control-label">Email</label>
                 <div class="col-sm-8">
                     <input type="email" th:field="*{email}" class="form-control" id="inputEmail" placeholder="Email" />
-                    <span class="help-block" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                    <span class="help-block" th:if="${#fields.hasErrors('email')}">Can't be empty</span>
+                    <span class="help-block" th:if="${#fields.hasErrors('emailExist')}">This email already exist</span>
                 </div>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('badgeName')}? 'has-error form-group' : 'form-group'">
                 <label for="inputBadgeName" class="col-sm-4 control-label">Badge name</label>
                 <div class="col-sm-8">
                     <input type="text" th:field="*{badgeName}" class="form-control" id="inputBadgeName" placeholder="Badge name" />
-                    <span class="help-block" th:if="${#fields.hasErrors('badgeName')}" th:errors="*{badgeName}"></span>
+                    <span class="help-block" th:if="${#fields.hasErrors('badgeName')}">Can't be empty</span>
                 </div>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('badgeNameCyr')}? 'has-error form-group' : 'form-group'">
                 <label for="inputBadgeNameCyr" class="col-sm-4 control-label">Имя на бейдже</label>
                 <div class="col-sm-8">
                     <input type="text" th:field="*{badgeNameCyr}" class="form-control" id="inputBadgeNameCyr" placeholder="Имя на бейдже" />
-                    <span class="help-block" th:if="${#fields.hasErrors('badgeNameCyr')}" th:errors="*{badgeNameCyr}"></span>
+                    <span class="help-block" th:if="${#fields.hasErrors('badgeNameCyr')}">Не может быть пустым</span>
                 </div>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('password')}? 'has-error form-group' : 'form-group'">
                 <label for="inputPassword" class="col-sm-4 control-label">Password</label>
                 <div class="col-sm-8">
                     <input type="password" th:field="*{password}" class="form-control" id="inputPassword" placeholder="Password" />
-                    <span class="help-block" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                    <span class="help-block" th:if="${#fields.hasErrors('password')}">Can't be empty</span>
                 </div>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('confirmPassword') || #fields.hasErrors('passwordEquals')}? 'has-error form-group' : 'form-group'">
                 <label for="inputConfirmPassword" class="col-sm-4 control-label">Confirm Password</label>
                 <div class="col-sm-8">
                     <input type="password" th:field="*{confirmPassword}" class="form-control" id="inputConfirmPassword" placeholder="Confirm Password" />
-                    <span class="help-block" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></span>
-                    <span class="help-block" th:if="${#fields.hasErrors('passwordEquals')}" th:errors="*{passwordEquals}"></span>
+                    <span class="help-block" th:if="${#fields.hasErrors('passwordEquals')}">Passwords are not equals</span>
+                    <span class="help-block" th:if="${#fields.hasErrors('confirmPassword')}">Can't be empty</span>
                 </div>
             </div>
             <div class="form-group">
