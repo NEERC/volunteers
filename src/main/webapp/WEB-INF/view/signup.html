@@ -12,14 +12,16 @@
             <div class="form-group" th:class="${#fields.hasErrors('firstName')}? 'has-error form-group' : 'form-group'">
                 <label for="inputFirstName" class="col-sm-4 control-label">First name</label>
                 <div class="col-sm-8">
-                    <input type="text" th:field="*{firstName}" class="form-control" id="inputFirstName" placeholder="First Name" oninput="badgeNameOnInput()"/>
+                    <input type="text" th:field="*{firstName}" class="form-control" id="inputFirstName"
+                           placeholder="First name" oninput="badgeNameOnInput()"/>
                     <span class="help-block" th:if="${#fields.hasErrors('firstName')}">Can't be empty</span>
                 </div>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('lastName')}? 'has-error form-group' : 'form-group'">
                 <label for="inputLastName" class="col-sm-4 control-label">Last name</label>
                 <div class="col-sm-8">
-                    <input type="text" th:field="*{lastName}" class="form-control" id="inputLastName" placeholder="Last Name" oninput="badgeNameOnInput()"/>
+                    <input type="text" th:field="*{lastName}" class="form-control" id="inputLastName"
+                           placeholder="Last name" oninput="badgeNameOnInput()"/>
                     <span class="help-block" th:if="${#fields.hasErrors('lastName')}">Can't be empty</span>
                 </div>
             </div>
@@ -67,16 +69,17 @@
                 </div>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('confirmPassword') || #fields.hasErrors('passwordEquals')}? 'has-error form-group' : 'form-group'">
-                <label for="inputConfirmPassword" class="col-sm-4 control-label">Confirm Password</label>
+                <label for="inputConfirmPassword" class="col-sm-4 control-label">Confirm password</label>
                 <div class="col-sm-8">
-                    <input type="password" th:field="*{confirmPassword}" class="form-control" id="inputConfirmPassword" placeholder="Confirm Password" />
+                    <input type="password" th:field="*{confirmPassword}" class="form-control" id="inputConfirmPassword"
+                           placeholder="Confirm password"/>
                     <span class="help-block" th:if="${#fields.hasErrors('passwordEquals')}">Passwords are not equals</span>
                     <span class="help-block" th:if="${#fields.hasErrors('confirmPassword')}">Can't be empty</span>
                 </div>
             </div>
             <div class="form-group">
                 <div class="col-sm-offset-4 col-sm-8">
-                    <button type="submit" class="btn btn-default">Sign Up</button>
+                    <button type="submit" class="btn btn-default">Sign up</button>
                 </div>
             </div>
         </form>

@@ -24,7 +24,7 @@
                     Positions
                 </th>
                 <th th:unless="${assessment}">
-                    Attandance
+                    Attendance
                 </th>
                 <th:block th:if="${assessment}" th:each="a:${assessments}">
                     <th th:text="${a.comment}+' (value='+${a.value}+')'"></th>
