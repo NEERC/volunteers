@@ -14,7 +14,7 @@
                 <input type="hidden" th:name="event" th:value="${event.id}"/>
                 <div class="col-md-8">
                     <select name="baseEvent" class="form-control">
-                        <option selected="true" value="-1">Choice event to copy this setting</option>
+                        <option selected="true" value="-1">Choose event to copy arrangement</option>
                         <th:block th:each="e:${events}">
                             <th:block th:if="${e.id}!=${event.id}">
                                 <option th:value="${e.id}" th:text="${e.name}"></option>

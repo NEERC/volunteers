@@ -38,11 +38,11 @@
                                 <form method="post" th:action="@{/admin/year/add}" th:object="${newYear}">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                        <h4 class="modal-title" id="yearLabel">Add new year</h4>
+                                        <h4 class="modal-title" id="yearLabel">Add year</h4>
                                     </div>
                                     <div class="modal-body">
                                         <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
-                                            <label for="positionName">Year name</label>
+                                            <label for="positionName">Year</label>
                                             <input type="text" class="form-control" id="positionName" th:field="*{name}" />
                                             <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
                                         </div>
