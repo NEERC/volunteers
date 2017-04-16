@@ -20,8 +20,7 @@ public class LoginController {
                         final Model model) {
 
         if (error != null) {
-            model.addAttribute("error", "Invalid UserId or Password");
-
+            model.addAttribute("error", "Invalid email or password");
         }
         if (signup != null) {
             model.addAttribute("message", "singup was successful");

@@ -42,7 +42,7 @@
                                     </div>
                                     <div class="modal-body">
                                         <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
-                                            <label for="positionName">Year name</label>
+                                            <label for="positionName">Year</label>
                                             <input type="text" class="form-control" id="positionName" th:field="*{name}" />
                                             <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
                                         </div>
