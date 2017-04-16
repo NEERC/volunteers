@@ -11,7 +11,7 @@ import java.util.Set;
  */
 @Entity
 @Data
-@ToString(exclude = {"id","year"},includeFieldNames = false)
+@ToString(exclude = {"id","year"}, includeFieldNames = false)
 public class ApplicationForm {
 
     @Id

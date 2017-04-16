@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
  * Created by Алексей on 21.02.2017.
  */
 @Repository
-public interface MyUserRepository extends CrudRepository<User, Long> {
+public interface UserRepository extends CrudRepository<User, Long> {
 
     User findByEmailIgnoreCase(String name);
 }

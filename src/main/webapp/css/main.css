@@ -2210,3 +2210,11 @@ body { /* Margin bottom by footer height */ margin-bottom: 60px; }
 .footer { position: absolute; bottom: 0; width: 100%; /* Set the fixed height of the footer here */ height: 60px; }
 .footer .container { background-color: #f5f5f5; }
 .footer .container .text-muted { margin: 20px 0; }
+
+.admin-sidebar { background-color: transparent; }
+.admin-sidebar .glyphicon { font-size: 80%; }
+.admin-sidebar > li > a + button { position: absolute; right: 10px; top: 8px; }
+.admin-sidebar > li > a:not(.collapsed) .expanded { display: none; }
+.admin-sidebar > li > a.collapsed .collapsed { display: none; }
+
+.show-grid {  margin-bottom: 15px; }

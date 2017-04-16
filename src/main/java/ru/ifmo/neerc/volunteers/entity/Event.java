@@ -14,8 +14,8 @@ import java.util.Set;
  */
 @Data
 @Entity
-@EqualsAndHashCode(exclude = {"year","users"})
-@ToString(exclude = {"year","users"})
+@EqualsAndHashCode(exclude = {"year", "users"})
+@ToString(exclude = {"year", "users"})
 public class Event {
 
     @Id
@@ -27,7 +27,7 @@ public class Event {
     private Year year;
 
     @NotNull
-    @NotEmpty(message = "надо указать название мероприятия")
+    @NotEmpty
     private String name;
 
     @NotNull
@@ -36,6 +36,7 @@ public class Event {
     @NotNull
     private int attendanceValue;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "event")
+    @OrderBy("id ASC")
     Set<UserEvent> users;
 }

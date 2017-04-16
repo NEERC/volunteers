@@ -1,9 +1,5 @@
 package ru.ifmo.neerc.volunteers.controller;
 
-import ru.ifmo.neerc.volunteers.entity.User;
-import ru.ifmo.neerc.volunteers.repository.MyRoleRepository;
-import ru.ifmo.neerc.volunteers.repository.MyUserRepository;
-import ru.ifmo.neerc.volunteers.service.SecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.thymeleaf.spring.support.Layout;
+import ru.ifmo.neerc.volunteers.entity.Role;
+import ru.ifmo.neerc.volunteers.entity.User;
+import ru.ifmo.neerc.volunteers.form.UserForm;
+import ru.ifmo.neerc.volunteers.repository.RoleRepository;
+import ru.ifmo.neerc.volunteers.repository.UserRepository;
+import ru.ifmo.neerc.volunteers.service.SecurityService;
 
 import javax.validation.Valid;
 
@@ -22,15 +25,16 @@ import javax.validation.Valid;
  * Created by Алексей on 16.02.2017.
  */
 @Controller
+@Layout("empty")
 public class SignupController {
 
     private static final Logger logger = LoggerFactory.getLogger(SignupController.class);
 
     @Autowired
-    MyUserRepository myUserRepository;
+    UserRepository userRepository;
 
     @Autowired
-    MyRoleRepository myRoleRepository;
+    RoleRepository roleRepository;
 
     @Autowired
     SecurityService securityService;
@@ -39,29 +43,31 @@ public class SignupController {
     PasswordEncoder passwordEncoder;
 
     @GetMapping("/signup")
-    public String signup(User user) {
+    public String signup(@ModelAttribute("user") UserForm user) {
         return "signup";
     }
 
     @PostMapping("/signup")
-    public String processSignup(@Valid @ModelAttribute("user") User user, BindingResult result) {
+    public String processSignup(@Valid @ModelAttribute("user") UserForm userForm, BindingResult result) {
+        if (userRepository.findByEmailIgnoreCase(userForm.getEmail()) != null) {
+            result.rejectValue("emailExist", "exist.user.email", "");
+        }
         if (result.hasErrors()) {
             return "signup";
         }
-
-        String password = user.getPassword();
-        user.setPassword(passwordEncoder.encode(password));
-        user.setConfirmPassword(user.getPassword());
+        User user = new User(userForm);
         logger.debug(String.format("User created %s", user.toString()));
-        user.setRole(myRoleRepository.findOne(2l));//ROLE_USER
-        myUserRepository.save(user);
-        securityService.autologin(user.getEmail(), password);
+        Role role = roleRepository.findByName("ROLE_USER");//ROLE_USER
+        user.setRole(role);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+        securityService.autologin(user.getEmail(), userForm.getPassword());
         return "redirect:/result";
     }
 
     @RequestMapping("/users")
     public String showUsers(Model model) {
-        model.addAttribute("users", myUserRepository.findAll());
+        model.addAttribute("users", userRepository.findAll());
         return "users";
     }
 }

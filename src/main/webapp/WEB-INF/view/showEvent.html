@@ -1,26 +1,151 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
-<meta charset="UTF-8" />
-<title>Title</title>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
 </head>
 <body>
-    <div th:fragment="content">
-        <a th:href="@{'/admin/year?id='+${event.year.id}}">Back</a> <a th:href="@{'/admin/event/edit?id='+${event.id}}">Edit</a>
-        <table>
-            <th:block th:each="hall:${halls}">
-                <tr>
-                    <td th:text="${hall}"></td>
-                    <td>
-                        <ul>
-                            <th:block th:each="user:${hallUser.get(hall)}">
-                                <li th:text="${user}"></li>
-                            </th:block>
-                        </ul>
-                    </td>
+<div th:fragment="content" class="col-md-10">
+    <form th:action="${attendance} ? @{/admin/event/attendance}: ( ${assessment}?@{/admin/event/assessments}:@{/})"
+          method="post">
+        <div class="table-responsive">
+            <input type="hidden" th:value="${event.id}" name="event"/>
+
+
+            <table class="table table-hover table-bordered table-fixed">
+                <thead>
+                <th>
+                    Halls
+                </th>
+                <th>
+                    Volunteers
+                </th>
+                <th>
+                    Positions
+                </th>
+                <th th:unless="${assessment}">
+                    Attandance
+                </th>
+                <th:block th:if="${assessment}" th:each="a:${assessments}">
+                    <th th:text="${a.comment}+' (value='+${a.value}+')'"></th>
+                </th:block>
+                </thead>
+                <tbody>
+                <th:block th:if="${assessment}">
+                    <tr>
+                        <td th:colspan="3"></td>
+                        <th:block th:each="a:${assessments}">
+                            <td>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" th:name="'assessment'+${a.id}"
+                                               onclick="toggle(this,'user')"/>
+                                        Select all
+                                    </label>
+                                </div>
+                            </td>
+                        </th:block>
+                    </tr>
+                </th:block>
+                <th:block th:each="hall:${halls}">
+                    <tr>
+                        <td th:text="${hall.name}" th:rowspan="${hallUser.get(hall).size()+1}"></td>
+                        <th:block th:each="user:${hallUser.get(hall)}">
+                    <tr>
+                        <td th:text="${user.userYear.user.badgeName}"></td>
+                        <td th:text="${user.position.name}">name position</td>
+                        <td th:if="${attendance}">
+                            <select class="form-control" th:name="'attendance'+${user.id}">
+                                <th:block th:if="${user.attendance}==null">
+                                    <option selected="selected" th:value="NONE"></option>
+                                </th:block>
+                                <th:block th:each="att:${attendances}">
+                                    <option th:selected="${user.attendance}==${att}" th:text="${att.name()}"
+                                            th:value="${att.name()}"></option>
+                                </th:block>
+                            </select>
+                        </td>
+                        <td th:unless="${attendance} or ${assessment}" th:text="${user.attendance}"></td>
+                        <th:block th:if="${assessment}" th:each="a: ${assessments}">
+                            <td>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" th:name="'assessment'+${a.id}+'user'+${user.id}"
+                                               th:value="${a.id}" th:checked="${user.assessments.contains(a)}"/>
+                                    </label>
+                                </div>
+                            </td>
+                        </th:block>
+                    </tr>
+                </th:block>
                 </tr>
+                </th:block>
+                </tbody>
+            </table>
+
+        </div>
+        <div class="text-center">
+            <th:block th:if="${attendance}">
+                <input class="btn btn-primary" role="button" type="submit" value="Save attendance"/>
             </th:block>
-        </table>
-    </div>
+            <th:block th:if="${assessments}">
+                <input class="btn btn-primary" role="button" type="submit" value="Save assessments"/>
+                <button type="button" class="btn btn-default" data-toggle="modal"
+                        data-target="#assessmentForm">
+                    Add assessments
+                </button>
+            </th:block>
+            <th:block th:unless="${assessments} or ${attendance}">
+                <a th:href="@{'/admin/event/edit?id='+${event.id}}" class="btn btn-default"
+                   role="button">Edit</a>
+                <a th:href="@{'/admin/event/attendance?id='+${event.id}}" class="btn btn-default"
+                   role="button">Set attendance</a>
+                <a th:href="@{'/admin/event/assessments?id='+${event.id}}" class="btn btn-default"
+                   role="button">Set assessments</a>
+            </th:block>
+        </div>
+    </form>
+
+    <th:block th:if="${assessment}">
+        <div class="modal fade" id="assessmentForm" tabindex="-1" role="dialog" aria-labelledby="assessmentLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" th:action="@{/admin/event/assessments/add}" th:object="${newAssessment}">
+                        <input th:value="${event.id}" type="hidden" name="event"/>
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="assessmentLabel">Add new assessment</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group"
+                                 th:class="${#fields.hasErrors('comment')}? 'has-error form-group' : 'form-group'">
+                                <label for="assessmentComment">Comment</label>
+                                <input type="text" class="form-control" id="assessmentComment"
+                                       th:field="*{comment}"/>
+                                <span class="help-block" th:if="${#fields.hasErrors('comment')}"
+                                      th:errors="*{comment}"></span>
+                            </div>
+                            <div class="form-group"
+                                 th:class="${#fields.hasErrors('value')}? 'has-error form-group' : 'form-group'">
+                                <label for="assessmentValue">Value</label>
+                                <input type="number" class="form-control" id="assessmentValue" th:field="*{value}"/>
+                                <span class="help-block" th:if="${#fields.hasErrors('value')}"
+                                      th:errors="*{value}"></span>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </th:block>
+    <th:block th:if="${assessment}">
+        <script th:src="@{/js/assessment.js}"/>
+    </th:block>
+</div>
 </body>
 </html>

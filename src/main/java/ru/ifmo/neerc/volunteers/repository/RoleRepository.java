@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
  * Created by Lapenok Akesej on 24.02.2017.
  */
 @Repository
-public interface MyRoleRepository extends CrudRepository<Role, Long> {
+public interface RoleRepository extends CrudRepository<Role, Long> {
+
+    Role findByName(String name);
 
 }

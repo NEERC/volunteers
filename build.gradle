@@ -9,7 +9,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath "com.moowork.gradle:gradle-node-plugin:1.0.0"
+		classpath "com.moowork.gradle:gradle-node-plugin:1.0.0"
 	}
 }
 
@@ -46,33 +46,48 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-security')
 	runtime('mysql:mysql-connector-java')
-    compileOnly('org.projectlombok:lombok')
+	compileOnly('org.projectlombok:lombok')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.hsqldb:hsqldb')
 }
 
 
 task copyjs(type:Sync) {
-    
-    group 'help'
-    description 'updates JS libraries from package.json and syncs with components folder'
 
-    def nodeExt = project.extensions.findByName("node")
+	group 'help'
+	description 'updates JS libraries from package.json and syncs with components folder'
 
-    nodeExt.with {
-        version = '0.12.2'
-        npmVersion = '2.7.5'
-        download = true
-    }
+	def nodeExt = project.extensions.findByName("node")
 
-    from fileTree('node_modules').files
-    into "src/main/webapp/components"
-    include '**/*.min.js'
-    include '*/fonts/*'
+	from fileTree('node_modules').files
+	into "src/main/webapp/components"
+	include '**/*.min.js'
+	include '**/fonts/**'
 
-    includeEmptyDirs false
-    dependsOn 'npmInstall'
-    
+	includeEmptyDirs false
+	dependsOn 'copyfonts'
+
+}
+
+
+task copyfonts(type:Sync) {
+
+	group 'other'
+
+	def nodeExt = project.extensions.findByName("node")
+
+	nodeExt.with {
+		version = '0.12.2'
+		npmVersion = '2.7.5'
+		download = true
+	}
+
+	from 'node_modules/bootstrap-sass/assets/fonts'
+	into "src/main/webapp/fonts"
+
+	includeEmptyDirs false
+	dependsOn 'npmInstall'
+
 }
 
 task generateDbPuml(type:JavaExec) {
@@ -82,4 +97,13 @@ task generateDbPuml(type:JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	//noinspection GroovyAssignabilityCheck
 	args "database"
+}
+
+task generateDataSql(type:JavaExec) {
+	group 'verification'
+
+	main = "ru.ifmo.neerc.dev.DataGenerator"
+	classpath = sourceSets.main.runtimeClasspath
+
+	args "data.sql"
 }

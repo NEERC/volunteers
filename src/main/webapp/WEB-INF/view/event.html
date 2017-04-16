@@ -1,55 +1,83 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title th:text="${event.name}">Title</title>
 </head>
 <body>
-<div th:fragment="content">
-        <a th:href="@{'/admin/event?id='+${event.id}}" >Back</a>
+<div th:fragment="content" class="col-md-10">
 
-    <th:block th:if="${!events.isEmpty()}">
+    <div class="row">
 
-    <form th:action="@{/admin/event/copy}" method="post">
-        <input type="hidden" th:name="event" th:value="${event.id}" />
-            <select name="baseEvent">
-                <th:block th:each="e:${events}">
-                    <option th:value="${e.id}" th:text="${e.name}"></option>
-                </th:block>
-            </select>
-        <input type="submit" th:value="copy" />
-    </form>
-
-    </th:block>
-    <form th:action="@{/admin/event/save}" method="post">
-        <input type="hidden" th:name="event" th:value="${event.id}"/>
-        <table>
-        <th:block th:each="user:${users}">
-            <tr>
-                <td th:text="${user.userYear}"></td>
-                <td>
-                    <ul>
-                    <th:block th:each="position:${positions}">
-                        <li>
-                            <input type="radio" th:name="p+${user.id}" th:value="${position.id}" th:checked="${position.id}==${user.position.id}" /><span th:text="${position}"></span>
-                        </li>
-                    </th:block>
-                    </ul>
-                </td>
-                <td>
-                    <ul>
-                        <th:block th:each="hall:${halls}">
-                            <li>
-                                <input type="radio" th:name="h+${user.id}" th:value="${hall.id}" th:checked="${hall.id}==${user.hall.id}" /><span th:text="${hall}"></span>
-                            </li>
+        <th:block th:if="${events.size()!=1}">
+            <form th:action="@{/admin/event/copy}" method="post">
+                <input type="hidden" th:name="event" th:value="${event.id}"/>
+                <div class="col-md-8">
+                    <select name="baseEvent" class="form-control">
+                        <option selected="true" value="-1">Choice event to copy this setting</option>
+                        <th:block th:each="e:${events}">
+                            <th:block th:if="${e.id}!=${event.id}">
+                                <option th:value="${e.id}" th:text="${e.name}"></option>
+                            </th:block>
                         </th:block>
-                    </ul>
-                </td>
-            </tr>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">Copy</button>
+                </div>
+            </form>
         </th:block>
-        </table>
-        <button type="submit" >save</button>
-    </form>
     </div>
+
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <th>
+                User
+            </th>
+            <th>
+                Position
+            </th>
+            <th>
+                Hall
+            </th>
+            </thead>
+            <tbody>
+            <form th:action="@{/admin/event/save}" method="post">
+                <input type="hidden" th:name="event" th:value="${event.id}"/>
+                <th:block th:each="user:${users}">
+
+                    <tr>
+                        <td th:text="${user.userYear.user.badgeName}"></td>
+                        <td>
+                            <select class="form-control" th:name="p+${user.id}">
+                                <th:block th:each="position:${positions}">
+                                    <option th:value="${position.id}" th:selected="${position.id}==${user.position.id}"
+                                            th:text="${position.position.name}"></option>
+                                </th:block>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control" th:name="h+${user.id}">
+                                <th:block th:each="hall:${halls}">
+                                    <option th:value="${hall.id}" th:selected="${hall.id}==${user.hall.id}"
+                                            th:text="${hall.name}"></option>
+                                </th:block>
+                            </select>
+                        </td>
+                    </tr>
+                </th:block>
+                <tr>
+                    <td colspan="3" align="center">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </td>
+                </tr>
+            </form>
+
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>

@@ -29,5 +29,6 @@ nbdist/
 node_modules
 .sass-cache
 **/webapp/components
-
+**/webapp/fonts/bootstrap
 database.puml
+
