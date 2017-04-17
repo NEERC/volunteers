@@ -25,10 +25,8 @@
 
 
         <div class="row">
-            <th:block th:if="${year}!=null">
                 <div class="col-md-2" th:replace="fragments/menuAdmin :: menu">Meny goes here!</div>
                 <div th:replace="${view} :: content" class="col-md-8">Content goes here!</div>
-            </th:block>
     </div>
 
     </th:block>
@@ -41,13 +39,15 @@
                     <form method="post" th:action="@{/admin/year/add}" th:object="${newYear}">
                         <div class="modal-header">
                             <button type="button" class="close disabled" data-dismiss="modal" aria-label="Close" disabled="disabled"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="yearLabel">Add new year</h4>
+                            <h4 class="modal-title" id="yearLabel" th:text="#{volunteers.form.year.header}">Add new
+                                year</h4>
                         </div>
                         <div class="modal-body">
                             <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
-                                <label for="positionName">Year name</label>
+                                <label for="positionName" th:text="#{volunteers.form.year.name}">Year name</label>
                                 <input type="text" class="form-control" id="positionName" th:field="*{name}" />
-                                <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                                <span class="help-block" th:if="${#fields.hasErrors('name')}"
+                                      th:errors="#{volunteers.form.year.name.error.empty}"></span>
                             </div>
                         </div>
                         <div class="modal-footer">

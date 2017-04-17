@@ -69,14 +69,14 @@
                                 <label for="eventName" th:text="#{volunteers.form.event.name}">Event name</label>
                                 <input type="text" class="form-control" id="eventName" th:field="*{name}" />
                                 <span class="help-block" th:if="${#fields.hasErrors('name')}"
-                                      th:errors="#{volunteers.form.event.name.error}"></span>
+                                      th:text="#{volunteers.form.event.name.error.empty}"></span>
                             </div>
                             <div class="form-group" th:class="${#fields.hasErrors('information')}? 'has-error form-group' : 'form-group'">
                                 <label for="information"
                                        th:text="#{volunteers.form.event.information}">Information</label>
                                 <input type="text" class="form-control" id="information" th:field="*{information}" />
                                 <span class="help-block" th:if="${#fields.hasErrors('information')}"
-                                      th:errors="#{volunteers.form.event.information.error}"></span>
+                                      th:text="#{volunteers.form.event.information.error.empty}"></span>
                             </div>
                         </div>
                         <div class="modal-footer">
