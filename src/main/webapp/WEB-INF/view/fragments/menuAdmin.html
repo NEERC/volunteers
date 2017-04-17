@@ -61,23 +61,30 @@
                     <form method="post" th:action="@{/admin/event/add}" th:object="${newEvent}">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="eventLabel">Add event</h4>
+                            <h4 class="modal-title" id="eventLabel" th:text="#{volunteers.form.event.header}">Add
+                                event</h4>
                         </div>
                         <div class="modal-body">
                             <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
-                                <label for="eventName">Event name</label>
+                                <label for="eventName" th:text="#{volunteers.form.event.name}">Event name</label>
                                 <input type="text" class="form-control" id="eventName" th:field="*{name}" />
-                                <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                                <span class="help-block" th:if="${#fields.hasErrors('name')}"
+                                      th:errors="#{volunteers.form.event.name.error}"></span>
                             </div>
                             <div class="form-group" th:class="${#fields.hasErrors('information')}? 'has-error form-group' : 'form-group'">
-                                <label for="information">Information</label>
+                                <label for="information"
+                                       th:text="#{volunteers.form.event.information}">Information</label>
                                 <input type="text" class="form-control" id="information" th:field="*{information}" />
-                                <span class="help-block" th:if="${#fields.hasErrors('information')}" th:errors="*{information}"></span>
+                                <span class="help-block" th:if="${#fields.hasErrors('information')}"
+                                      th:errors="#{volunteers.form.event.information.error}"></span>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                                    th:text="#{volunteers.form.button.close}">Close
+                            </button>
+                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.add}">Add
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -90,7 +97,8 @@
                     <form method="post" th:action="@{/admin/add}">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="adminLabel">Add new admin</h4>
+                            <h4 class="modal-title" id="adminLabel" th:text="#{volunteers.form.admin.header}">Add new
+                                admin</h4>
                         </div>
                         <div class="modal-body">
                             <select class="form-control" name="newAdmin">
@@ -100,8 +108,11 @@
                             </select>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                                    th:text="#{volunteers.form.button.close}">Close
+                            </button>
+                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.add}">Add
+                            </button>
                         </div>
                     </form>
                 </div>
