@@ -9,7 +9,9 @@ spring:
     cache: false
 
   messages:
+    encoding: UTF-8
     basename: messages/messages
+
       
 server:
   context-path: /

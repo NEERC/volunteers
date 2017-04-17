@@ -6,7 +6,7 @@
 </head>
 <body>
     <form th:action="@{/login}" method="post" th:fragment="content" class="sign-in-form col-sm-offset-3 col-sm-6">
-        <h2 class="" th:text="#{volunteers.login.name-page}"> Log into volunteers </h2>
+        <h2 class="" th:text="#{volunteers.login.namePage}"> Log into volunteers </h2>
         <div th:if="${error!=null}" th:text="#{volunteers.login.error}" class="help-block">Invalid email or password
         </div>
         <div th:if="${message!=null}" th:text="#{volunteers.login.information.logout}" class="help-block">Logout was
@@ -23,7 +23,7 @@
         </div>
         <div class="form-group">
             <button type="submit" class="btn btn-default" th:text="#{volunteers.login.login}">Log in</button>
-            <a th:href="@{/signup}" class="btn btn-link" role="button" th:text="#{volunteers.login.sign-up}">Sign up</a>
+            <a th:href="@{/signup}" class="btn btn-link" role="button" th:text="#{volunteers.login.signUp}">Sign up</a>
         </div>
     </form>
 </body>

@@ -10,7 +10,8 @@
             <li><a href="#eventsList" data-toggle="collapse" aria-expanded="true" aria-controls="eventsList">
                 <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
                 <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
-                Events</a>
+                <span th:text="#{volunteers.admin.menu.events}">Events</span>
+            </a>
                 <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                 </button>
@@ -23,46 +24,22 @@
                 </ul>
             </li>
             <li>
-                <a th:href="@{/admin/position}" class="collapsed">
-                    <!--<span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
-                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>-->
+                <a th:href="@{/admin/position}" class="collapsed" th:text="#{volunteers.admin.menu.positions}">
                     Positions</a>
-                <!--<a th:href="@{/admin/positions}" type="button" class="btn btn-primary btn-xs">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                </a>-->
-                <!--<ul class="collapse" id="positionsList">
-                    <th:block th:each="position:${positions}">
-                        <li>
-                            <a href="#" th:text="${position.name}"></a>
-                        </li>
-                    </th:block>
-                </ul>-->
-
             </li>
             <li>
-                <a th:href="@{/admin/hall}" class="collapsed">
-                    <!--<span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
-                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>-->
+                <a th:href="@{/admin/hall}" class="collapsed" th:text="#{volunteers.admin.menu.halls}">
                     Halls</a>
-                <!--<button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#hallForm">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                </button>
-                <ul class="collapse" id="hallsList">
-                    <th:block th:each="hall : ${halls}">
-                        <li>
-                            <a href="#" th:text="${hall.name}"></a>
-                        </li>
-                    </th:block>
-                </ul>-->
             </li>
             <li th:if="${year.openForRegistration}">
-                <a th:href="@{/admin/year/close}" class="collapsed">Close registration</a>
+                <a th:href="@{/admin/year/close}" class="collapsed"
+                   th:text="#{volunteers.admin.menu.closeRegistration}">Close registration</a>
             </li>
             <li>
                 <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">
                     <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
                     <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
-                    Admins
+                    <span th:text="#{volunteers.admin.menu.admins}">Admins</span>
                 </a>
                 <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#adminForm">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>

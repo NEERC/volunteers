@@ -31,4 +31,4 @@ node_modules
 **/webapp/components
 **/webapp/fonts/bootstrap
 database.puml
-
+data.sql
