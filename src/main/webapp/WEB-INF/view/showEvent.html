@@ -11,23 +11,22 @@
         <div class="table-responsive">
             <input type="hidden" th:value="${event.id}" name="event"/>
 
-
             <table class="table table-hover table-bordered table-fixed">
                 <thead>
-                <th>
+                <th th:text="#{volunteers.event.halls}">
                     Halls
                 </th>
-                <th>
+                <th th:text="#{volunteers.event.volunteers}">
                     Volunteers
                 </th>
-                <th>
+                <th th:text="#{volunteers.event.positions}">
                     Positions
                 </th>
-                <th th:unless="${assessment}">
+                <th th:unless="${assessment}" th:text="#{volunteers.event.attendance}">
                     Attendance
                 </th>
                 <th:block th:if="${assessment}" th:each="a:${assessments}">
-                    <th th:text="${a.comment}+' (value='+${a.value}+')'"></th>
+                    <th th:text="${a.comment}+' ('+#{volunteers.event.assessment.value}+'='+${a.value}+')'"></th>
                 </th:block>
                 </thead>
                 <tbody>
