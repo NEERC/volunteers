@@ -32,7 +32,8 @@
                     Halls</a>
             </li>
             <li th:if="${year.openForRegistration}">
-                <a th:href="@{/admin/year/close}" class="collapsed"
+                <a href="#closeRegistrationConfirm" class="collapsed" type="button" data-toggle="modal"
+                   data-target="#closeRegistrationConfirm"
                    th:text="#{volunteers.admin.menu.closeRegistration}">Close registration</a>
             </li>
             <li>
@@ -115,6 +116,30 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="closeRegistrationConfirm" tabindex="-1" role="dialog" aria-labelledby="">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="closeRegistrationLabel"
+                            th:text="#{volunteers.form.closeRegistration.header}">Confirm to close registration</h4>
+                    </div>
+                    <div class="modal-body">
+                        <label th:text="#{volunteers.form.closeRegistration.body}">Close registration?</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                                th:text="#{volunteers.form.closeRegistration.cancel}">No
+                        </button>
+                        <a th:href="@{/admin/year/close}" type="button" class="btn btn-primary"
+                           th:text="#{volunteers.form.closeRegistration.confirm}">Yes
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
