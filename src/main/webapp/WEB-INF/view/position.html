@@ -9,8 +9,8 @@
         <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
-                        <th>Position</th>
-                        <th>Value</th>
+                    <th th:text="#{volunteers.position.name}">Position</th>
+                    <th th:text="#{volunteers.position.value}">Value</th>
                     </thead>
                     <tbody>
                         <form th:action="@{/admin/position/values}" method="post">
@@ -46,23 +46,28 @@
                     <form method="post" th:action="@{/admin/position/add}" th:object="${newPosition}">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="positionLabel">Add new position</h4>
+                            <h4 class="modal-title" id="positionLabel" th:text="#{volunteers.form.position.header}">Add
+                                new position</h4>
                         </div>
                         <div class="modal-body">
                             <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
-                                <label for="positionName">Position name</label>
+                                <label for="positionName" th:text="#{volunteers.form.position.positionName}">Position
+                                    name</label>
                                 <input type="text" class="form-control" id="positionName" th:field="*{name}" />
                                 <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
                             </div>
                             <div class="form-group" th:class="${#fields.hasErrors('value')}? 'has error form-group':'form-group'">
-                                <label for="positionValue">Position value</label>
+                                <label for="positionValue" th:text="#{volunteers.form.position.positionValue}">Position
+                                    value</label>
                                 <input type="number" step="any" class="form-control" id="positionValue" th:field="*{value}" value="0" min="0"/>
                                 <span class="help-block"  th:if="${#fields.hasErrors('value')}">Error</span>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <a href="#" class="btn btn-link" data-dismiss="modal">Close</a>
-                            <button type="submit" class="btn btn-primary">Add</button>
+                            <a href="#" class="btn btn-link" data-dismiss="modal"
+                               th:text="#{volunteers.form.button.close}">Close</a>
+                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.add}">Add
+                            </button>
                         </div>
                     </form>
                 </div>
