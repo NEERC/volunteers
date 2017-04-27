@@ -24,7 +24,7 @@ public class Hall {
     String name;
 
     @NotEmpty
-    String decryption;
+    String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     Year year;

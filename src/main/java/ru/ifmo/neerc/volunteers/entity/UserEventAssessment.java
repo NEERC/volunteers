@@ -1,6 +1,7 @@
 package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,6 +18,7 @@ public class UserEventAssessment {
     @GeneratedValue
     int id;
 
+    @NotEmpty
     String comment;
 
     int value;

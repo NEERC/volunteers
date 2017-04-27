@@ -125,7 +125,7 @@
                                 <input type="text" class="form-control" id="assessmentComment"
                                        th:field="*{comment}"/>
                                 <span class="help-block" th:if="${#fields.hasErrors('comment')}"
-                                      th:errors="*{comment}"></span>
+                                      th:text="#{volunteers.form.assessment.comment.error.empty}"></span>
                             </div>
                             <div class="form-group"
                                  th:class="${#fields.hasErrors('value')}? 'has-error form-group' : 'form-group'">
