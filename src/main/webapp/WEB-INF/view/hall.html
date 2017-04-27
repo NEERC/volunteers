@@ -9,28 +9,30 @@
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
-                    <th>Hall name</th>
-                    <th>Hall description</th>
+                <th th:text="#{volunteers.hall.hallName}">Hall name</th>
+                <th th:text="#{volunteers.hall.hallDescription}">Hall description</th>
                 </thead>
                 <tbody>
                     <th:block th:each="hall : ${halls}">
                         <tr>
                             <td>
-                                <label th:text="${hall.name}" >
+                                <label th:text="${hall.name}">
                                 </label>
                             </td>
                             <td>
-                                <label th:text="${hall.decryption}"></label>
+                                <label th:text="${hall.description}"></label>
                             </td>
                             <td>
-                                <a th:href="@{'/admin/hall/delete?id='+${hall.id}}" class="btn btn-default" role="button">Delete</a>
+                                <a th:href="@{'/admin/hall/delete?id='+${hall.id}}" class="btn btn-default"
+                                   role="button" th:text="#{volunteers.form.button.delete}">Delete</a>
                             </td>
                         </tr>
                     </th:block>
                     <tr>
                         <td></td>
                         <td>
-                            <a href="#" data-toggle="modal" data-target="#hallForm" class="btn btn-default" role="button">Add</a>
+                            <a href="#" data-toggle="modal" data-target="#hallForm" class="btn btn-default"
+                               role="button" th:text="#{volunteers.hall.button.add}">Add</a>
                         </td>
                     </tr>
                 </tbody>
@@ -43,24 +45,32 @@
                     <form method="post" th:action="@{/admin/hall/add}" th:object="${newHall}">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="hallLabel">Add hall</h4>
+                            <h4 class="modal-title" id="hallLabel" th:text="#{volunteers.form.hall.header}">Add
+                                hall</h4>
                         </div>
                         <div class="modal-body">
 
                             <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
-                                <label for="hallName">Hall name</label>
+                                <label for="hallName" th:text="#{volunteers.form.hall.hallName}">Hall name</label>
                                 <input type="text" class="form-control" id="hallName" th:field="*{name}" />
-                                <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                                <span class="help-block" th:if="${#fields.hasErrors('name')}"
+                                      th:text="#{volunteers.form.hall.hallName.error.empty}"></span>
                             </div>
-                            <div class="form-group" th:class="${#fields.hasErrors('decryption')}? 'has-error form-group' : 'form-group'">
-                                <label for="decryption">Decryption</label>
-                                <input type="text" class="form-control" id="decryption" th:field="*{decryption}" />
-                                <span class="help-block" th:if="${#fields.hasErrors('decryption')}" th:errors="*{decryption}"></span>
+                            <div class="form-group"
+                                 th:class="${#fields.hasErrors('description')}? 'has-error form-group' : 'form-group'">
+                                <label for="description"
+                                       th:text="#{volunteers.form.hall.hallDescription}">Description</label>
+                                <input type="text" class="form-control" id="description" th:field="*{description}"/>
+                                <span class="help-block" th:if="${#fields.hasErrors('description')}"
+                                      th:text="#{volunteers.form.hall.hallDescription.error.empty}"></span>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                                    th:text="#{volunteers.form.button.close}">Close
+                            </button>
+                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.hall.button.add}">Add
+                            </button>
                         </div>
                     </form>
                 </div>

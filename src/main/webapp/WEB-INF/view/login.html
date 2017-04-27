@@ -6,21 +6,24 @@
 </head>
 <body>
     <form th:action="@{/login}" method="post" th:fragment="content" class="sign-in-form col-sm-offset-3 col-sm-6">
-        <h2 class=""> Log into volunteers </h2>
-        <div th:if="${error!=null}" th:text="${error}"></div>
-        <div th:if="${message!=null}" th:text="${message}"></div>
+        <h2 class="" th:text="#{volunteers.login.namePage}"> Log into volunteers </h2>
+        <div th:if="${error!=null}" th:text="#{volunteers.login.error}" class="help-block">Invalid email or password
+        </div>
+        <div th:if="${message!=null}" th:text="#{volunteers.login.information.logout}" class="help-block">Logout was
+            successful
+        </div>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <div class="form-group">
-            <label for="inputEmail" >Email address</label>
+            <label for="inputEmail" th:text="#{volunteers.login.email}">Email </label>
             <input type="email" class="form-control" id="inputEmail" placeholder="Email" name="username" />
         </div>
         <div class="form-group">
-            <label for="inputPass">Password</label>
+            <label for="inputPass" th:text="#{volunteers.login.password}">Password</label>
                 <input type="password" class="form-control" id="inputPass" placeholder="Password" name="password" />
         </div>
         <div class="form-group">
-            <button type="submit" class="btn btn-default">Log in</button>
-            <a th:href="@{/signup}" class="btn btn-link" role="button">Sign up</a>
+            <button type="submit" class="btn btn-default" th:text="#{volunteers.login.login}">Log in</button>
+            <a th:href="@{/signup}" class="btn btn-link" role="button" th:text="#{volunteers.login.signUp}">Sign up</a>
         </div>
     </form>
 </body>

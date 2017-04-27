@@ -282,7 +282,9 @@ public class AdminController {
         for (UserEvent user : users) {
             boolean flage = false;
             long newIdPosition = Long.parseLong(request.getParameter("p" + user.getId()));
-            long newIdHall = Long.parseLong(request.getParameter("h" + user.getId()));
+            long newIdHall = user.getHall().getId();
+            if (request.getParameter("h" + user.getId()) != null)
+                newIdHall = Long.parseLong(request.getParameter("h" + user.getId()));
             if (user.getPosition().getId() != newIdPosition) {
                 user.setPosition(positionValueRepository.findOne(newIdPosition).getPosition());
                 flage = true;

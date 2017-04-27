@@ -7,7 +7,12 @@ spring:
     prefix:  /WEB-INF/view/
     suffix: .html
     cache: false
+
+  messages:
+    encoding: UTF-8
+    basename: messages/messages
+
       
 server:
-  context-path: /volunteers
+  context-path: /
   

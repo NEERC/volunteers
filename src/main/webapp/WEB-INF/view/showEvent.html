@@ -11,23 +11,22 @@
         <div class="table-responsive">
             <input type="hidden" th:value="${event.id}" name="event"/>
 
-
             <table class="table table-hover table-bordered table-fixed">
                 <thead>
-                <th>
+                <th th:text="#{volunteers.event.halls}">
                     Halls
                 </th>
-                <th>
+                <th th:text="#{volunteers.event.volunteers}">
                     Volunteers
                 </th>
-                <th>
+                <th th:text="#{volunteers.event.positions}">
                     Positions
                 </th>
-                <th th:unless="${assessment}">
+                <th th:unless="${assessment}" th:text="#{volunteers.event.attendance}">
                     Attendance
                 </th>
                 <th:block th:if="${assessment}" th:each="a:${assessments}">
-                    <th th:text="${a.comment}+' (value='+${a.value}+')'"></th>
+                    <th th:text="${a.comment}+' ('+#{volunteers.event.assessment.value}+'='+${a.value}+')'"></th>
                 </th:block>
                 </thead>
                 <tbody>
@@ -86,22 +85,23 @@
         </div>
         <div class="text-center">
             <th:block th:if="${attendance}">
-                <input class="btn btn-primary" role="button" type="submit" value="Save attendance"/>
+                <input class="btn btn-primary" role="button" type="submit" value="Save attendance"
+                       th:value="#{volunteers.event.button.saveAttendance}"/>
             </th:block>
             <th:block th:if="${assessments}">
                 <input class="btn btn-primary" role="button" type="submit" value="Save assessments"/>
                 <button type="button" class="btn btn-default" data-toggle="modal"
-                        data-target="#assessmentForm">
+                        data-target="#assessmentForm" th:text="#{volunteers.event.button.addAssessment}">
                     Add assessments
                 </button>
             </th:block>
             <th:block th:unless="${assessments} or ${attendance}">
                 <a th:href="@{'/admin/event/edit?id='+${event.id}}" class="btn btn-default"
-                   role="button">Edit</a>
+                   role="button" th:text="#{volunteers.event.button.edit}">Edit</a>
                 <a th:href="@{'/admin/event/attendance?id='+${event.id}}" class="btn btn-default"
-                   role="button">Set attendance</a>
+                   role="button" th:text="#{volunteers.event.button.editAttendance}">Set attendance</a>
                 <a th:href="@{'/admin/event/assessments?id='+${event.id}}" class="btn btn-default"
-                   role="button">Set assessments</a>
+                   role="button" th:text="#{volunteers.event.button.editAssessments}">Set assessments</a>
             </th:block>
         </div>
     </form>
@@ -120,23 +120,27 @@
                         <div class="modal-body">
                             <div class="form-group"
                                  th:class="${#fields.hasErrors('comment')}? 'has-error form-group' : 'form-group'">
-                                <label for="assessmentComment">Comment</label>
+                                <label for="assessmentComment"
+                                       th:text="#{volunteers.form.assessment.comment}">Comment</label>
                                 <input type="text" class="form-control" id="assessmentComment"
                                        th:field="*{comment}"/>
                                 <span class="help-block" th:if="${#fields.hasErrors('comment')}"
-                                      th:errors="*{comment}"></span>
+                                      th:text="#{volunteers.form.assessment.comment.error.empty}"></span>
                             </div>
                             <div class="form-group"
                                  th:class="${#fields.hasErrors('value')}? 'has-error form-group' : 'form-group'">
-                                <label for="assessmentValue">Value</label>
+                                <label for="assessmentValue" th:text="#{volunteers.form.assessment.value}">Value</label>
                                 <input type="number" class="form-control" id="assessmentValue" th:field="*{value}"/>
                                 <span class="help-block" th:if="${#fields.hasErrors('value')}"
                                       th:errors="*{value}"></span>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                                    th:text="#{volunteers.form.button.close}">Close
+                            </button>
+                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.add}">Add
+                            </button>
                         </div>
                     </form>
                 </div>

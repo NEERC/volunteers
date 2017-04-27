@@ -15,18 +15,14 @@ public class LoginController {
     @RequestMapping("/login")
     @Layout("empty")
     public String login(@RequestParam(value = "error", required = false) final String error,
-                        @RequestParam(value = "signup", required = false) final String signup,
                         @RequestParam(value = "logout", required = false) final String logout,
                         final Model model) {
 
         if (error != null) {
-            model.addAttribute("error", "Invalid email or password");
-        }
-        if (signup != null) {
-            model.addAttribute("message", "singup was successful");
+            model.addAttribute("error", "");
         }
         if (logout != null) {
-            model.addAttribute("message", "logout was successful");
+            model.addAttribute("message", "");
         }
         return "login";
     }
