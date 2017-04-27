@@ -52,7 +52,7 @@
                         <th:block th:each="user:${hallUser.get(hall)}">
                     <tr>
                         <td th:text="${user.userYear.user.badgeName}"></td>
-                        <td th:text="${user.position.name}">name position</td>
+                        <td th:text="${user.position.position.name}">name position</td>
                         <td th:if="${attendance}">
                             <select class="form-control" th:name="'attendance'+${user.id}">
                                 <th:block th:if="${user.attendance}==null">

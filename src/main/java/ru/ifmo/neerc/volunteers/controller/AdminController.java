@@ -2,6 +2,7 @@ package ru.ifmo.neerc.volunteers.controller;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -57,6 +58,12 @@ public class AdminController {
 
     @Autowired
     MedalRepository medalRepository;
+
+    @Autowired
+    ApplicationFormRepository applicationFormRepository;
+
+    @Autowired
+    MessageSource messageSource;
 
     @RequestMapping(method = RequestMethod.GET)
     public String admin(Model model, Authentication authentication) {
@@ -225,7 +232,7 @@ public class AdminController {
         eventRepository.save(event);
         Set<ApplicationForm> users = year.getUsers();
         event.setUsers(new HashSet<>());
-        Position position = positionRepository.findOne(1L);//default position
+        PositionValue position = positionValueRepository.findOne(1L);//default position
         Hall hall = hallRepository.findOne(1L);//default hall
         List<UserEvent> userEvents = new ArrayList<>();
         users.forEach(applicationForm -> {
@@ -289,7 +296,7 @@ public class AdminController {
             if (request.getParameter("h" + user.getId()) != null)
                 newIdHall = Long.parseLong(request.getParameter("h" + user.getId()));
             if (user.getPosition().getId() != newIdPosition) {
-                user.setPosition(positionValueRepository.findOne(newIdPosition).getPosition());
+                user.setPosition(positionValueRepository.findOne(newIdPosition));
                 flage = true;
             }
             if (user.getHall().getId() != newIdHall) {
@@ -346,45 +353,44 @@ public class AdminController {
         showEvent(id, model, authentication);
         model.addAttribute("assessment", true);
         model.addAttribute("assessments", userEventAssessmentRepository.findAll());
-        if(!model.containsAttribute("newAssessment"))
-            model.addAttribute("newAssessment",new UserEventAssessment());
+        if (!model.containsAttribute("newAssessment"))
+            model.addAttribute("newAssessment", new UserEventAssessment());
         return "showEvent";
     }
 
     @RequestMapping(value = "/event/assessments", method = RequestMethod.POST)
     public String setAssessments(HttpServletRequest request) {
         Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        Set<UserEvent> users=new HashSet<>();
-        Iterable<UserEventAssessment> assessments=userEventAssessmentRepository.findAll();
-        for(UserEvent user:event.getUsers()) {
+        Set<UserEvent> users = new HashSet<>();
+        Iterable<UserEventAssessment> assessments = userEventAssessmentRepository.findAll();
+        for (UserEvent user : event.getUsers()) {
             userEventRepository.save(user);
-            Set<UserEventAssessment> assessmentSet=new HashSet<>();
-            for(UserEventAssessment assessment:assessments) {
-                boolean chosen=request.getParameter("assessment"+assessment.getId()+"user"+user.getId())!=null;
-                if(chosen) {
+            Set<UserEventAssessment> assessmentSet = new HashSet<>();
+            for (UserEventAssessment assessment : assessments) {
+                boolean chosen = request.getParameter("assessment" + assessment.getId() + "user" + user.getId()) != null;
+                if (chosen) {
                     assessmentSet.add(assessment);
                 }
             }
-            if(!CollectionUtils.isEqualCollection(user.getAssessments(),assessmentSet)) {
+            if (!CollectionUtils.isEqualCollection(user.getAssessments(), assessmentSet)) {
                 user.getAssessments().clear();
                 user.getAssessments().addAll(assessmentSet);
                 userEventRepository.save(user);
             }
         }
-        if(!users.isEmpty())
+        if (!users.isEmpty())
             userEventRepository.save(users);
         return "redirect:/admin/event?id=" + request.getParameter("event");
     }
 
-    @RequestMapping(value = "/event/assessments/add",method = RequestMethod.POST)
+    @RequestMapping(value = "/event/assessments/add", method = RequestMethod.POST)
     public String addAttendance(@Valid @ModelAttribute("newAssessment") UserEventAssessment assessment, BindingResult result, RedirectAttributes attributes, HttpServletRequest request) {
-        if(result.hasErrors()) {
+        if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newAssessment", result);
             attributes.addFlashAttribute("newAssessment", assessment);
-        }
-        else
+        } else
             userEventAssessmentRepository.save(assessment);
-        return "redirect:/admin/event/assessments?id="+request.getParameter("event");
+        return "redirect:/admin/event/assessments?id=" + request.getParameter("event");
     }
 
     @RequestMapping(value = "/event/attendance", method = RequestMethod.POST)
@@ -421,6 +427,66 @@ public class AdminController {
             medalRepository.save(medal);
         }
         return "redirect:/admin/medals";
+    }
+
+    @RequestMapping(value = "/results", method = RequestMethod.GET)
+    public String showResults(Model model, Authentication authentication, Locale locale) {
+        Year year = getUser(authentication).getYear();
+        Set<ApplicationForm> users = year.getUsers();
+        Set<ApplicationForm> needToSave = new HashSet<>();
+        int countEvents = year.getEvents().size();
+        Map<Long, Integer> assessments = new HashMap<>();
+        Map<Long, Double> experience = new HashMap<>();
+        for (ApplicationForm user : users) {
+            double exp = 0;
+            double totalExp = 0;
+            final int[] assessment = {0};
+            for (UserEvent userEvent : user.getUserEvents()) {
+                if (userEvent.getAttendance() == Attendance.YES || userEvent.getAttendance() == Attendance.LATE) {
+                    exp += userEvent.getPosition().getValue() / countEvents;
+                }
+                userEvent.getAssessments().forEach(
+                        (userEventAssessment -> assessment[0] += userEventAssessment.getValue()));
+            }
+            for (ApplicationForm applicationForm : user.getUser().getApplicationForms()) {
+                totalExp += applicationForm.getExperience();
+            }
+            totalExp -= user.getExperience();
+            totalExp += exp;
+            if (exp != user.getExperience()) {
+                user.setExperience(exp);
+                needToSave.add(user);
+            }
+            assessments.put(user.getId(), assessment[0]);
+            experience.put(user.getId(), totalExp);
+        }
+        applicationFormRepository.save(needToSave);
+        List<ApplicationForm> applicationForms = new ArrayList<>(users);
+        applicationForms.sort(
+                (user1, user2) -> {
+                    if (experience.get(user1.getId()).equals(experience.get(user2.getId()))) {
+                        return Integer.compare(assessments.get(user2.getId()), assessments.get(user1.getId()));
+                    } else {
+                        return Double.compare(experience.get(user2.getId()), experience.get(user1.getId()));
+                    }
+                }
+        );
+        Map<Long, Medal> userMedals = new HashMap<>();
+        List<Medal> medals = new ArrayList<>(medalRepository.findAll());
+        medals.sort(Comparator.comparing(Medal::getValue).reversed());
+        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medal", locale), -1));
+        for (int i = 0, j = 0; i < applicationForms.size(); i++) {
+            while (medals.get(j).getValue() > experience.get(applicationForms.get(i).getId())) {
+                j++;
+            }
+            userMedals.put(applicationForms.get(i).getId(), medals.get(j));
+        }
+        setModel(model, year);
+        model.addAttribute("applicationForms", applicationForms);
+        model.addAttribute("assessments", assessments);
+        model.addAttribute("experience", experience);
+        model.addAttribute("medals", userMedals);
+        return "results";
     }
 
     private User getUser(Authentication authentication) {

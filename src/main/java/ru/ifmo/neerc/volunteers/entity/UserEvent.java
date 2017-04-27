@@ -29,7 +29,7 @@ public class UserEvent {
 
     @ManyToOne
     @JoinColumn(name = "position")
-    Position position;
+    PositionValue position;
 
     @ManyToMany(fetch = FetchType.LAZY)
     Set<UserEventAssessment> assessments;

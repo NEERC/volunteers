@@ -22,4 +22,12 @@ public class Medal {
     String name;
 
     int value;
+
+    public Medal() {
+    }
+
+    public Medal(String name, int value) {
+        this.name = name;
+        this.value = value;
+    }
 }
