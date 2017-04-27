@@ -59,7 +59,7 @@
                             <div class="form-group"
                                  th:class="${#fields.hasErrors('description')}? 'has-error form-group' : 'form-group'">
                                 <label for="description"
-                                       th:text="#{volunteers.form.hall.hallDescription}">Decryption</label>
+                                       th:text="#{volunteers.form.hall.hallDescription}">Description</label>
                                 <input type="text" class="form-control" id="description" th:field="*{description}"/>
                                 <span class="help-block" th:if="${#fields.hasErrors('description')}"
                                       th:text="#{volunteers.form.hall.hallDescription.error.empty}"></span>
