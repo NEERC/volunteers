@@ -55,6 +55,9 @@ public class AdminController {
     @Autowired
     UserEventAssessmentRepository userEventAssessmentRepository;
 
+    @Autowired
+    MedalRepository medalRepository;
+
     @RequestMapping(method = RequestMethod.GET)
     public String admin(Model model, Authentication authentication) {
         User user = getUser(authentication);
@@ -194,11 +197,11 @@ public class AdminController {
         setModel(model, year);
         Set<ApplicationForm> users = year.getUsers();
         model.addAttribute("users", users);
-        if (!model.containsAttribute("event")) {
+        /*if (!model.containsAttribute("event")) {
             Event event = new Event();
             event.setYear(year);
             model.addAttribute("event", event);
-        }
+        }*/
         model.addAttribute("title", year.getName());
         return "year";
     }
@@ -397,6 +400,27 @@ public class AdminController {
         }
         userEventRepository.save(users);
         return "redirect:/admin/event?id=" + request.getParameter("event");
+    }
+
+    @RequestMapping(value = "/medals")
+    public String medals(Model model, Authentication authentication) {
+        setModel(model, getUser(authentication).getYear());
+        model.addAttribute("medals", medalRepository.findAll());
+        if (!model.containsAttribute("newMedal")) {
+            model.addAttribute("newMedal", new Medal());
+        }
+        return "medals";
+    }
+
+    @RequestMapping(value = "/medals/add", method = RequestMethod.POST)
+    public String addMedals(@Valid @ModelAttribute("newMedal") Medal medal, BindingResult result, RedirectAttributes attributes) {
+        if (result.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newMedal", result);
+            attributes.addFlashAttribute("newMedal", medal);
+        } else {
+            medalRepository.save(medal);
+        }
+        return "redirect:/admin/medals";
     }
 
     private User getUser(Authentication authentication) {
