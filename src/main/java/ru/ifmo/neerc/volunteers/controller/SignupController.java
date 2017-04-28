@@ -64,10 +64,4 @@ public class SignupController {
         securityService.autologin(user.getEmail(), userForm.getPassword());
         return "redirect:/result";
     }
-
-    @RequestMapping("/users")
-    public String showUsers(Model model) {
-        model.addAttribute("users", userRepository.findAll());
-        return "users";
-    }
 }
