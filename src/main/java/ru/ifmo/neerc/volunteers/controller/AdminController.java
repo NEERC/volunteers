@@ -214,7 +214,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/event/add")
-    public String addEvent(@Valid @ModelAttribute("newEvent") Event event, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
+    public String addEvent(@Valid @ModelAttribute("newEvent") Event event, BindingResult result, RedirectAttributes attributes, Authentication authentication) throws Exception {
         User user = getUser(authentication);
         Year year = event.getYear();
         if (year == null) {
@@ -232,14 +232,22 @@ public class AdminController {
         eventRepository.save(event);
         Set<ApplicationForm> users = year.getUsers();
         event.setUsers(new HashSet<>());
-        PositionValue position = positionValueRepository.findOne(1L);//default position
+        PositionValue positionValue = null;
+        for (PositionValue positionValue1 : year.getPositionValues()) {
+            if (positionValue1.getPosition().isDef())
+                positionValue = positionValue1;
+        }
+        if (positionValue == null) {
+            throw new Exception("No default position");
+        }
         Hall hall = hallRepository.findOne(1L);//default hall
         List<UserEvent> userEvents = new ArrayList<>();
+        PositionValue finalPositionValue = positionValue;
         users.forEach(applicationForm -> {
             UserEvent userEvent = new UserEvent();
             userEvent.setEvent(event);
             userEvent.setHall(hall);
-            userEvent.setPosition(position);
+            userEvent.setPosition(finalPositionValue);
             userEvent.setUserYear(applicationForm);
             userEvent.setAttendance(Attendance.YES);
             userEvents.add(userEvent);
@@ -249,7 +257,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "event")
-    public String showEvent(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
+    public String event(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
         Year year = getUser(authentication).getYear();
         Event event = eventRepository.findOne(id);
         setModel(model, year);
@@ -322,9 +330,13 @@ public class AdminController {
             Set<UserEvent> users = event.getUsers();
             for (UserEvent user : users) {
                 Long form = user.getUserYear().getId();
-                user.setHall(userEventBase.get(form).getHall());
-                user.setPosition(userEventBase.get(form).getPosition());
-                userEventRepository.save(user);
+                if (userEventBase.get(form) != null) {
+                    if (userEventBase.get(form).getHall() != null)
+                        user.setHall(userEventBase.get(form).getHall());
+                    if (userEventBase.get(form).getPosition() != null)
+                        user.setPosition(userEventBase.get(form).getPosition());
+                    userEventRepository.save(user);
+                }
             }
         }
         return "redirect:/admin/event/?id=" + event.getId();
@@ -342,7 +354,7 @@ public class AdminController {
 
     @RequestMapping(value = "/event/attendance", method = RequestMethod.GET)
     public String attendance(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
-        showEvent(id, model, authentication);
+        event(id, model, authentication);
         model.addAttribute("attendances", Attendance.values());
         model.addAttribute("attendance", true);
         return "showEvent";
@@ -350,7 +362,7 @@ public class AdminController {
 
     @RequestMapping(value = "/event/assessments", method = RequestMethod.GET)
     public String assessments(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
-        showEvent(id, model, authentication);
+        event(id, model, authentication);
         model.addAttribute("assessment", true);
         model.addAttribute("assessments", userEventAssessmentRepository.findAll());
         if (!model.containsAttribute("newAssessment"))
