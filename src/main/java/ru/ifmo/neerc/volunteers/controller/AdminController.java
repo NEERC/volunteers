@@ -118,7 +118,8 @@ public class AdminController {
 
     @RequestMapping(value = "/position/delete")
     public String deletePosition(@RequestParam("id") long id) {
-        if (id != 1) {
+        Position position = positionValueRepository.findOne(id).getPosition();
+        if (position.getId() != 1) {
             positionValueRepository.delete(id);
         }
         return "redirect:/admin/position";

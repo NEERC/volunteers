@@ -24,7 +24,12 @@
                                         <input type="number" step="any" class="form-control" th:value="${position.value}" th:id="position+${position.id}" th:name="v+${position.id}" min="0"/>
                                     </td>
                                     <td>
-                                        <a th:href="@{'/admin/position/delete?id='+${position.id}}" class="btn btn-default" role="button" th:disabled="${position.position.def}">Delete</a>
+                                        <a th:unless="${position.position.def}"
+                                           th:href="@{'/admin/position/delete?id='+${position.id}}"
+                                           class="btn btn-default" role="button"
+                                           th:text="#{volunteers.form.button.delete}">Delete</a>
+                                        <a th:if="${position.position.def}" class="btn btn-default" role="button"
+                                           disabled="true" th:text="#{volunteers.form.button.delete}">Delete</a>
                                     </td>
                                 </tr>
                             </th:block>
