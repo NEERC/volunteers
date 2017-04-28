@@ -52,7 +52,7 @@
                                     <label>
                                         <input type="checkbox" th:id="'assessment'+${a.id}"
                                                onclick="selectAll(this)"/>
-                                        Select all
+                                        <span th:text="#{volunteers.event.form.selectAll}">Select all</span>
                                     </label>
                                 </div>
                             </td>
@@ -77,7 +77,8 @@
                                     <label>
                                         <input type="checkbox" onclick="selectAll(this)"
                                                th:id="'assessment'+${a.id}+'hall'+${hall.id}"/>
-                                        Select all from hall
+                                        <span th:text="#{volunteers.event.form.selectAllForHall}">
+                                        Select all from hall</span>
                                     </label>
                                 </div>
                             </td>
