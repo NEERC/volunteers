@@ -465,6 +465,12 @@ public class AdminController {
         return "redirect:/admin/medals";
     }
 
+    @RequestMapping(value = "/medals/delete")
+    public String deleteMedal(@RequestParam("id") long id) {
+        medalRepository.delete(id);
+        return "redirect:/admin/medals";
+    }
+
     @RequestMapping(value = "/results", method = RequestMethod.GET)
     public String showResults(Model model, Authentication authentication, Locale locale) {
         Year year = getUser(authentication).getYear();

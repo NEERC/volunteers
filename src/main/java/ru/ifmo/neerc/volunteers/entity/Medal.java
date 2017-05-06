@@ -16,7 +16,7 @@ public class Medal {
 
     @Id
     @GeneratedValue
-    int id;
+    long id;
 
     @NotEmpty
     String name;

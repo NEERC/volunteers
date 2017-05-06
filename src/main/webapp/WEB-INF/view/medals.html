@@ -10,6 +10,7 @@
         <thead>
         <th th:text="#{volunteers.medals.name}">Medal name</th>
         <th th:text="#{volunteers.medals.value}">Medal value</th>
+        <th></th>
         </thead>
         <tbody>
         <th:block th:each="medal:${medals}">
@@ -19,6 +20,10 @@
                 </td>
                 <td>
                     <label th:text="${medal.value}"></label>
+                </td>
+                <td>
+                    <a th:href="@{'/admin/medals/delete?id='+${medal.id}}" class="btn btn-default"
+                       role="button" th:text="#{volunteers.form.button.delete}">Delete</a>
                 </td>
             </tr>
         </th:block>
