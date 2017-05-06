@@ -117,12 +117,27 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/position/delete")
-    public String deletePosition(@RequestParam("id") long id) {
+    public String deletePosition(@RequestParam("id") long id, RedirectAttributes attributes, Locale locale) {
         Position position = positionValueRepository.findOne(id).getPosition();
         if (position.getId() != 1) {
-            positionValueRepository.delete(id);
+            try {
+                positionValueRepository.delete(id);
+            } catch (Exception e) {
+                attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", locale));
+            }
         }
         return "redirect:/admin/position";
+    }
+
+    @RequestMapping(value = "/hall/delete")
+    public String deleteHall(@RequestParam("id") long id, RedirectAttributes attributes, Locale locale) {
+        try {
+            hallRepository.delete(id);
+        } catch (Exception e) {
+            Hall hall = hallRepository.findOne(id);
+            attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.hall.error.delete", new Object[]{hall.getName()}, "Error to delete hall", locale));
+        }
+        return "redirect:/admin/hall";
     }
 
     @RequestMapping(value = "/hall")
@@ -329,16 +344,24 @@ public class AdminController {
                 userEventBase.put(userEvent.getUserYear().getId(), userEvent);
             }
             Set<UserEvent> users = event.getUsers();
+            Set<UserEvent> savedUsers = new HashSet<>();
             for (UserEvent user : users) {
                 Long form = user.getUserYear().getId();
                 if (userEventBase.get(form) != null) {
-                    if (userEventBase.get(form).getHall() != null)
+                    boolean needToSave = false;
+                    if (userEventBase.get(form).getHall() != null && !user.getHall().equals(userEventBase.get(form).getHall())) {
                         user.setHall(userEventBase.get(form).getHall());
-                    if (userEventBase.get(form).getPosition() != null)
+                        needToSave = true;
+                    }
+                    if (userEventBase.get(form).getPosition() != null && !user.getPosition().equals(userEventBase.get(form).getPosition())) {
                         user.setPosition(userEventBase.get(form).getPosition());
-                    userEventRepository.save(user);
+                        needToSave = true;
+                    }
+                    if (needToSave)
+                        savedUsers.add(user);
                 }
             }
+            userEventRepository.save(savedUsers);
         }
         return "redirect:/admin/event/?id=" + event.getId();
     }

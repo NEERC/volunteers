@@ -7,6 +7,9 @@
 <body>
     <div th:fragment="content" class="col-md-10">
         <div class="table-responsive">
+            <div class="has-error form-group" th:if="${message!=null}">
+                <label th:text="${message}" class="help-block"></label>
+            </div>
             <table class="table table-hover">
                 <thead>
                 <th th:text="#{volunteers.hall.hallName}">Hall name</th>
