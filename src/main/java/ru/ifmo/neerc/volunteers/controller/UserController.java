@@ -14,6 +14,7 @@ import ru.ifmo.neerc.volunteers.entity.Day;
 import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
 import ru.ifmo.neerc.volunteers.form.EmailForm;
+import ru.ifmo.neerc.volunteers.form.UserProfileForm;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
 import ru.ifmo.neerc.volunteers.repository.DayRepository;
 import ru.ifmo.neerc.volunteers.repository.UserRepository;
@@ -155,5 +156,31 @@ public class UserController {
         model.addAttribute("halls", user.getYear().getHalls());
         model.addAttribute("title", day.getName());
         return "showEvent";
+    }
+
+    @GetMapping("/user/profile")
+    public String profile(Model model, Authentication authentication) {
+        if (!model.containsAttribute("profile")) {
+            User user = userRepository.findByEmailIgnoreCase(authentication.getName());
+            model.addAttribute("profile", new UserProfileForm(user));
+        }
+        return "profile";
+    }
+
+    @PostMapping("/user/profile")
+    public String updateProfile(@Valid @ModelAttribute("profile") UserProfileForm profile, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
+        profile.setBadgeName(profile.getFirstName() + " " + profile.getLastName());
+        profile.setBadgeNameCyr(profile.getFirstNameCyr() + " " + profile.getLastNameCyr());
+        if (result.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.profile", result);
+            attributes.addFlashAttribute("profile", profile);
+        } else {
+            User user = userRepository.findByEmailIgnoreCase(authentication.getName());
+            user.updateProfile(profile);
+            userRepository.save(user);
+            attributes.addFlashAttribute("isProfileUpdated", true);
+        }
+
+        return "redirect:/user/profile";
     }
 }

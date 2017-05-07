@@ -87,7 +87,7 @@
                 <li th:if="${emailForm!=null}">
                     <a class="navbar-link" href="#" data-toggle="modal" data-target="#emailModal">Change email</a>
                 </li>
-                <li><a class="navbar-link" th:text="${currentUser.badgeName}">User Name</a></li>
+                <li><a class="navbar-link" th:href="@{/user/profile}" th:text="${currentUser.badgeName}">User Name</a></li>
                 <li>
                     <form th:action="@{/logout}" method="post">
                         <button type="submit" class="btn btn-default navbar-btn" th:text="#{volunteers.header.logout}">

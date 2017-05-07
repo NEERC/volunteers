@@ -6,6 +6,7 @@ import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.ifmo.neerc.volunteers.form.UserForm;
+import ru.ifmo.neerc.volunteers.form.UserProfileForm;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
 
 import javax.persistence.*;
@@ -112,6 +113,16 @@ public class User implements UserDetails {
             result = true;
         }
         return result;
+    }
+
+    public void updateProfile(UserProfileForm profile) {
+        firstName = profile.getFirstName();
+        lastName = profile.getLastName();
+        firstNameCyr = profile.getFirstNameCyr();
+        lastNameCyr = profile.getLastNameCyr();
+        badgeName = profile.getBadgeName();
+        badgeNameCyr = profile.getBadgeNameCyr();
+        phone = profile.getPhone();
     }
 
     @Override
