@@ -254,7 +254,8 @@ public class AdminController {
                 positionValue = positionValue1;
         }
         if (positionValue == null) {
-            throw new Exception("No default position");
+            positionValue = new PositionValue(positionRepository.findOne(1L), year, 0);
+            positionValueRepository.save(positionValue);
         }
         Hall hall = hallRepository.findOne(1L);//default hall
         List<UserEvent> userEvents = new ArrayList<>();
