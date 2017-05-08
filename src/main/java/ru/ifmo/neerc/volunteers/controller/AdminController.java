@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -27,6 +30,7 @@ import java.util.*;
 @RequestMapping("/admin")
 @Controller
 @Layout("publicAdmin")
+@EnableTransactionManagement
 public class AdminController {
 
     @Autowired
@@ -87,6 +91,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/position/add", method = RequestMethod.POST)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, RedirectAttributes attributes, Authentication authentication) {
         User user = getUser(authentication);
         Year year = user.getYear();
@@ -103,6 +108,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/position/values", method = RequestMethod.POST)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String setPositionValues(HttpServletRequest request, Authentication authentication) {
         Year year = getUser(authentication).getYear();
         Set<PositionValue> positionValues = year.getPositionValues();
@@ -117,6 +123,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/position/delete")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String deletePosition(@RequestParam("id") long id, RedirectAttributes attributes, Locale locale) {
         Position position = positionValueRepository.findOne(id).getPosition();
         if (position.getId() != 1) {
@@ -130,6 +137,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/hall/delete")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String deleteHall(@RequestParam("id") long id, RedirectAttributes attributes, Locale locale) {
         try {
             hallRepository.delete(id);
@@ -148,6 +156,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/hall/add", method = RequestMethod.POST)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addHall(@Valid @ModelAttribute("newHall") Hall hall, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
         User user = getUser(authentication);
         Year year = user.getYear();
@@ -162,6 +171,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/year/add", method = RequestMethod.POST)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addYear(@Valid @ModelAttribute("newYear") Year year, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
         Year yearOld = getUser(authentication).getYear();
         if (result.hasErrors()) {
@@ -230,6 +240,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/event/add")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addEvent(@Valid @ModelAttribute("newEvent") Event event, BindingResult result, RedirectAttributes attributes, Authentication authentication) throws Exception {
         User user = getUser(authentication);
         Year year = event.getYear();
@@ -310,6 +321,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/event/save")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String save(HttpServletRequest request) {
         Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
         Set<UserEvent> users = event.getUsers();
@@ -336,6 +348,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/event/copy")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String copy(HttpServletRequest request) {
         Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
         if (Long.parseLong(request.getParameter("baseEvent")) != -1) {
@@ -368,6 +381,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/add")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addAdmin(HttpServletRequest request) {
         Long id = Long.parseLong(request.getParameter("newAdmin"));
         Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
@@ -396,6 +410,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/event/assessments", method = RequestMethod.POST)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String setAssessments(HttpServletRequest request) {
         Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
         Set<UserEvent> users = new HashSet<>();
@@ -412,7 +427,7 @@ public class AdminController {
             if (!CollectionUtils.isEqualCollection(user.getAssessments(), assessmentSet)) {
                 user.getAssessments().clear();
                 user.getAssessments().addAll(assessmentSet);
-                userEventRepository.save(user);
+                users.add(user);
             }
         }
         if (!users.isEmpty())
@@ -421,6 +436,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/event/assessments/add", method = RequestMethod.POST)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addAttendance(@Valid @ModelAttribute("newAssessment") UserEventAssessment assessment, BindingResult result, RedirectAttributes attributes, HttpServletRequest request) {
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newAssessment", result);
@@ -431,6 +447,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/event/attendance", method = RequestMethod.POST)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String setAttendance(HttpServletRequest request) {
         Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
         Set<UserEvent> users = new HashSet<>();
@@ -456,6 +473,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/medals/add", method = RequestMethod.POST)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addMedals(@Valid @ModelAttribute("newMedal") Medal medal, BindingResult result, RedirectAttributes attributes) {
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newMedal", result);
@@ -467,12 +485,14 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/medals/delete")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String deleteMedal(@RequestParam("id") long id) {
         medalRepository.delete(id);
         return "redirect:/admin/medals";
     }
 
     @RequestMapping(value = "/results", method = RequestMethod.GET)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String showResults(Model model, Authentication authentication, Locale locale) {
         Year year = getUser(authentication).getYear();
         Set<ApplicationForm> users = year.getUsers();
