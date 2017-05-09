@@ -17,5 +17,5 @@ import java.util.Set;
 public interface YearRepository extends CrudRepository<Year, Long> {
 
     List<Year> findAll();
-
+    List<Year> findAllByOrderByIdDesc();
 }

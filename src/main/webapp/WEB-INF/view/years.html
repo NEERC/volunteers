@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8" />
+    <title>Years</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="panel-group">
+            <div class="panel panel-default" th:each="year : ${years}">
+                <div class="panel-heading">
+                    <h4 class="panel-title pull-left">
+                        <a role="button" data-toggle="collapse" th:href="'#collapse' + ${year.id}" th:text="${year.name}">
+                        </a>
+                    </h4>
+                    <div th:switch="${year.openForRegistration}">
+                        <span th:case="${true}" class="label label-success pull-right"
+                              th:text="#{volunteers.years.registrationOpen}">Registration open</span>
+                        <span th:case="${false}" class="label label-default pull-right"
+                              th:text="#{volunteers.years.registrationClosed}">Registration closed</span>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div th:id="collapse + ${year.id}" class="panel-collapse collapse" th:classappend="${year.openForRegistration} ? 'in'">
+                    <div class="list-group">
+                        <div class="list-group-item" th:each="event : ${year.events}">
+                            <h4 class="list-group-item-heading" th:text="${event.name}"></h4>
+                            <p class="list-group-item-text" th:text="${event.information}"></p>
+                        </div>
+                    </div>
+                    <div class="panel-footer" th:if="${year.openForRegistration}">
+                        <a class="btn btn-primary pull-right" th:href="@{/years/{id}/signup(id=${year.id})}" role="button"
+                           th:text="#{volunteers.years.button.signUp}">Sign Up</a>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
