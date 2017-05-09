@@ -19,7 +19,7 @@ public class SimpleController {
             return "redirect:/admin";
         }
         if (roles.contains("ROLE_USER")) {
-            return "redirect:/result";
+            return "redirect:/years";
         }
         return "redirect:/login";
     }

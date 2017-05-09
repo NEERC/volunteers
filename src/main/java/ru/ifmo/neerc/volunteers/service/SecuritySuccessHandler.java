@@ -24,7 +24,7 @@ public class SecuritySuccessHandler implements AuthenticationSuccessHandler {
             return;
         }
         if (roles.contains("ROLE_USER")) {
-            response.sendRedirect("/result");
+            response.sendRedirect("/years");
             return;
         }
         response.sendRedirect("/");
