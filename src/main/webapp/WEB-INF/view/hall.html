@@ -26,7 +26,10 @@
                                 <label th:text="${hall.description}"></label>
                             </td>
                             <td>
-                                <a th:href="@{'/admin/hall/delete?id='+${hall.id}}" class="btn btn-default"
+                                <a th:if="${hall.id}==1" class="btn btn-default" role="button"
+                                   th:text="#{volunteers.form.button.delete}" disabled="true">Delete</a>
+                                <a th:unless="${hall.id}==1" th:href="@{'/admin/hall/delete?id='+${hall.id}}"
+                                   class="btn btn-default"
                                    role="button" th:text="#{volunteers.form.button.delete}">Delete</a>
                             </td>
                         </tr>

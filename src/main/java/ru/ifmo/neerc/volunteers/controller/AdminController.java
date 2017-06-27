@@ -140,7 +140,8 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String deleteHall(@RequestParam("id") long id, RedirectAttributes attributes, Locale locale) {
         try {
-            hallRepository.delete(id);
+            if (id != 1L)
+                hallRepository.delete(id);
         } catch (Exception e) {
             Hall hall = hallRepository.findOne(id);
             attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.hall.error.delete", new Object[]{hall.getName()}, "Error to delete hall", locale));
@@ -564,7 +565,9 @@ public class AdminController {
         if (year != null) {
             model.addAttribute("events", year.getEvents());
             model.addAttribute("positions", year.getPositionValues());
-            model.addAttribute("halls", year.getHalls());
+            Set<Hall> halls = year.getHalls();
+            halls.add(hallRepository.findOne(1L));
+            model.addAttribute("halls", halls);
         } else {
             model.addAttribute("events", Collections.EMPTY_LIST);
             model.addAttribute("positions", Collections.EMPTY_LIST);
