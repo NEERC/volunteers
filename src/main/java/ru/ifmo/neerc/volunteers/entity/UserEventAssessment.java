@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 /**
  * Created by Lapenok Akesej on 08.03.2017.
@@ -22,4 +23,7 @@ public class UserEventAssessment {
     String comment;
 
     int value;
+
+    @ManyToOne
+    Event event;
 }

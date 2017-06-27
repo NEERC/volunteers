@@ -403,10 +403,14 @@ public class AdminController {
     @RequestMapping(value = "/event/assessments", method = RequestMethod.GET)
     public String assessments(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
         event(id, model, authentication);
+        Event event = eventRepository.findOne(id);
         model.addAttribute("assessment", true);
-        model.addAttribute("assessments", userEventAssessmentRepository.findAll());
-        if (!model.containsAttribute("newAssessment"))
+        model.addAttribute("assessments", event.getAssessments());
+        if (!model.containsAttribute("newAssessment")) {
+            UserEventAssessment assessment = new UserEventAssessment();
+            assessment.setEvent(event);
             model.addAttribute("newAssessment", new UserEventAssessment());
+        }
         return "showEvent";
     }
 
@@ -415,7 +419,7 @@ public class AdminController {
     public String setAssessments(HttpServletRequest request) {
         Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
         Set<UserEvent> users = new HashSet<>();
-        Iterable<UserEventAssessment> assessments = userEventAssessmentRepository.findAll();
+        Iterable<UserEventAssessment> assessments = event.getAssessments();
         for (UserEvent user : event.getUsers()) {
             userEventRepository.save(user);
             Set<UserEventAssessment> assessmentSet = new HashSet<>();
@@ -442,8 +446,9 @@ public class AdminController {
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newAssessment", result);
             attributes.addFlashAttribute("newAssessment", assessment);
-        } else
+        } else {
             userEventAssessmentRepository.save(assessment);
+        }
         return "redirect:/admin/event/assessments?id=" + request.getParameter("event");
     }
 
