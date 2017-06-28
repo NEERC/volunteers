@@ -27,7 +27,15 @@
                 </th>
 
                 <th:block th:if="${assessment}" th:each="a:${assessments}">
-                    <th th:text="${a.comment}+' ('+#{volunteers.event.assessment.value}+'='+${a.value}+')'"></th>
+                    <th>
+                        <div class="input-group">
+                            <span th:text="${a.comment}+' ('+#{volunteers.event.assessment.value}+'='"
+                                  class="input-group-addon"></span>
+                            <input type="number" th:name="'assessmentValue'+${a.id}" th:value="${a.value}"
+                                   class="form-control"/>
+                            <span th:text="')'" class="input-group-addon"></span>
+                        </div>
+                    </th>
                 </th:block>
 
                 </thead>

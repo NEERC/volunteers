@@ -418,8 +418,19 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String setAssessments(HttpServletRequest request) {
         Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        Set<UserEvent> users = new HashSet<>();
+        Set<UserEventAssessment> userEventAssessments = new HashSet<>();
         Iterable<UserEventAssessment> assessments = event.getAssessments();
+        for (UserEventAssessment assessment : assessments) {
+            int val = Integer.parseInt(request.getParameter("assessmentValue" + assessment.getId()));
+            if (assessment.getValue() != val) {
+                assessment.setValue(val);
+                userEventAssessments.add(assessment);
+            }
+        }
+        userEventAssessmentRepository.save(userEventAssessments);
+
+
+        Set<UserEvent> users = new HashSet<>();
         for (UserEvent user : event.getUsers()) {
             userEventRepository.save(user);
             Set<UserEventAssessment> assessmentSet = new HashSet<>();

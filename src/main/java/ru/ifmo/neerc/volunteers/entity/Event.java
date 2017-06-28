@@ -41,5 +41,6 @@ public class Event {
     Set<UserEvent> users;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "event")
+    @OrderBy("id ASC")
     Set<UserEventAssessment> assessments;
 }
