@@ -14,8 +14,8 @@ import java.util.Set;
  */
 @Data
 @Entity
-@EqualsAndHashCode(exclude = {"year", "users"})
-@ToString(exclude = {"year", "users"})
+@EqualsAndHashCode(exclude = {"year", "users", "assessments"})
+@ToString(exclude = {"year", "users", "assessments"})
 public class Event {
 
     @Id
@@ -39,4 +39,8 @@ public class Event {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "event")
     @OrderBy("id ASC")
     Set<UserEvent> users;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "event")
+    @OrderBy("id ASC")
+    Set<UserEventAssessment> assessments;
 }

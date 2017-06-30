@@ -5,12 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.Role;
 import ru.ifmo.neerc.volunteers.entity.User;
@@ -26,6 +27,7 @@ import javax.validation.Valid;
  */
 @Controller
 @Layout("empty")
+@EnableTransactionManagement
 public class SignupController {
 
     private static final Logger logger = LoggerFactory.getLogger(SignupController.class);
@@ -48,6 +50,7 @@ public class SignupController {
     }
 
     @PostMapping("/signup")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String processSignup(@Valid @ModelAttribute("user") UserForm userForm, BindingResult result) {
         if (userRepository.findByEmailIgnoreCase(userForm.getEmail()) != null) {
             result.rejectValue("emailExist", "exist.user.email", "");
@@ -63,11 +66,5 @@ public class SignupController {
         userRepository.save(user);
         securityService.autologin(user.getEmail(), userForm.getPassword());
         return "redirect:/result";
-    }
-
-    @RequestMapping("/users")
-    public String showUsers(Model model) {
-        model.addAttribute("users", userRepository.findAll());
-        return "users";
     }
 }

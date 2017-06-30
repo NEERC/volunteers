@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="content" class="col-md-10">
+    <table class="table table-hover">
+        <thead>
+        <th th:text="#{volunteers.medals.name}">Medal name</th>
+        <th th:text="#{volunteers.medals.value}">Medal value</th>
+        <th></th>
+        </thead>
+        <tbody>
+        <th:block th:each="medal:${medals}">
+            <tr>
+                <td>
+                    <label th:text="${medal.name}"></label>
+                </td>
+                <td>
+                    <label th:text="${medal.value}"></label>
+                </td>
+                <td>
+                    <a th:href="@{'/admin/medals/delete?id='+${medal.id}}" class="btn btn-default"
+                       role="button" th:text="#{volunteers.form.button.delete}">Delete</a>
+                </td>
+            </tr>
+        </th:block>
+        <tr>
+            <td colspan="2" class="text-center">
+                <a align="center" href="#" data-toggle="modal" data-target="#medalForm" class="btn btn-default"
+                   role="button" th:text="#{volunteers.hall.button.add}">Add</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="medalForm" tabindex="-1" role="dialog" aria-labelledby="medalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form method="post" th:action="@{/admin/medals/add}" th:object="${newMedal}">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="medalLabel" th:text="#{volunteers.form.medal.header}">Add
+                            medal</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group"
+                             th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
+                            <label for="medalName" th:text="#{volunteers.form.medal.medalName}">Medal name</label>
+                            <input type="text" class="form-control" id="medalName" th:field="*{name}"/>
+                            <span class="help-block" th:if="${#fields.hasErrors('name')}"
+                                  th:text="#{volunteers.form.hall.hallName.error.empty}"></span>
+                        </div>
+                        <div class="form-group"
+                             th:class="${#fields.hasErrors('value')}? 'has-error form-group' : 'form-group'">
+                            <label for="medalValue"
+                                   th:text="#{volunteers.form.medal.medalValue}">Medal value</label>
+                            <input type="number" class="form-control" id="medalValue" th:field="*{value}"/>
+                            <span class="help-block" th:if="${#fields.hasErrors('value')}"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                                th:text="#{volunteers.form.button.close}">Close
+                        </button>
+                        <button type="submit" class="btn btn-primary" th:text="#{volunteers.hall.button.add}">Add
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

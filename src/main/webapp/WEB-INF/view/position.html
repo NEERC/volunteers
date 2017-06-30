@@ -7,6 +7,9 @@
 <body>
     <div th:fragment="content"  class="col-md-10">
         <div class="table-responsive">
+            <div class="has-error form-group" th:if="${message!=null}">
+                <label th:text="${message}" class="help-block"></label>
+            </div>
                 <table class="table table-hover">
                     <thead>
                     <th th:text="#{volunteers.position.name}">Position</th>
@@ -24,7 +27,12 @@
                                         <input type="number" step="any" class="form-control" th:value="${position.value}" th:id="position+${position.id}" th:name="v+${position.id}" min="0"/>
                                     </td>
                                     <td>
-                                        <a th:href="@{'/admin/position/delete?id='+${position.id}}" class="btn btn-default" role="button" th:disabled="${position.position.def}">Delete</a>
+                                        <a th:unless="${position.position.def}"
+                                           th:href="@{'/admin/position/delete?id='+${position.id}}"
+                                           class="btn btn-default" role="button"
+                                           th:text="#{volunteers.form.button.delete}">Delete</a>
+                                        <a th:if="${position.position.def}" class="btn btn-default" role="button"
+                                           disabled="true" th:text="#{volunteers.form.button.delete}">Delete</a>
                                     </td>
                                 </tr>
                             </th:block>
@@ -56,7 +64,8 @@
                                 <input type="text" class="form-control" id="positionName" th:field="*{name}" />
                                 <span class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
                             </div>
-                            <div class="form-group" th:class="${#fields.hasErrors('value')}? 'has error form-group':'form-group'">
+                            <div class="form-group"
+                                 th:class="${#fields.hasErrors('value')}? 'has-error form-group':'form-group'">
                                 <label for="positionValue" th:text="#{volunteers.form.position.positionValue}">Position
                                     value</label>
                                 <input type="number" step="any" class="form-control" id="positionValue" th:field="*{value}" value="0" min="0"/>

@@ -1,6 +1,7 @@
 package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -11,7 +12,8 @@ import java.util.Set;
  */
 @Entity
 @Data
-@ToString(exclude = {"id","year"}, includeFieldNames = false)
+@ToString(exclude = {"id", "year", "userEvents"}, includeFieldNames = false)
+@EqualsAndHashCode(exclude = {"id", "year", "userEvents"})
 public class ApplicationForm {
 
     @Id
@@ -32,4 +34,9 @@ public class ApplicationForm {
 
     @Column(name = "`group`")
     private String group;
+
+    private double experience;
+
+    @OneToMany(mappedBy = "userYear")
+    private Set<UserEvent> userEvents;
 }

@@ -7,6 +7,9 @@
 <body>
     <div th:fragment="content" class="col-md-10">
         <div class="table-responsive">
+            <div class="has-error form-group" th:if="${message!=null}">
+                <label th:text="${message}" class="help-block"></label>
+            </div>
             <table class="table table-hover">
                 <thead>
                 <th th:text="#{volunteers.hall.hallName}">Hall name</th>
@@ -22,10 +25,13 @@
                             <td>
                                 <label th:text="${hall.description}"></label>
                             </td>
-                            <!--<td>
-                                <a th:href="@{'/admin/hall/delete?id='+${hall.id}}" class="btn btn-default"
+                            <td>
+                                <a th:if="${hall.id}==1" class="btn btn-default" role="button"
+                                   th:text="#{volunteers.form.button.delete}" disabled="true">Delete</a>
+                                <a th:unless="${hall.id}==1" th:href="@{'/admin/hall/delete?id='+${hall.id}}"
+                                   class="btn btn-default"
                                    role="button" th:text="#{volunteers.form.button.delete}">Delete</a>
-                            </td>-->
+                            </td>
                         </tr>
                     </th:block>
                     <tr>

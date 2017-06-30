@@ -31,10 +31,17 @@
                 <a th:href="@{/admin/hall}" class="collapsed" th:text="#{volunteers.admin.menu.halls}">
                     Halls</a>
             </li>
+            <li>
+                <a th:href="@{/admin/medals}" class="collapsed" th:text="#{volunteers.admin.menu.medals}">Medals</a>
+            </li>
             <li th:if="${year.openForRegistration}">
                 <a href="#closeRegistrationConfirm" class="collapsed" type="button" data-toggle="modal"
                    data-target="#closeRegistrationConfirm"
                    th:text="#{volunteers.admin.menu.closeRegistration}">Close registration</a>
+            </li>
+            <li>
+                <a th:href="@{/admin/results}" class="collapsed" th:text="#{volunteers.admin.menu.results}">Show
+                    results</a>
             </li>
             <li>
                 <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">

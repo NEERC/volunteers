@@ -67,14 +67,14 @@ public class DataGenerator {
 
             printWriter.println("-- write application form");
             printWriter.println("INSERT IGNORE INTO " + TABLE_APPLICATION_FORM);
-            printWriter.println("(id,`group`,suggestions,user_id,year) VALUES");
+            printWriter.println("(id,`group`,suggestions,user_id,year,experience) VALUES");
             for (int i = 0; i < COUNT_USER; i++) {
                 printWriter.print("(");
                 printWriter.print(i + 1);
                 printWriter.print(", 'M333" + (4 + i % 5));
                 printWriter.print("', 'no suggestion', ");
                 printWriter.print(i + 2);
-                printWriter.print(", 1)");
+                printWriter.print(", 1, 0)");
                 if (i == COUNT_USER - 1) {
                     printWriter.println(";");
                 } else {
