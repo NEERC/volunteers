@@ -1,13 +1,23 @@
 package ru.ifmo.neerc.volunteers.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotEmpty;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.util.Set;
 
 /**
  * Created by Lapenok Akesej on 25.02.2017.
@@ -43,4 +53,15 @@ public class Event {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "event")
     @OrderBy("id ASC")
     Set<UserEventAssessment> assessments;
+
+    public void addUser(final UserEvent ue) {
+        if (ue != null) {
+            getUsers();
+            if (users == null) {
+                users = new HashSet<>();
+            }
+            users.add(ue);
+            ue.setEvent(this);
+        }
+    }
 }

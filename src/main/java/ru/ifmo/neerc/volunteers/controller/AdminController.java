@@ -1,7 +1,21 @@
 package ru.ifmo.neerc.volunteers.controller;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -10,19 +24,39 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
-import ru.ifmo.neerc.volunteers.entity.*;
-import ru.ifmo.neerc.volunteers.form.PositionForm;
-import ru.ifmo.neerc.volunteers.repository.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.*;
+import lombok.AllArgsConstructor;
+import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
+import ru.ifmo.neerc.volunteers.entity.Attendance;
+import ru.ifmo.neerc.volunteers.entity.Event;
+import ru.ifmo.neerc.volunteers.entity.Hall;
+import ru.ifmo.neerc.volunteers.entity.Medal;
+import ru.ifmo.neerc.volunteers.entity.Position;
+import ru.ifmo.neerc.volunteers.entity.PositionValue;
+import ru.ifmo.neerc.volunteers.entity.Role;
+import ru.ifmo.neerc.volunteers.entity.User;
+import ru.ifmo.neerc.volunteers.entity.UserEvent;
+import ru.ifmo.neerc.volunteers.entity.UserEventAssessment;
+import ru.ifmo.neerc.volunteers.entity.Year;
+import ru.ifmo.neerc.volunteers.form.PositionForm;
+import ru.ifmo.neerc.volunteers.repository.ApplicationFormRepository;
+import ru.ifmo.neerc.volunteers.repository.EventRepository;
+import ru.ifmo.neerc.volunteers.repository.HallRepository;
+import ru.ifmo.neerc.volunteers.repository.MedalRepository;
+import ru.ifmo.neerc.volunteers.repository.PositionRepository;
+import ru.ifmo.neerc.volunteers.repository.PositionValueRepository;
+import ru.ifmo.neerc.volunteers.repository.RoleRepository;
+import ru.ifmo.neerc.volunteers.repository.UserEventAssessmentRepository;
+import ru.ifmo.neerc.volunteers.repository.UserEventRepository;
+import ru.ifmo.neerc.volunteers.repository.UserRepository;
+import ru.ifmo.neerc.volunteers.repository.YearRepository;
 
 /**
  * Created by Lapenok Akesej on 25.02.2017.
@@ -31,51 +65,29 @@ import java.util.*;
 @Controller
 @Layout("publicAdmin")
 @EnableTransactionManagement
+@AllArgsConstructor
 public class AdminController {
 
-    @Autowired
     YearRepository yearRepository;
-
-    @Autowired
     EventRepository eventRepository;
-
-    @Autowired
     PositionRepository positionRepository;
-
-    @Autowired
     HallRepository hallRepository;
-
-    @Autowired
     UserEventRepository userEventRepository;
-
-    @Autowired
     UserRepository userRepository;
-
-    @Autowired
     PositionValueRepository positionValueRepository;
-
-    @Autowired
     RoleRepository roleRepository;
-
-    @Autowired
     UserEventAssessmentRepository userEventAssessmentRepository;
-
-    @Autowired
     MedalRepository medalRepository;
-
-    @Autowired
     ApplicationFormRepository applicationFormRepository;
-
-    @Autowired
     MessageSource messageSource;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public String admin(Model model, Authentication authentication) {
-        User user = getUser(authentication);
+    @GetMapping
+    public String admin(final Model model, final Authentication authentication) {
+        final User user = getUser(authentication);
         if (user.getYear() != null) {
             return "redirect:/admin/year?id=" + user.getYear().getId();
         }
-        List<Year> years = yearRepository.findAll();
+        final List<Year> years = yearRepository.findAll();
         if (years.size() != 0) {
             return "redirect:/admin/year?id=" + years.get(years.size() - 1).getId();
         }
@@ -83,8 +95,8 @@ public class AdminController {
         return "admin";
     }
 
-    @RequestMapping(value = "/position", method = RequestMethod.GET)
-    public String positions(Model model, Authentication authentication) {
+    @GetMapping("/position")
+    public String positions(final Model model, final Authentication authentication) {
         setModel(model, getUser(authentication).getYear());
         model.addAttribute("title", "Positions");
         return "position";
@@ -92,16 +104,16 @@ public class AdminController {
 
     @RequestMapping(value = "/position/add", method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, RedirectAttributes attributes, Authentication authentication) {
-        User user = getUser(authentication);
-        Year year = user.getYear();
+    public String addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
+        final User user = getUser(authentication);
+        final Year year = user.getYear();
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newPosition", result);
             attributes.addFlashAttribute("newPosition", positionForm);
         } else {
-            Position position = new Position(positionForm);
+            final Position position = new Position(positionForm);
             positionRepository.save(position);
-            PositionValue positionValue = new PositionValue(position, year, positionForm.getValue());
+            final PositionValue positionValue = new PositionValue(position, year, positionForm.getValue());
             positionValueRepository.save(positionValue);
         }
         return "redirect:/admin/position";
@@ -109,11 +121,11 @@ public class AdminController {
 
     @RequestMapping(value = "/position/values", method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String setPositionValues(HttpServletRequest request, Authentication authentication) {
-        Year year = getUser(authentication).getYear();
-        Set<PositionValue> positionValues = year.getPositionValues();
-        for (PositionValue positionValue : positionValues) {
-            Double value = Double.parseDouble(request.getParameter("v" + positionValue.getId()));
+    public String setPositionValues(final HttpServletRequest request, final Authentication authentication) {
+        final Year year = getUser(authentication).getYear();
+        final Set<PositionValue> positionValues = year.getPositionValues();
+        for (final PositionValue positionValue : positionValues) {
+            final Double value = Double.parseDouble(request.getParameter("v" + positionValue.getId()));
             if (positionValue.getValue() != value) {
                 positionValue.setValue(value);
                 positionValueRepository.save(positionValue);
@@ -124,12 +136,12 @@ public class AdminController {
 
     @RequestMapping(value = "/position/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deletePosition(@RequestParam("id") long id, RedirectAttributes attributes, Locale locale) {
-        Position position = positionValueRepository.findOne(id).getPosition();
+    public String deletePosition(@RequestParam("id") final long id, final RedirectAttributes attributes, final Locale locale) {
+        final Position position = positionValueRepository.findOne(id).getPosition();
         if (position.getId() != 1) {
             try {
                 positionValueRepository.delete(id);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", locale));
             }
         }
@@ -138,19 +150,20 @@ public class AdminController {
 
     @RequestMapping(value = "/hall/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deleteHall(@RequestParam("id") long id, RedirectAttributes attributes, Locale locale) {
+    public String deleteHall(@RequestParam("id") final long id, final RedirectAttributes attributes, final Locale locale) {
         try {
-            if (id != 1L)
+            if (id != 1L) {
                 hallRepository.delete(id);
-        } catch (Exception e) {
-            Hall hall = hallRepository.findOne(id);
+            }
+        } catch (final Exception e) {
+            final Hall hall = hallRepository.findOne(id);
             attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.hall.error.delete", new Object[]{hall.getName()}, "Error to delete hall", locale));
         }
         return "redirect:/admin/hall";
     }
 
     @RequestMapping(value = "/hall")
-    public String hall(Model model, Authentication authentication) {
+    public String hall(final Model model, final Authentication authentication) {
         setModel(model, getUser(authentication).getYear());
         model.addAttribute("title", "Halls");
         return "hall";
@@ -158,9 +171,9 @@ public class AdminController {
 
     @RequestMapping(value = "/hall/add", method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addHall(@Valid @ModelAttribute("newHall") Hall hall, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
-        User user = getUser(authentication);
-        Year year = user.getYear();
+    public String addHall(@Valid @ModelAttribute("newHall") final Hall hall, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
+        final User user = getUser(authentication);
+        final Year year = user.getYear();
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newHall", result);
             attributes.addFlashAttribute("newHall", hall);
@@ -173,37 +186,38 @@ public class AdminController {
 
     @RequestMapping(value = "/year/add", method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addYear(@Valid @ModelAttribute("newYear") Year year, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
-        Year yearOld = getUser(authentication).getYear();
+    public String addYear(@Valid @ModelAttribute("newYear") final Year year, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
+        final Year yearOld = getUser(authentication).getYear();
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newYear", result);
             attributes.addFlashAttribute("newYear", year);
-            if (yearOld != null)
+            if (yearOld != null) {
                 return "redirect:/admin/year?id=" + yearOld.getId();
-            else
+            } else {
                 return "redirect:/admin";
+            }
         }
-        Set<Position> positions = positionRepository.findAll();
+        final Set<Position> positions = positionRepository.findAll();
         year.setOpenForRegistration(true);
         yearRepository.save(year);
         if (yearOld != null) {
-            Set<PositionValue> positionValuesOld = yearOld.getPositionValues();
-            Map<Long, Double> positionValueMap = new HashMap<>();
-            for (PositionValue positionValue : positionValuesOld) {
+            final Set<PositionValue> positionValuesOld = yearOld.getPositionValues();
+            final Map<Long, Double> positionValueMap = new HashMap<>();
+            for (final PositionValue positionValue : positionValuesOld) {
                 positionValueMap.put(positionValue.getPosition().getId(), positionValue.getValue());
             }
 
-            Set<PositionValue> positionValues = new HashSet<>();
-            for (Position position : positions) {
+            final Set<PositionValue> positionValues = new HashSet<>();
+            for (final Position position : positions) {
                 if (positionValueMap.containsKey(position.getId())) {
-                    PositionValue positionValue = new PositionValue(position, year, positionValueMap.get(position.getId()));
+                    final PositionValue positionValue = new PositionValue(position, year, positionValueMap.get(position.getId()));
                     positionValues.add(positionValue);
                 }
             }
             positionValueRepository.save(positionValues);
         } else {
-            Set<PositionValue> positionValues = new HashSet<>();
-            for (Position position : positions) {
+            final Set<PositionValue> positionValues = new HashSet<>();
+            for (final Position position : positions) {
                 positionValues.add(new PositionValue(position, year, 0));
             }
             positionValueRepository.save(positionValues);
@@ -212,24 +226,24 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/year/close")
-    public String closeYear(Authentication authentication) {
-        Year year = getUser(authentication).getYear();
+    public String closeYear(final Authentication authentication) {
+        final Year year = getUser(authentication).getYear();
         year.setOpenForRegistration(false);
         yearRepository.save(year);
         return "redirect:/admin/year?id=" + year.getId();
     }
 
     @RequestMapping(value = "/year")
-    public String showYear(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
-        User user = getUser(authentication);
+    public String showYear(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+        final User user = getUser(authentication);
 
-        Year year = yearRepository.findOne(id);
+        final Year year = yearRepository.findOne(id);
         if (user.getYear() == null || user.getYear().getId() != id) {
             user.setYear(year);
             userRepository.save(user);
         }
         setModel(model, year);
-        Set<ApplicationForm> users = year.getUsers();
+        final Set<ApplicationForm> users = year.getUsers();
         model.addAttribute("users", users);
         /*if (!model.containsAttribute("event")) {
             Event event = new Event();
@@ -242,8 +256,8 @@ public class AdminController {
 
     @RequestMapping(value = "/event/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addEvent(@Valid @ModelAttribute("newEvent") Event event, BindingResult result, RedirectAttributes attributes, Authentication authentication) throws Exception {
-        User user = getUser(authentication);
+    public String addEvent(@Valid @ModelAttribute("newEvent") final Event event, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
+        final User user = getUser(authentication);
         Year year = event.getYear();
         if (year == null) {
             year = user.getYear();
@@ -254,26 +268,19 @@ public class AdminController {
                 attributes.addFlashAttribute("org.springframework.validation.BindingResult.newEvent", result);
                 attributes.addFlashAttribute("newEvent", event);
                 return "redirect:/admin/year?id=" + year.getId();
-            } else
+            } else {
                 return "redirect:/admin";
+            }
         }
         eventRepository.save(event);
-        Set<ApplicationForm> users = year.getUsers();
+        final Set<ApplicationForm> users = year.getUsers();
         event.setUsers(new HashSet<>());
-        PositionValue positionValue = null;
-        for (PositionValue positionValue1 : year.getPositionValues()) {
-            if (positionValue1.getPosition().isDef())
-                positionValue = positionValue1;
-        }
-        if (positionValue == null) {
-            positionValue = new PositionValue(positionRepository.findOne(1L), year, 0);
-            positionValueRepository.save(positionValue);
-        }
-        Hall hall = hallRepository.findOne(1L);//default hall
-        List<UserEvent> userEvents = new ArrayList<>();
-        PositionValue finalPositionValue = positionValue;
+        final PositionValue positionValue = findOrCreateDefaultPosition(year);
+        final Hall hall = hallRepository.findOne(1L);//default hall
+        final List<UserEvent> userEvents = new ArrayList<>();
+        final PositionValue finalPositionValue = positionValue;
         users.forEach(applicationForm -> {
-            UserEvent userEvent = new UserEvent();
+            final UserEvent userEvent = new UserEvent();
             userEvent.setEvent(event);
             userEvent.setHall(hall);
             userEvent.setPosition(finalPositionValue);
@@ -285,25 +292,52 @@ public class AdminController {
         return "redirect:/admin/event?id=" + event.getId();
     }
 
-    @RequestMapping(value = "event")
-    public String event(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
-        Year year = getUser(authentication).getYear();
-        Event event = eventRepository.findOne(id);
-        setModel(model, year);
-        Set<UserEvent> users = event.getUsers();
-        HashMap<Hall, List<UserEvent>> hallUser = new HashMap<>();
-        for (UserEvent user : users) {
-            if (!hallUser.containsKey(user.getHall())) {
-                hallUser.put(user.getHall(), new ArrayList<>());
+    private PositionValue findOrCreateDefaultPosition(final Year year) {
+        PositionValue positionValue = null;
+        for (final PositionValue positionValue1 : year.getPositionValues()) {
+            if (positionValue1.getPosition().isDef()) {
+                positionValue = positionValue1;
             }
-            hallUser.get(user.getHall()).add(user);
         }
-        Set<Hall> halls = year.getHalls();
-        halls.add(hallRepository.findOne(1L));
-        for (Hall hall : halls) {
-            if (!hallUser.containsKey(hall))
-                hallUser.put(hall, new ArrayList<>());
+        if (positionValue == null) {
+            positionValue = new PositionValue(positionRepository.findOne(1L), year, 0);
+            positionValueRepository.save(positionValue);
         }
+        return positionValue;
+    }
+
+    @RequestMapping(value = "event")
+    public String event(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+        final Year year = getUser(authentication).getYear();
+        final Event currentEvent = eventRepository.findOne(id);
+        setModel(model, year);
+        final Set<ApplicationForm> yearUsers = new HashSet<>(year.getUsers());
+        yearUsers.removeAll(currentEvent.getUsers().stream().map(UserEvent::getUserYear).collect(Collectors.toSet()));
+        final Hall reserve = hallRepository.findOne(1L);
+
+        final PositionValue defaultPosition = findOrCreateDefaultPosition(year);
+
+        userEventRepository.save(yearUsers.stream().map(af -> {
+            final UserEvent ue = new UserEvent();
+            ue.setUserYear(af);
+            ue.setHall(reserve);
+            ue.setPosition(defaultPosition);
+            ue.setAttendance(Attendance.YES );
+            currentEvent.addUser(ue);
+            return ue;
+        }).collect(Collectors.toList()));
+
+        final Event event = eventRepository.save(currentEvent);
+
+
+        final HashMap<Hall, List<UserEvent>> hallUser = new HashMap<>(
+                event.getUsers().stream().collect(Collectors.groupingBy(ue -> ue.getHall())));
+
+        final Set<Hall> halls = year.getHalls();
+        hallUser.putAll(halls.stream()
+                .filter(h -> !hallUser.containsKey(h))
+                .collect(Collectors.toMap(Function.identity(), hall -> new ArrayList<>())));
+
         model.addAttribute("hallUser", hallUser);
         model.addAttribute("event", event);
         model.addAttribute("halls", halls);
@@ -312,9 +346,9 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/event/edit")
-    public String editEvent(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
-        Year year = getUser(authentication).getYear();
-        Event event = eventRepository.findOne(id);
+    public String editEvent(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+        final Year year = getUser(authentication).getYear();
+        final Event event = eventRepository.findOne(id);
         setModel(model, year);
         model.addAttribute("event", event);
         model.addAttribute("users", event.getUsers());
@@ -323,16 +357,17 @@ public class AdminController {
 
     @RequestMapping(value = "/event/save")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String save(HttpServletRequest request) {
-        Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        Set<UserEvent> users = event.getUsers();
-        Set<UserEvent> forSave = new HashSet<>();
-        for (UserEvent user : users) {
+    public String save(final HttpServletRequest request) {
+        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
+        final Set<UserEvent> users = event.getUsers();
+        final Set<UserEvent> forSave = new HashSet<>();
+        for (final UserEvent user : users) {
             boolean flage = false;
-            long newIdPosition = Long.parseLong(request.getParameter("p" + user.getId()));
+            final long newIdPosition = Long.parseLong(request.getParameter("p" + user.getId()));
             long newIdHall = user.getHall().getId();
-            if (request.getParameter("h" + user.getId()) != null)
+            if (request.getParameter("h" + user.getId()) != null) {
                 newIdHall = Long.parseLong(request.getParameter("h" + user.getId()));
+            }
             if (user.getPosition().getId() != newIdPosition) {
                 user.setPosition(positionValueRepository.findOne(newIdPosition));
                 flage = true;
@@ -341,8 +376,9 @@ public class AdminController {
                 user.setHall(hallRepository.findOne(newIdHall));
                 flage = true;
             }
-            if (flage)
+            if (flage) {
                 forSave.add(user);
+            }
         }
         userEventRepository.save(forSave);
         return "redirect:/admin/event?id=" + event.getId();
@@ -350,18 +386,18 @@ public class AdminController {
 
     @RequestMapping(value = "/event/copy")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String copy(HttpServletRequest request) {
-        Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
+    public String copy(final HttpServletRequest request) {
+        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
         if (Long.parseLong(request.getParameter("baseEvent")) != -1) {
-            Event baseEvent = eventRepository.findOne(Long.parseLong(request.getParameter("baseEvent")));
-            Map<Long, UserEvent> userEventBase = new HashMap<>();
-            for (UserEvent userEvent : baseEvent.getUsers()) {
+            final Event baseEvent = eventRepository.findOne(Long.parseLong(request.getParameter("baseEvent")));
+            final Map<Long, UserEvent> userEventBase = new HashMap<>();
+            for (final UserEvent userEvent : baseEvent.getUsers()) {
                 userEventBase.put(userEvent.getUserYear().getId(), userEvent);
             }
-            Set<UserEvent> users = event.getUsers();
-            Set<UserEvent> savedUsers = new HashSet<>();
-            for (UserEvent user : users) {
-                Long form = user.getUserYear().getId();
+            final Set<UserEvent> users = event.getUsers();
+            final Set<UserEvent> savedUsers = new HashSet<>();
+            for (final UserEvent user : users) {
+                final Long form = user.getUserYear().getId();
                 if (userEventBase.get(form) != null) {
                     boolean needToSave = false;
                     if (userEventBase.get(form).getHall() != null && !user.getHall().equals(userEventBase.get(form).getHall())) {
@@ -372,8 +408,9 @@ public class AdminController {
                         user.setPosition(userEventBase.get(form).getPosition());
                         needToSave = true;
                     }
-                    if (needToSave)
+                    if (needToSave) {
                         savedUsers.add(user);
+                    }
                 }
             }
             userEventRepository.save(savedUsers);
@@ -383,17 +420,17 @@ public class AdminController {
 
     @RequestMapping(value = "/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addAdmin(HttpServletRequest request) {
-        Long id = Long.parseLong(request.getParameter("newAdmin"));
-        Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
-        User user = userRepository.findOne(id);
+    public String addAdmin(final HttpServletRequest request) {
+        final Long id = Long.parseLong(request.getParameter("newAdmin"));
+        final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
+        final User user = userRepository.findOne(id);
         user.setRole(roleAdmin);
         userRepository.save(user);
         return "redirect:/admin";
     }
 
     @RequestMapping(value = "/event/attendance", method = RequestMethod.GET)
-    public String attendance(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
+    public String attendance(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
         model.addAttribute("attendances", Attendance.values());
         model.addAttribute("attendance", true);
@@ -401,13 +438,13 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/event/assessments", method = RequestMethod.GET)
-    public String assessments(@RequestParam(value = "id") long id, Model model, Authentication authentication) {
+    public String assessments(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
-        Event event = eventRepository.findOne(id);
+        final Event event = eventRepository.findOne(id);
         model.addAttribute("assessment", true);
         model.addAttribute("assessments", event.getAssessments());
         if (!model.containsAttribute("newAssessment")) {
-            UserEventAssessment assessment = new UserEventAssessment();
+            final UserEventAssessment assessment = new UserEventAssessment();
             assessment.setEvent(event);
             model.addAttribute("newAssessment", new UserEventAssessment());
         }
@@ -416,12 +453,12 @@ public class AdminController {
 
     @RequestMapping(value = "/event/assessments", method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String setAssessments(HttpServletRequest request) {
-        Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        Set<UserEventAssessment> userEventAssessments = new HashSet<>();
-        Iterable<UserEventAssessment> assessments = event.getAssessments();
-        for (UserEventAssessment assessment : assessments) {
-            int val = Integer.parseInt(request.getParameter("assessmentValue" + assessment.getId()));
+    public String setAssessments(final HttpServletRequest request) {
+        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
+        final Set<UserEventAssessment> userEventAssessments = new HashSet<>();
+        final Iterable<UserEventAssessment> assessments = event.getAssessments();
+        for (final UserEventAssessment assessment : assessments) {
+            final int val = Integer.parseInt(request.getParameter("assessmentValue" + assessment.getId()));
             if (assessment.getValue() != val) {
                 assessment.setValue(val);
                 userEventAssessments.add(assessment);
@@ -430,12 +467,12 @@ public class AdminController {
         userEventAssessmentRepository.save(userEventAssessments);
 
 
-        Set<UserEvent> users = new HashSet<>();
-        for (UserEvent user : event.getUsers()) {
+        final Set<UserEvent> users = new HashSet<>();
+        for (final UserEvent user : event.getUsers()) {
             userEventRepository.save(user);
-            Set<UserEventAssessment> assessmentSet = new HashSet<>();
-            for (UserEventAssessment assessment : assessments) {
-                boolean chosen = request.getParameter("assessment" + assessment.getId() + "user" + user.getId()) != null;
+            final Set<UserEventAssessment> assessmentSet = new HashSet<>();
+            for (final UserEventAssessment assessment : assessments) {
+                final boolean chosen = request.getParameter("assessment" + assessment.getId() + "user" + user.getId()) != null;
                 if (chosen) {
                     assessmentSet.add(assessment);
                 }
@@ -446,14 +483,15 @@ public class AdminController {
                 users.add(user);
             }
         }
-        if (!users.isEmpty())
+        if (!users.isEmpty()) {
             userEventRepository.save(users);
+        }
         return "redirect:/admin/event?id=" + request.getParameter("event");
     }
 
     @RequestMapping(value = "/event/assessments/add", method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addAttendance(@Valid @ModelAttribute("newAssessment") UserEventAssessment assessment, BindingResult result, RedirectAttributes attributes, HttpServletRequest request) {
+    public String addAttendance(@Valid @ModelAttribute("newAssessment") final UserEventAssessment assessment, final BindingResult result, final RedirectAttributes attributes, final HttpServletRequest request) {
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newAssessment", result);
             attributes.addFlashAttribute("newAssessment", assessment);
@@ -465,11 +503,11 @@ public class AdminController {
 
     @RequestMapping(value = "/event/attendance", method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String setAttendance(HttpServletRequest request) {
-        Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        Set<UserEvent> users = new HashSet<>();
-        for (UserEvent user : event.getUsers()) {
-            String val = request.getParameter("attendance" + user.getId());
+    public String setAttendance(final HttpServletRequest request) {
+        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
+        final Set<UserEvent> users = new HashSet<>();
+        for (final UserEvent user : event.getUsers()) {
+            final String val = request.getParameter("attendance" + user.getId());
             if (!val.equals("NONE")) {
                 user.setAttendance(Attendance.valueOf(val));
                 users.add(user);
@@ -480,7 +518,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/medals")
-    public String medals(Model model, Authentication authentication) {
+    public String medals(final Model model, final Authentication authentication) {
         setModel(model, getUser(authentication).getYear());
         model.addAttribute("medals", medalRepository.findAll());
         if (!model.containsAttribute("newMedal")) {
@@ -491,7 +529,7 @@ public class AdminController {
 
     @RequestMapping(value = "/medals/add", method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addMedals(@Valid @ModelAttribute("newMedal") Medal medal, BindingResult result, RedirectAttributes attributes) {
+    public String addMedals(@Valid @ModelAttribute("newMedal") final Medal medal, final BindingResult result, final RedirectAttributes attributes) {
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newMedal", result);
             attributes.addFlashAttribute("newMedal", medal);
@@ -503,32 +541,32 @@ public class AdminController {
 
     @RequestMapping(value = "/medals/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deleteMedal(@RequestParam("id") long id) {
+    public String deleteMedal(@RequestParam("id") final long id) {
         medalRepository.delete(id);
         return "redirect:/admin/medals";
     }
 
     @RequestMapping(value = "/results", method = RequestMethod.GET)
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String showResults(Model model, Authentication authentication, Locale locale) {
-        Year year = getUser(authentication).getYear();
-        Set<ApplicationForm> users = year.getUsers();
-        Set<ApplicationForm> needToSave = new HashSet<>();
-        int countEvents = year.getEvents().size();
-        Map<Long, Integer> assessments = new HashMap<>();
-        Map<Long, Double> experience = new HashMap<>();
-        for (ApplicationForm user : users) {
+    public String showResults(final Model model, final Authentication authentication, final Locale locale) {
+        final Year year = getUser(authentication).getYear();
+        final Set<ApplicationForm> users = year.getUsers();
+        final Set<ApplicationForm> needToSave = new HashSet<>();
+        final int countEvents = year.getEvents().size();
+        final Map<Long, Integer> assessments = new HashMap<>();
+        final Map<Long, Double> experience = new HashMap<>();
+        for (final ApplicationForm user : users) {
             double exp = 0;
             double totalExp = 0;
             final int[] assessment = {0};
-            for (UserEvent userEvent : user.getUserEvents()) {
+            for (final UserEvent userEvent : user.getUserEvents()) {
                 if (userEvent.getAttendance() == Attendance.YES || userEvent.getAttendance() == Attendance.LATE) {
                     exp += userEvent.getPosition().getValue() / countEvents;
                 }
                 userEvent.getAssessments().forEach(
-                        (userEventAssessment -> assessment[0] += userEventAssessment.getValue()));
+                        userEventAssessment -> assessment[0] += userEventAssessment.getValue());
             }
-            for (ApplicationForm applicationForm : user.getUser().getApplicationForms()) {
+            for (final ApplicationForm applicationForm : user.getUser().getApplicationForms()) {
                 totalExp += applicationForm.getExperience();
             }
             totalExp -= user.getExperience();
@@ -541,7 +579,7 @@ public class AdminController {
             experience.put(user.getId(), totalExp);
         }
         applicationFormRepository.save(needToSave);
-        List<ApplicationForm> applicationForms = new ArrayList<>(users);
+        final List<ApplicationForm> applicationForms = new ArrayList<>(users);
         applicationForms.sort(
                 (user1, user2) -> {
                     if (experience.get(user1.getId()).equals(experience.get(user2.getId()))) {
@@ -551,8 +589,8 @@ public class AdminController {
                     }
                 }
         );
-        Map<Long, Medal> userMedals = new HashMap<>();
-        List<Medal> medals = new ArrayList<>(medalRepository.findAll());
+        final Map<Long, Medal> userMedals = new HashMap<>();
+        final List<Medal> medals = new ArrayList<>(medalRepository.findAll());
         medals.sort(Comparator.comparing(Medal::getValue).reversed());
         medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medal", locale), -1));
         for (int i = 0, j = 0; i < applicationForms.size(); i++) {
@@ -569,19 +607,20 @@ public class AdminController {
         return "results";
     }
 
-    private User getUser(Authentication authentication) {
+    private User getUser(final Authentication authentication) {
         return userRepository.findByEmailIgnoreCase(authentication.getName());
     }
 
-    private void setModel(Model model, Year year) {
+    private void setModel(final Model model, final Year year) {
         model.addAttribute("year", year);
-        if (!model.containsAttribute("newYear"))
+        if (!model.containsAttribute("newYear")) {
             model.addAttribute("newYear", new Year());
+        }
         model.addAttribute("years", yearRepository.findAll());
         if (year != null) {
             model.addAttribute("events", year.getEvents());
             model.addAttribute("positions", year.getPositionValues());
-            Set<Hall> halls = year.getHalls();
+            final Set<Hall> halls = year.getHalls();
             halls.add(hallRepository.findOne(1L));
             model.addAttribute("halls", halls);
         } else {
@@ -590,20 +629,23 @@ public class AdminController {
             model.addAttribute("halls", Collections.EMPTY_LIST);
         }
         if (!model.containsAttribute("newEvent")) {
-            Event newEvent = new Event();
+            final Event newEvent = new Event();
             newEvent.setYear(year);
             model.addAttribute("newEvent", newEvent);
         }
-        if (!model.containsAttribute("newPosition"))
+        if (!model.containsAttribute("newPosition")) {
             model.addAttribute("newPosition", new PositionForm());
+        }
         if (!model.containsAttribute("newHall")) {
-            Hall newHall = new Hall();
+            final Hall newHall = new Hall();
             newHall.setYear(year);
             model.addAttribute("newHall", newHall);
         }
-        Role roleUser = roleRepository.findByName("ROLE_USER");
-        Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
+        final Role roleUser = roleRepository.findByName("ROLE_USER");
+        final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
         model.addAttribute("roleAdmin", roleAdmin.getUsers());
         model.addAttribute("roleUsers", roleUser.getUsers());
     }
+
+
 }
