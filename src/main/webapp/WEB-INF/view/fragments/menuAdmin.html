@@ -7,6 +7,18 @@
 <body>
     <div th:fragment="menu" class="col-md-2">
         <ul id="sidebar" class="nav nav-pills nav-stacked admin-sidebar well well-sm">
+
+            <li th:if="${year.openForRegistration}">
+                <a href="#closeRegistrationConfirm" class="collapsed" type="button" data-toggle="modal"
+                   data-target="#closeRegistrationConfirm"
+                   th:text="#{volunteers.admin.menu.closeRegistration}">Close registration</a>
+            </li>
+            <li th:unless="${year.openForRegistration}">
+                <a href="#openRegistration" class="collapsed" type="button" data-toggle="modal"
+                   data-target="#openRegistrationConfirm"
+                   th:text="#{volunteers.admin.menu.openRegistration}"></a>
+            </li>
+
             <li><a href="#eventsList" data-toggle="collapse" aria-expanded="true" aria-controls="eventsList">
                 <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
                 <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
@@ -34,11 +46,7 @@
             <li>
                 <a th:href="@{/admin/medals}" class="collapsed" th:text="#{volunteers.admin.menu.medals}">Medals</a>
             </li>
-            <li th:if="${year.openForRegistration}">
-                <a href="#closeRegistrationConfirm" class="collapsed" type="button" data-toggle="modal"
-                   data-target="#closeRegistrationConfirm"
-                   th:text="#{volunteers.admin.menu.closeRegistration}">Close registration</a>
-            </li>
+
             <li>
                 <a th:href="@{/admin/results}" class="collapsed" th:text="#{volunteers.admin.menu.results}">Show
                     results</a>
@@ -127,17 +135,31 @@
             </div>
         </div>
 
-        <div class="modal fade" id="closeRegistrationConfirm" tabindex="-1" role="dialog" aria-labelledby="">
+        <div class="modal fade"
+             th:id="${year.openForRegistration? 'closeRegistrationConfirm':'openRegistrationConfirm'}" tabindex="-1"
+             role="dialog" aria-labelledby="">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="closeRegistrationLabel"
-                            th:text="#{volunteers.form.closeRegistration.header}">Confirm to close registration</h4>
+                        <th:block th:if="${year.openForRegistration}">
+                            <h4 class="modal-title" id="closeRegistrationLabel"
+                                th:text="#{volunteers.form.closeRegistration.header}">Confirm to close registration</h4>
+                        </th:block>
+                        <th:block th:unless="${year.openForRegistration}">
+                            <h4 class="modal-title" id="openRegistrationLabel"
+                                th:text="#{volunteers.for.openRegistration.header}">Confirm to open registration</h4>
+                        </th:block>
+
                     </div>
                     <div class="modal-body">
-                        <label th:text="#{volunteers.form.closeRegistration.body}">Close registration?</label>
+                        <th:block th:if="${year.openForRegistration}">
+                            <label th:text="#{volunteers.form.closeRegistration.body}">Close registration?</label>
+                        </th:block>
+                        <th:block th:unless="${year.openForRegistration}">
+                            <label th:text="#{volunteers.form.openRegistration.body}">Open registration?</label>
+                        </th:block>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"

@@ -1,22 +1,9 @@
 package ru.ifmo.neerc.volunteers.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
+import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -24,39 +11,18 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
-
-import lombok.AllArgsConstructor;
-import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
-import ru.ifmo.neerc.volunteers.entity.Attendance;
-import ru.ifmo.neerc.volunteers.entity.Event;
-import ru.ifmo.neerc.volunteers.entity.Hall;
-import ru.ifmo.neerc.volunteers.entity.Medal;
-import ru.ifmo.neerc.volunteers.entity.Position;
-import ru.ifmo.neerc.volunteers.entity.PositionValue;
-import ru.ifmo.neerc.volunteers.entity.Role;
-import ru.ifmo.neerc.volunteers.entity.User;
-import ru.ifmo.neerc.volunteers.entity.UserEvent;
-import ru.ifmo.neerc.volunteers.entity.UserEventAssessment;
-import ru.ifmo.neerc.volunteers.entity.Year;
+import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
-import ru.ifmo.neerc.volunteers.repository.ApplicationFormRepository;
-import ru.ifmo.neerc.volunteers.repository.EventRepository;
-import ru.ifmo.neerc.volunteers.repository.HallRepository;
-import ru.ifmo.neerc.volunteers.repository.MedalRepository;
-import ru.ifmo.neerc.volunteers.repository.PositionRepository;
-import ru.ifmo.neerc.volunteers.repository.PositionValueRepository;
-import ru.ifmo.neerc.volunteers.repository.RoleRepository;
-import ru.ifmo.neerc.volunteers.repository.UserEventAssessmentRepository;
-import ru.ifmo.neerc.volunteers.repository.UserEventRepository;
-import ru.ifmo.neerc.volunteers.repository.UserRepository;
-import ru.ifmo.neerc.volunteers.repository.YearRepository;
+import ru.ifmo.neerc.volunteers.repository.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by Lapenok Akesej on 25.02.2017.
@@ -68,18 +34,18 @@ import ru.ifmo.neerc.volunteers.repository.YearRepository;
 @AllArgsConstructor
 public class AdminController {
 
-    YearRepository yearRepository;
-    EventRepository eventRepository;
-    PositionRepository positionRepository;
-    HallRepository hallRepository;
-    UserEventRepository userEventRepository;
-    UserRepository userRepository;
-    PositionValueRepository positionValueRepository;
-    RoleRepository roleRepository;
-    UserEventAssessmentRepository userEventAssessmentRepository;
-    MedalRepository medalRepository;
-    ApplicationFormRepository applicationFormRepository;
-    MessageSource messageSource;
+    private final YearRepository yearRepository;
+    private final EventRepository eventRepository;
+    private final HallRepository hallRepository;
+    private final UserEventRepository userEventRepository;
+    private final UserRepository userRepository;
+    private final PositionValueRepository positionValueRepository;
+    private final RoleRepository roleRepository;
+    private final UserEventAssessmentRepository userEventAssessmentRepository;
+    private final MedalRepository medalRepository;
+    private final ApplicationFormRepository applicationFormRepository;
+    private final MessageSource messageSource;
+    private final Locale local = LocaleContextHolder.getLocale();
 
     @GetMapping
     public String admin(final Model model, final Authentication authentication) {
@@ -111,9 +77,7 @@ public class AdminController {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newPosition", result);
             attributes.addFlashAttribute("newPosition", positionForm);
         } else {
-            final Position position = new Position(positionForm);
-            positionRepository.save(position);
-            final PositionValue positionValue = new PositionValue(position, year, positionForm.getValue());
+            final PositionValue positionValue = new PositionValue(positionForm, year);
             positionValueRepository.save(positionValue);
         }
         return "redirect:/admin/position";
@@ -137,8 +101,8 @@ public class AdminController {
     @RequestMapping(value = "/position/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String deletePosition(@RequestParam("id") final long id, final RedirectAttributes attributes, final Locale locale) {
-        final Position position = positionValueRepository.findOne(id).getPosition();
-        if (position.getId() != 1) {
+        final PositionValue position = positionValueRepository.findOne(id);
+        if (!position.isDef()) {
             try {
                 positionValueRepository.delete(id);
             } catch (final Exception e) {
@@ -197,14 +161,13 @@ public class AdminController {
                 return "redirect:/admin";
             }
         }
-        final Set<Position> positions = positionRepository.findAll();
-        year.setOpenForRegistration(true);
+        year.setOpenForRegistration(false);
         yearRepository.save(year);
-        if (yearOld != null) {
+        /*if (yearOld != null) {
             final Set<PositionValue> positionValuesOld = yearOld.getPositionValues();
             final Map<Long, Double> positionValueMap = new HashMap<>();
             for (final PositionValue positionValue : positionValuesOld) {
-                positionValueMap.put(positionValue.getPosition().getId(), positionValue.getValue());
+                positionValueMap.put(positionValue.getId(), positionValue.getValue());
             }
 
             final Set<PositionValue> positionValues = new HashSet<>();
@@ -221,14 +184,15 @@ public class AdminController {
                 positionValues.add(new PositionValue(position, year, 0));
             }
             positionValueRepository.save(positionValues);
-        }
+        }*/
         return "redirect:/admin/year?id=" + year.getId();
     }
 
     @RequestMapping(value = "/year/close")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String closeYear(final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
-        year.setOpenForRegistration(false);
+        year.setOpenForRegistration(!year.isOpenForRegistration());
         yearRepository.save(year);
         return "redirect:/admin/year?id=" + year.getId();
     }
@@ -278,12 +242,11 @@ public class AdminController {
         final PositionValue positionValue = findOrCreateDefaultPosition(year);
         final Hall hall = hallRepository.findOne(1L);//default hall
         final List<UserEvent> userEvents = new ArrayList<>();
-        final PositionValue finalPositionValue = positionValue;
         users.forEach(applicationForm -> {
             final UserEvent userEvent = new UserEvent();
             userEvent.setEvent(event);
             userEvent.setHall(hall);
-            userEvent.setPosition(finalPositionValue);
+            userEvent.setPosition(positionValue);
             userEvent.setUserYear(applicationForm);
             userEvent.setAttendance(Attendance.YES);
             userEvents.add(userEvent);
@@ -295,12 +258,12 @@ public class AdminController {
     private PositionValue findOrCreateDefaultPosition(final Year year) {
         PositionValue positionValue = null;
         for (final PositionValue positionValue1 : year.getPositionValues()) {
-            if (positionValue1.getPosition().isDef()) {
+            if (positionValue1.isDef()) {
                 positionValue = positionValue1;
             }
         }
         if (positionValue == null) {
-            positionValue = new PositionValue(positionRepository.findOne(1L), year, 0);
+            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "No medal", local), true, 0, year);
             positionValueRepository.save(positionValue);
         }
         return positionValue;
@@ -322,7 +285,7 @@ public class AdminController {
             ue.setUserYear(af);
             ue.setHall(reserve);
             ue.setPosition(defaultPosition);
-            ue.setAttendance(Attendance.YES );
+            ue.setAttendance(Attendance.YES);
             currentEvent.addUser(ue);
             return ue;
         }).collect(Collectors.toList()));
@@ -331,7 +294,7 @@ public class AdminController {
 
 
         final HashMap<Hall, List<UserEvent>> hallUser = new HashMap<>(
-                event.getUsers().stream().collect(Collectors.groupingBy(ue -> ue.getHall())));
+                event.getUsers().stream().collect(Collectors.groupingBy(UserEvent::getHall)));
 
         final Set<Hall> halls = year.getHalls();
         hallUser.putAll(halls.stream()
@@ -646,6 +609,4 @@ public class AdminController {
         model.addAttribute("roleAdmin", roleAdmin.getUsers());
         model.addAttribute("roleUsers", roleUser.getUsers());
     }
-
-
 }

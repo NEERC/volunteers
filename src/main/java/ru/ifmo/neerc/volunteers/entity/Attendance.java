@@ -5,6 +5,6 @@ package ru.ifmo.neerc.volunteers.entity;
  * Represents attendance of a particular user on a particular event.
  */
 public enum Attendance {
-    YES, NO, LATE, SICK
+    YES, NO, LATE, SICK, UNKNOWN
 }
 

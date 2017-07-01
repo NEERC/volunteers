@@ -28,7 +28,7 @@ public class ApplicationForm {
     private Year year;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    private Set<Position> position;
+    private Set<PositionValue> positions;
 
     private String suggestions;
 

@@ -56,7 +56,7 @@
                             <select class="form-control" th:name="p+${user.id}">
                                 <th:block th:each="position:${positions}">
                                     <option th:value="${position.id}" th:selected="${position.id}==${user.position.id}"
-                                            th:text="${position.position.name}"></option>
+                                            th:text="${position.name}"></option>
                                 </th:block>
                             </select>
                         </td>
