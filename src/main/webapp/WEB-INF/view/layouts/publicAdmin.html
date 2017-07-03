@@ -86,19 +86,18 @@
 
         var requestData = {};
         requestData[_csrf_param_name] = _csrf_token;
+        $(this).prop("checked", !this.checked);
 
         $.ajax({
             type: "POST",
             url: /*[[@{/admin/year/close}]]*/ '/admin/year/close',
             data: requestData,
             success: function () {
+                $('#registration').prop("checked", !$('#registration:checked').val());
                 console.log("success");
             },
             error: function (e) {
                 console.log("error", e);
-            },
-            done: function () {
-                console.log("done");
             }
         })
     })
