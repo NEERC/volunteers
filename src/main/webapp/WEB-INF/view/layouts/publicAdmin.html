@@ -77,5 +77,31 @@
             $('#yearForm').modal('show');
     </script>
 </th:block>
+<script th:inline="javascript">
+    $('#registration').change(function () {
+        /*<![CDATA[*/
+        var _csrf_token = /*[[${_csrf.token}]]*/ '';
+        var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
+        /*]]>*/
+
+        var requestData = {};
+        requestData[_csrf_param_name] = _csrf_token;
+
+        $.ajax({
+            type: "POST",
+            url: /*[[@{/admin/year/close}]]*/ '/admin/year/close',
+            data: requestData,
+            success: function () {
+                console.log("success");
+            },
+            error: function (e) {
+                console.log("error", e);
+            },
+            done: function () {
+                console.log("done");
+            }
+        })
+    })
+</script>
 </body>
 </html>

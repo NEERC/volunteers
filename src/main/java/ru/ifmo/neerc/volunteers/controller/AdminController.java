@@ -68,7 +68,7 @@ public class AdminController {
         return "position";
     }
 
-    @RequestMapping(value = "/position/add", method = RequestMethod.POST)
+    @PostMapping("/position/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
         final User user = getUser(authentication);
@@ -83,7 +83,7 @@ public class AdminController {
         return "redirect:/admin/position";
     }
 
-    @RequestMapping(value = "/position/values", method = RequestMethod.POST)
+    @PostMapping("/position/values")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String setPositionValues(final HttpServletRequest request, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
@@ -98,7 +98,7 @@ public class AdminController {
         return "redirect:/admin/position";
     }
 
-    @RequestMapping(value = "/position/delete")
+    @GetMapping("/position/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String deletePosition(@RequestParam("id") final long id, final RedirectAttributes attributes, final Locale locale) {
         final PositionValue position = positionValueRepository.findOne(id);
@@ -112,7 +112,7 @@ public class AdminController {
         return "redirect:/admin/position";
     }
 
-    @RequestMapping(value = "/hall/delete")
+    @GetMapping("/hall/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String deleteHall(@RequestParam("id") final long id, final RedirectAttributes attributes, final Locale locale) {
         try {
@@ -126,14 +126,14 @@ public class AdminController {
         return "redirect:/admin/hall";
     }
 
-    @RequestMapping(value = "/hall")
+    @GetMapping("/hall")
     public String hall(final Model model, final Authentication authentication) {
         setModel(model, getUser(authentication).getYear());
         model.addAttribute("title", "Halls");
         return "hall";
     }
 
-    @RequestMapping(value = "/hall/add", method = RequestMethod.POST)
+    @PostMapping("/hall/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addHall(@Valid @ModelAttribute("newHall") final Hall hall, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
         final User user = getUser(authentication);
@@ -148,7 +148,7 @@ public class AdminController {
         return "redirect:/admin/hall";
     }
 
-    @RequestMapping(value = "/year/add", method = RequestMethod.POST)
+    @PostMapping("/year/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addYear(@Valid @ModelAttribute("newYear") final Year year, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
         final Year yearOld = getUser(authentication).getYear();
@@ -188,7 +188,7 @@ public class AdminController {
         return "redirect:/admin/year?id=" + year.getId();
     }
 
-    @RequestMapping(value = "/year/close")
+    @PostMapping("/year/close")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String closeYear(final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
@@ -197,7 +197,7 @@ public class AdminController {
         return "redirect:/admin/year?id=" + year.getId();
     }
 
-    @RequestMapping(value = "/year")
+    @GetMapping("/year")
     public String showYear(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
         final User user = getUser(authentication);
 
@@ -218,7 +218,7 @@ public class AdminController {
         return "year";
     }
 
-    @RequestMapping(value = "/event/add")
+    @PostMapping("/event/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addEvent(@Valid @ModelAttribute("newEvent") final Event event, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
         final User user = getUser(authentication);
@@ -269,7 +269,8 @@ public class AdminController {
         return positionValue;
     }
 
-    @RequestMapping(value = "event")
+    @GetMapping("event")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String event(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
         final Event currentEvent = eventRepository.findOne(id);
@@ -308,7 +309,7 @@ public class AdminController {
         return "showEvent";
     }
 
-    @RequestMapping(value = "/event/edit")
+    @GetMapping("/event/edit")
     public String editEvent(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
         final Event event = eventRepository.findOne(id);
@@ -318,7 +319,7 @@ public class AdminController {
         return "event";
     }
 
-    @RequestMapping(value = "/event/save")
+    @PostMapping("/event/save")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String save(final HttpServletRequest request) {
         final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
@@ -347,7 +348,7 @@ public class AdminController {
         return "redirect:/admin/event?id=" + event.getId();
     }
 
-    @RequestMapping(value = "/event/copy")
+    @PostMapping("/event/copy")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String copy(final HttpServletRequest request) {
         final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
@@ -381,7 +382,7 @@ public class AdminController {
         return "redirect:/admin/event/?id=" + event.getId();
     }
 
-    @RequestMapping(value = "/add")
+    @PostMapping("/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addAdmin(final HttpServletRequest request) {
         final Long id = Long.parseLong(request.getParameter("newAdmin"));
@@ -392,7 +393,7 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    @RequestMapping(value = "/event/attendance", method = RequestMethod.GET)
+    @GetMapping("/event/attendance")
     public String attendance(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
         model.addAttribute("attendances", Attendance.values());
@@ -400,7 +401,7 @@ public class AdminController {
         return "showEvent";
     }
 
-    @RequestMapping(value = "/event/assessments", method = RequestMethod.GET)
+    @GetMapping("/event/assessments")
     public String assessments(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
         final Event event = eventRepository.findOne(id);
@@ -414,7 +415,7 @@ public class AdminController {
         return "showEvent";
     }
 
-    @RequestMapping(value = "/event/assessments", method = RequestMethod.POST)
+    @PostMapping("/event/assessments")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String setAssessments(final HttpServletRequest request) {
         final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
@@ -452,7 +453,7 @@ public class AdminController {
         return "redirect:/admin/event?id=" + request.getParameter("event");
     }
 
-    @RequestMapping(value = "/event/assessments/add", method = RequestMethod.POST)
+    @PostMapping("/event/assessments/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addAttendance(@Valid @ModelAttribute("newAssessment") final UserEventAssessment assessment, final BindingResult result, final RedirectAttributes attributes, final HttpServletRequest request) {
         if (result.hasErrors()) {
@@ -464,7 +465,7 @@ public class AdminController {
         return "redirect:/admin/event/assessments?id=" + request.getParameter("event");
     }
 
-    @RequestMapping(value = "/event/attendance", method = RequestMethod.POST)
+    @PostMapping("/event/attendance")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String setAttendance(final HttpServletRequest request) {
         final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
@@ -480,7 +481,7 @@ public class AdminController {
         return "redirect:/admin/event?id=" + request.getParameter("event");
     }
 
-    @RequestMapping(value = "/medals")
+    @GetMapping(value = "/medals")
     public String medals(final Model model, final Authentication authentication) {
         setModel(model, getUser(authentication).getYear());
         model.addAttribute("medals", medalRepository.findAll());
@@ -490,7 +491,7 @@ public class AdminController {
         return "medals";
     }
 
-    @RequestMapping(value = "/medals/add", method = RequestMethod.POST)
+    @PostMapping("/medals/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addMedals(@Valid @ModelAttribute("newMedal") final Medal medal, final BindingResult result, final RedirectAttributes attributes) {
         if (result.hasErrors()) {
@@ -502,14 +503,14 @@ public class AdminController {
         return "redirect:/admin/medals";
     }
 
-    @RequestMapping(value = "/medals/delete")
+    @GetMapping("/medals/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String deleteMedal(@RequestParam("id") final long id) {
         medalRepository.delete(id);
         return "redirect:/admin/medals";
     }
 
-    @RequestMapping(value = "/results", method = RequestMethod.GET)
+    @GetMapping("/results")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String showResults(final Model model, final Authentication authentication, final Locale locale) {
         final Year year = getUser(authentication).getYear();
