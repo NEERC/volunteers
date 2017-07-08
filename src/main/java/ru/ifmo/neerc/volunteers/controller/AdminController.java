@@ -16,6 +16,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
+import ru.ifmo.neerc.volunteers.modal.JsonResponse;
+import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,11 +53,11 @@ public class AdminController {
     public String admin(final Model model, final Authentication authentication) {
         final User user = getUser(authentication);
         if (user.getYear() != null) {
-            return "redirect:/admin/year?id=" + user.getYear().getId();
+            return "redirect:/admin/year/" + user.getYear().getId();
         }
         final List<Year> years = yearRepository.findAll();
         if (years.size() != 0) {
-            return "redirect:/admin/year?id=" + years.get(years.size() - 1).getId();
+            return "redirect:/admin/year/" + years.get(years.size() - 1).getId();
         }
         setModel(model, null);
         return "admin";
@@ -70,17 +72,23 @@ public class AdminController {
 
     @PostMapping("/position/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
-        final User user = getUser(authentication);
-        final Year year = user.getYear();
+    public @ResponseBody
+    JsonResponse addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, /*final RedirectAttributes attributes,*/ final Authentication authentication) {
+        JsonResponse response = new JsonResponse();
         if (result.hasErrors()) {
-            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newPosition", result);
-            attributes.addFlashAttribute("newPosition", positionForm);
+            response.setStatus(Status.FAIL);
+            response.setResult(result.getAllErrors());
+            /*attributes.addFlashAttribute("org.springframework.validation.BindingResult.newPosition", result);
+            attributes.addFlashAttribute("newPosition", positionForm);*/
         } else {
+            final User user = getUser(authentication);
+            final Year year = user.getYear();
             final PositionValue positionValue = new PositionValue(positionForm, year);
             positionValueRepository.save(positionValue);
+            response.setStatus(Status.OK);
+            response.setResult(positionValue);
         }
-        return "redirect:/admin/position";
+        return response;
     }
 
     @PostMapping("/position/values")
@@ -98,23 +106,23 @@ public class AdminController {
         return "redirect:/admin/position";
     }
 
-    @GetMapping("/position/delete")
+    @GetMapping("/position/{id}/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deletePosition(@RequestParam("id") final long id, final RedirectAttributes attributes, final Locale locale) {
+    public String deletePosition(@PathVariable final long id, final RedirectAttributes attributes) {
         final PositionValue position = positionValueRepository.findOne(id);
         if (!position.isDef()) {
             try {
                 positionValueRepository.delete(id);
             } catch (final Exception e) {
-                attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", locale));
+                attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", local));
             }
         }
         return "redirect:/admin/position";
     }
 
-    @GetMapping("/hall/delete")
+    @GetMapping("/hall/{id}/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deleteHall(@RequestParam("id") final long id, final RedirectAttributes attributes, final Locale locale) {
+    public String deleteHall(@PathVariable final long id, final RedirectAttributes attributes, final Locale locale) {
         try {
             if (id != 1L) {
                 hallRepository.delete(id);
@@ -156,7 +164,7 @@ public class AdminController {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newYear", result);
             attributes.addFlashAttribute("newYear", year);
             if (yearOld != null) {
-                return "redirect:/admin/year?id=" + yearOld.getId();
+                return "redirect:/admin/year/" + yearOld.getId();
             } else {
                 return "redirect:/admin";
             }
@@ -185,20 +193,21 @@ public class AdminController {
             }
             positionValueRepository.save(positionValues);
         }*/
-        return "redirect:/admin/year?id=" + year.getId();
+        return "redirect:/admin/year/" + year.getId();
     }
 
     @PostMapping("/year/close")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String closeYear(final Authentication authentication) {
-        final Year year = getUser(authentication).getYear();
-        year.setOpenForRegistration(!year.isOpenForRegistration());
+    public String closeYear(@RequestParam final long id, @RequestParam final boolean isOpen) {
+
+        final Year year = yearRepository.findOne(id);
+        year.setOpenForRegistration(isOpen);
         yearRepository.save(year);
-        return "redirect:/admin/year?id=" + year.getId();
+        return "redirect:/admin/year/" + year.getId();
     }
 
-    @GetMapping("/year")
-    public String showYear(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+    @GetMapping("/year/{id}")
+    public String showYear(@PathVariable final long id, final Model model, final Authentication authentication) {
         final User user = getUser(authentication);
 
         final Year year = yearRepository.findOne(id);
@@ -231,7 +240,7 @@ public class AdminController {
             if (year != null) {
                 attributes.addFlashAttribute("org.springframework.validation.BindingResult.newEvent", result);
                 attributes.addFlashAttribute("newEvent", event);
-                return "redirect:/admin/year?id=" + year.getId();
+                return "redirect:/admin/year/" + year.getId();
             } else {
                 return "redirect:/admin";
             }

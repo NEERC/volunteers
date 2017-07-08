@@ -1,5 +1,7 @@
 package ru.ifmo.neerc.volunteers.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Data
 @RequiredArgsConstructor
+@JsonIgnoreProperties(value = {"year"})
 public class PositionValue {
 
     @Id
@@ -35,6 +38,7 @@ public class PositionValue {
 
     @ManyToOne
     @NonNull
+    @JsonIgnore
     private Year year;
 
     public PositionValue(PositionForm positionForm, Year year) {
