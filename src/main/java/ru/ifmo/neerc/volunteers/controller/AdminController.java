@@ -106,18 +106,26 @@ public class AdminController {
         return "redirect:/admin/position";
     }
 
-    @GetMapping("/position/{id}/delete")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deletePosition(@PathVariable final long id, final RedirectAttributes attributes) {
+    @PostMapping("/position/delete")
+    //@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public @ResponseBody
+    JsonResponse deletePosition(@RequestParam final long id) {
         final PositionValue position = positionValueRepository.findOne(id);
-        if (!position.isDef()) {
+        JsonResponse result = new JsonResponse();
+        if (position != null && !position.isDef()) {
             try {
                 positionValueRepository.delete(id);
+                result.setStatus(Status.OK);
+                result.setResult("");
             } catch (final Exception e) {
-                attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", local));
+                result.setStatus(Status.FAIL);
+                result.setResult(messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", local));
             }
+        } else {
+            result.setStatus(Status.FAIL);
+            result.setResult("Error!!!");
         }
-        return "redirect:/admin/position";
+        return result;
     }
 
     @GetMapping("/hall/{id}/delete")

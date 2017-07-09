@@ -19,7 +19,7 @@
                     </thead>
                     <tbody>
                             <th:block th:each="position : ${positions}">
-                                <tr>
+                                <tr th:id="${position.id}">
                                     <td>
                                         <label th:text="${position.name}" th:for="position+${position.id}">
                                         </label>
@@ -29,7 +29,7 @@
                                     </td>
                                     <td>
                                         <a th:unless="${position.def}"
-                                           th:href="@{'/admin/position/'+${position.id}+'/delete/'}"
+                                           th:onclick="'deletePosition('+${position.id}+'); return false;'"
                                            class="btn btn-default" role="button"
                                            th:text="#{volunteers.form.button.delete}">Delete</a>
                                         <a th:if="${position.def}" class="btn btn-default" role="button"
@@ -120,9 +120,9 @@
                                 if (data.status === "OK") {
                                     var path = /*[[@{/admin/position/}]]*/"/admin/position/add/";
                                     var note = /*[[#{volunteers.form.button.delete}]]*/'Delete';
-                                    var str = '<tr><td><label for="position' + data.result.id + '">' + data.result.name + '</label></td>' +
+                                    var str = '<tr id="' + data.result.id + '"><td><label for="position' + data.result.id + '">' + data.result.name + '</label></td>' +
                                         '<td><input type="number" step="any" class="form-control" min="0" id="position' + data.result.id + '" name="v' + data.result.id + '" value="' + data.result.value + '"/></td>' +
-                                        '<td><a class="btn btn-default" role="button" href="' + path + data.result.id + '/delete/">' + note + '</a></td>' +
+                                        '<td><a class="btn btn-default" role="button" onclick="deletePosition(' + data.result.id + '); return false;">' + note + '</a></td>' +
                                         '</tr>';
                                     $("#positions tbody").find("tr:last").before(str);
                                     $("#positionForm").modal("hide");
@@ -135,6 +135,31 @@
                     }
                 })
             });
+
+            function deletePosition(id) {
+                var data = {
+                    'id': id
+                };
+                /*<![CDATA[*/
+                var _csrf_token = /*[[${_csrf.token}]]*/ '';
+                var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
+                /*]]>*/
+                data[_csrf_param_name] = _csrf_token;
+                $.ajax({
+                    type: "post",
+                    data: data,
+                    url: /*[[@{/admin/position/delete/}]]*/"/admin/position/delete/",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.status === "OK") {
+                            $("#" + id).remove();
+                        }
+                        else {
+                            alert(data.result);
+                        }
+                    }
+                })
+            }
         </script>
     </div>
 
