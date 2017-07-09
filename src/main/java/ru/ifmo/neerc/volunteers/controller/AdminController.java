@@ -91,23 +91,7 @@ public class AdminController {
         return response;
     }
 
-    @PostMapping("/position/values")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String setPositionValues(final HttpServletRequest request, final Authentication authentication) {
-        final Year year = getUser(authentication).getYear();
-        final Set<PositionValue> positionValues = year.getPositionValues();
-        for (final PositionValue positionValue : positionValues) {
-            final Double value = Double.parseDouble(request.getParameter("v" + positionValue.getId()));
-            if (positionValue.getValue() != value) {
-                positionValue.setValue(value);
-                positionValueRepository.save(positionValue);
-            }
-        }
-        return "redirect:/admin/position";
-    }
-
     @PostMapping("/position/value")
-    //@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse setPositionValue(@RequestParam final long id, @RequestParam final double value) {
         JsonResponse response = new JsonResponse();

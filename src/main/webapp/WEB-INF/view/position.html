@@ -10,12 +10,11 @@
             <div class="has-error form-group" th:if="${message!=null}">
                 <label th:text="${message}" class="help-block"></label>
             </div>
-
-            <!--            <form th:action="@{/admin/position/values}" method="post" id="formPositions">-->
                 <table class="table table-hover" id="positions">
                     <thead>
                     <th th:text="#{volunteers.position.name}">Position</th>
-                    <th th:text="#{volunteers.position.value}">Value</th>
+                    <th th:text="#{volunteers.position.value}" class="text-center">Value</th>
+                    <th></th>
                     </thead>
                     <tbody>
                             <th:block th:each="position : ${positions}">
@@ -43,18 +42,12 @@
                                 </tr>
                             </th:block>
                             <tr>
-                                <td></td>
-                                <td>
-                                    <a href="#" data-toggle="modal" data-target="#positionForm" class="btn btn-default"
-                                       role="button" th:text="#{volunteers.hall.button.add}">Add</a>
-                                    <!--<button type="submit" class="btn btn-primary"
-                                            th:text="#{volunteers.form.button.save}"></button>-->
-                                </td>
+                                <td colspan="3" class="text-center">
+                                    <a href="#" data-toggle="modal" data-target="#positionForm" class="btn btn-default "
+                                       role="button" th:text="#{volunteers.hall.button.add}">Add</a></td>
                             </tr>
                     </tbody>
                 </table>
-
-            <!--</form>-->
         </div>
             <!-- Modal -->
         <div class="modal fade" id="positionForm" tabindex="-1" role="dialog" aria-labelledby="positionLabel">
