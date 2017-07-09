@@ -11,7 +11,7 @@
                 <label th:text="${message}" class="help-block"></label>
             </div>
 
-            <form th:action="@{/admin/position/values}" method="post" id="formPositions">
+            <!--            <form th:action="@{/admin/position/values}" method="post" id="formPositions">-->
                 <table class="table table-hover" id="positions">
                     <thead>
                     <th th:text="#{volunteers.position.name}">Position</th>
@@ -25,7 +25,12 @@
                                         </label>
                                     </td>
                                     <td>
-                                        <input type="number" step="any" class="form-control" th:value="${position.value}" th:id="position+${position.id}" th:name="v+${position.id}" min="0"/>
+                                        <input type="number" step="any" class="form-control"
+                                               th:value="${position.value}" th:id="position+${position.id}"
+                                               th:name="v+${position.id}" min="0"
+                                               th:onblur="'changePositionValue('+${position.id}+', this.value);'"/>
+                                        <input type="hidden" th:value="${position.value}"
+                                               th:id="originValue+${position.id}"/>
                                     </td>
                                     <td>
                                         <a th:unless="${position.def}"
@@ -42,14 +47,14 @@
                                 <td>
                                     <a href="#" data-toggle="modal" data-target="#positionForm" class="btn btn-default"
                                        role="button" th:text="#{volunteers.hall.button.add}">Add</a>
-                                    <button type="submit" class="btn btn-primary"
-                                            th:text="#{volunteers.form.button.save}"></button>
+                                    <!--<button type="submit" class="btn btn-primary"
+                                            th:text="#{volunteers.form.button.save}"></button>-->
                                 </td>
                             </tr>
                     </tbody>
                 </table>
 
-            </form>
+            <!--</form>-->
         </div>
             <!-- Modal -->
         <div class="modal fade" id="positionForm" tabindex="-1" role="dialog" aria-labelledby="positionLabel">
@@ -89,6 +94,10 @@
             </div>
         </div>
         <script th:inline="javascript">
+            /*<![CDATA[*/
+            var _csrf_token = /*[[${_csrf.token}]]*/ '';
+            var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
+            /*]]>*/
             $(function () {
                 $('#position').validate({
                     rules: {
@@ -110,7 +119,7 @@
                     },
                     submitHandler: function (form) {
                         var str = $(form).serialize();
-                        alert(str);
+                        console.log(str);
                         $.ajax({
                             type: "post",
                             data: str,
@@ -121,15 +130,17 @@
                                     var path = /*[[@{/admin/position/}]]*/"/admin/position/add/";
                                     var note = /*[[#{volunteers.form.button.delete}]]*/'Delete';
                                     var str = '<tr id="' + data.result.id + '"><td><label for="position' + data.result.id + '">' + data.result.name + '</label></td>' +
-                                        '<td><input type="number" step="any" class="form-control" min="0" id="position' + data.result.id + '" name="v' + data.result.id + '" value="' + data.result.value + '"/></td>' +
+                                        '<td><input type="number" step="any" class="form-control" min="0" id="position' + data.result.id + '" name="v' + data.result.id + '" value="' + data.result.value + '" onblur="changePositionValue(' + data.result.id + ', this.value);"/></td>' +
+                                        '<input type="hidden" id="originValue' + data.result.value + '" value="' + data.result.value + '" />' +
                                         '<td><a class="btn btn-default" role="button" onclick="deletePosition(' + data.result.id + '); return false;">' + note + '</a></td>' +
                                         '</tr>';
                                     $("#positions tbody").find("tr:last").before(str);
                                     $("#positionForm").modal("hide");
+                                    form.reset();
                                 }
                                 if (data.status === "FAIL") {
                                 }
-                                alert("success");
+                                console.log("success");
                             }
                         });
                     }
@@ -140,10 +151,6 @@
                 var data = {
                     'id': id
                 };
-                /*<![CDATA[*/
-                var _csrf_token = /*[[${_csrf.token}]]*/ '';
-                var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
-                /*]]>*/
                 data[_csrf_param_name] = _csrf_token;
                 $.ajax({
                     type: "post",
@@ -153,12 +160,39 @@
                     success: function (data) {
                         if (data.status === "OK") {
                             $("#" + id).remove();
+                            console.log("success");
                         }
                         else {
                             alert(data.result);
                         }
                     }
                 })
+            }
+
+            function changePositionValue(id, value) {
+                console.log(id + " " + value);
+                if ($("#originValue" + id).val() !== value) {
+                    var data = {
+                        'id': id,
+                        'value': value
+                    };
+                    data[_csrf_param_name] = _csrf_token;
+                    $.ajax({
+                        type: "post",
+                        data: data,
+                        url: /*[[@{/admin/position/value/}]]*/"/admin/position/value",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.status === "OK") {
+                                $("#originValue" + id).val(value);
+                                console.log("success");
+                            }
+                            else {
+                                console.log("ERROR!!", data);
+                            }
+                        }
+                    })
+                }
             }
         </script>
     </div>

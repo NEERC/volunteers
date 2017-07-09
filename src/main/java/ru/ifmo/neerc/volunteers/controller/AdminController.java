@@ -106,6 +106,25 @@ public class AdminController {
         return "redirect:/admin/position";
     }
 
+    @PostMapping("/position/value")
+    //@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public @ResponseBody
+    JsonResponse setPositionValue(@RequestParam final long id, @RequestParam final double value) {
+        JsonResponse response = new JsonResponse();
+        try {
+            PositionValue positionValue = positionValueRepository.findOne(id);
+            if (positionValue.getValue() != value) {
+                positionValue.setValue(value);
+                positionValueRepository.save(positionValue);
+            }
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+        }
+        return response;
+
+    }
+
     @PostMapping("/position/delete")
     //@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
