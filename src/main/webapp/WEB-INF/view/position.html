@@ -120,7 +120,6 @@
                             dataType: "json",
                             success: function (data) {
                                 if (data.status === "OK") {
-                                    var path = /*[[@{/admin/position/}]]*/"/admin/position/add/";
                                     var note = /*[[#{volunteers.form.button.delete}]]*/'Delete';
                                     var str = '<tr id="' + data.result.id + '"><td><label for="position' + data.result.id + '">' + data.result.name + '</label></td>' +
                                         '<td><input type="number" step="any" class="form-control" min="0" id="position' + data.result.id + '" name="v' + data.result.id + '" value="' + data.result.value + '" onblur="changePositionValue(' + data.result.id + ', this.value);"/></td>' +
@@ -182,7 +181,12 @@
                             }
                             else {
                                 console.log("ERROR!!", data);
+                                $("#position" + id).val($("#originValue" + id).val());
                             }
+                        },
+                        error: function (data) {
+                            console.log("ERROR!!", data);
+                            $("#position" + id).val($("#originValue" + id).val());
                         }
                     })
                 }

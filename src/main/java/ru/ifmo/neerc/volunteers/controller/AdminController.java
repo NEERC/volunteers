@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.*;
+import ru.ifmo.neerc.volunteers.form.HallForm;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
 import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
@@ -131,18 +132,24 @@ public class AdminController {
         return result;
     }
 
-    @GetMapping("/hall/{id}/delete")
+    @PostMapping("/hall/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deleteHall(@PathVariable final long id, final RedirectAttributes attributes, final Locale locale) {
+    public @ResponseBody
+    JsonResponse deleteHall(@RequestParam final long id, final RedirectAttributes attributes, final Locale locale) {
+        JsonResponse response = new JsonResponse();
         try {
-            if (id != 1L) {
+            if (!hallRepository.findOne(id).isDef()) {
                 hallRepository.delete(id);
+                response.setStatus(Status.OK);
+            } else {
+                response.setStatus(Status.FAIL);
             }
         } catch (final Exception e) {
             final Hall hall = hallRepository.findOne(id);
-            attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.hall.error.delete", new Object[]{hall.getName()}, "Error to delete hall", locale));
+            response.setStatus(Status.FAIL);
+            response.setResult(messageSource.getMessage("volunteers.hall.error.delete", new Object[]{hall.getName()}, "Error to delete hall", locale));
         }
-        return "redirect:/admin/hall";
+        return response;
     }
 
     @GetMapping("/hall")
@@ -152,19 +159,48 @@ public class AdminController {
         return "hall";
     }
 
+    @PostMapping("hall/edit")
+    public @ResponseBody
+    JsonResponse editHall(@RequestParam final long id, @RequestParam final String name, @RequestParam final String description) {
+        JsonResponse response = new JsonResponse();
+        try {
+            Hall hall = hallRepository.findOne(id);
+            boolean isChanged = false;
+            if (!description.isEmpty() && !hall.getDescription().equals(description)) {
+                hall.setDescription(description);
+                isChanged = true;
+            }
+            if (!name.isEmpty() && !hall.getName().equals(name)) {
+                hall.setName(name);
+                isChanged = true;
+            }
+            if (isChanged) {
+                hallRepository.save(hall);
+            }
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
+        }
+        return response;
+    }
+
     @PostMapping("/hall/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addHall(@Valid @ModelAttribute("newHall") final Hall hall, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
-        final User user = getUser(authentication);
-        final Year year = user.getYear();
+    public @ResponseBody
+    JsonResponse addHall(@Valid @ModelAttribute("newHall") final HallForm hall, final BindingResult result, final Authentication authentication) {
+        JsonResponse response = new JsonResponse();
         if (result.hasErrors()) {
-            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newHall", result);
-            attributes.addFlashAttribute("newHall", hall);
+            response.setStatus(Status.FAIL);
+            response.setResult(result.getAllErrors());
         } else {
-            hall.setYear(year);
-            hallRepository.save(hall);
+            final Year year = getUser(authentication).getYear();
+            Hall newHall = new Hall(hall, year);
+            hallRepository.save(newHall);
+            response.setStatus(Status.OK);
+            response.setResult(newHall);
         }
-        return "redirect:/admin/hall";
+        return response;
     }
 
     @PostMapping("/year/add")
@@ -260,7 +296,7 @@ public class AdminController {
         final Set<ApplicationForm> users = year.getUsers();
         event.setUsers(new HashSet<>());
         final PositionValue positionValue = findOrCreateDefaultPosition(year);
-        final Hall hall = hallRepository.findOne(1L);//default hall
+        final Hall hall = findOrCreateDefaultHall(year);
         final List<UserEvent> userEvents = new ArrayList<>();
         users.forEach(applicationForm -> {
             final UserEvent userEvent = new UserEvent();
@@ -283,10 +319,23 @@ public class AdminController {
             }
         }
         if (positionValue == null) {
-            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "No medal", local), true, 0, year);
+            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "Reserve", local), true, 0, year);
             positionValueRepository.save(positionValue);
         }
         return positionValue;
+    }
+
+    private Hall findOrCreateDefaultHall(final Year year) {
+        Hall hall = null;
+        for (final Hall hall1 : year.getHalls()) {
+            if (hall1.isDef())
+                hall = hall1;
+        }
+        if (hall == null) {
+            hall = new Hall(messageSource.getMessage("volunteers.reserve.hall", null, "Reserve", local), true, "", year);
+            hallRepository.save(hall);
+        }
+        return hall;
     }
 
     @GetMapping("event")
@@ -297,7 +346,7 @@ public class AdminController {
         setModel(model, year);
         final Set<ApplicationForm> yearUsers = new HashSet<>(year.getUsers());
         yearUsers.removeAll(currentEvent.getUsers().stream().map(UserEvent::getUserYear).collect(Collectors.toSet()));
-        final Hall reserve = hallRepository.findOne(1L);
+        final Hall reserve = findOrCreateDefaultHall(year);
 
         final PositionValue defaultPosition = findOrCreateDefaultPosition(year);
 
@@ -604,9 +653,7 @@ public class AdminController {
         if (year != null) {
             model.addAttribute("events", year.getEvents());
             model.addAttribute("positions", year.getPositionValues());
-            final Set<Hall> halls = year.getHalls();
-            halls.add(hallRepository.findOne(1L));
-            model.addAttribute("halls", halls);
+            model.addAttribute("halls", year.getHalls());
         } else {
             model.addAttribute("events", Collections.EMPTY_LIST);
             model.addAttribute("positions", Collections.EMPTY_LIST);
@@ -621,9 +668,7 @@ public class AdminController {
             model.addAttribute("newPosition", new PositionForm());
         }
         if (!model.containsAttribute("newHall")) {
-            final Hall newHall = new Hall();
-            newHall.setYear(year);
-            model.addAttribute("newHall", newHall);
+            model.addAttribute("newHall", new HallForm());
         }
         final Role roleUser = roleRepository.findByName("ROLE_USER");
         final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
