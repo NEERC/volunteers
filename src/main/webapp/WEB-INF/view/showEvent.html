@@ -58,7 +58,7 @@
                             <td>
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" th:id="'assessment'+${a.id}"
+                                        <input type="checkbox" th:id="'assessment'+${a.id}+'hall'"
                                                onclick="selectAll(this)"/>
                                         <span th:text="#{volunteers.event.form.selectAll}">Select all</span>
                                     </label>
@@ -72,7 +72,7 @@
                         <td th:text="${hall.name}" th:rowspan="${hallUser.get(hall).size()+1}"></td>
                         <td colspan="2" th:if="${assessment} or ${attendance}"></td>
                         <td th:if="${attendance}">
-                            <select class="form-control" onchange="selectAll(this)" th:id="hall+${hall.id}">
+                            <select class="form-control" onchange="selectAll(this)" th:id="hall+${hall.id}+'_'">
                                 <option disabled="disabled" selected="selected" value=""></option>
                                 <th:block th:each="att:${attendances}">
                                     <option th:text="${attendanceMap.get(att)}" th:value="${att.name()}"></option>
@@ -84,7 +84,7 @@
                                 <div class="checkbox">
                                     <label>
                                         <input type="checkbox" onclick="selectAll(this)"
-                                               th:id="'assessment'+${a.id}+'hall'+${hall.id}"/>
+                                               th:id="'assessment'+${a.id}+'hall'+${hall.id}+'_'"/>
                                         <span th:text="#{volunteers.event.form.selectAllForHall}">
                                         Select all from hall</span>
                                     </label>
@@ -96,8 +96,9 @@
                         <td th:text="${user.userYear.user.badgeName}"></td>
                         <td th:text="${user.position.name}">name position</td>
                         <td th:if="${attendance}">
-                            <select class="form-control" th:name="'attendance'+${user.id}"
-                                    th:id="'hall'+${hall.id}+'_'+${user.id}">
+                            <select class="form-control" th:name="${user.id}"
+                                    th:id="'hall'+${hall.id}+'_'+${user.id}"
+                                    th:onchange="'save('+${user.id}+', this.value)'">
                                 <th:block th:if="${user.attendance}==null">
                                     <option selected="selected" th:value="" disabled="disabled"></option>
                                 </th:block>
@@ -107,14 +108,15 @@
                                 </th:block>
                             </select>
                         </td>
-                    <td th:unless="${attendance} or ${assessment}" th:text="${attendanceMap.get(user.attendance)}"></td>
+                        <td th:unless="${attendance} or ${assessment}"
+                            th:text="${attendanceMap.get(user.attendance)}"></td>
                         <th:block th:if="${assessment}" th:each="a: ${assessments}">
                             <td>
                                 <div class="checkbox">
                                     <label>
                                         <input type="checkbox" th:name="'assessment'+${a.id}+'user'+${user.id}"
                                                th:value="${a.id}" th:checked="${user.assessments.contains(a)}"
-                                               th:id="'assessment'+${a.id}+'hall'+${hall.id}"/>
+                                               th:id="'assessment'+${a.id}+'hall'+${hall.id}+'_'"/>
                                     </label>
                                 </div>
                             </td>
@@ -128,10 +130,6 @@
 
         </div>
         <div class="text-center">
-            <th:block th:if="${attendance}">
-                <input class="btn btn-primary" role="button" type="submit" value="Save attendance"
-                       th:value="#{volunteers.event.button.saveAttendance}"/>
-            </th:block>
             <th:block th:if="${assessments}">
                 <input class="btn btn-primary" role="button" type="submit" value="Save assessments"/>
                 <button type="button" class="btn btn-default" data-toggle="modal"
@@ -142,7 +140,7 @@
             <th:block th:unless="${assessments} or ${attendance}">
                 <a th:href="@{'/admin/event/edit?id='+${event.id}}" class="btn btn-default"
                    role="button" th:text="#{volunteers.event.button.edit}">Edit</a>
-                <a th:href="@{'/admin/event/attendance?id='+${event.id}}" class="btn btn-default"
+                <a th:href="@{'/admin/event/'+${event.id}+'/attendance/'}" class="btn btn-default"
                    role="button" th:text="#{volunteers.event.button.editAttendance}">Set attendance</a>
                 <a th:href="@{'/admin/event/assessments?id='+${event.id}}" class="btn btn-default"
                    role="button" th:text="#{volunteers.event.button.editAssessments}">Set assessments</a>
@@ -191,9 +189,53 @@
             </div>
         </div>
     </th:block>
-    <th:block th:if="${attendance} or ${assessments}">
+    <th:block th:if="${assessments}">
         <script th:src="@{/js/showEvent.js}"/>
     </th:block>
+    <script th:if="${attendance}" th:inline="javascript">
+        /*<![CDATA[*/
+        var _csrf_token = /*[[${_csrf.token}]]*/ '';
+        var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
+
+        /*]]>*/
+        function save(id, value) {
+            if (id === "")
+                return;
+            console.log(id + " " + value);
+            var data = {
+                'id': id,
+                'value': value
+            };
+            data[_csrf_param_name] = _csrf_token;
+            $.ajax({
+                type: "post",
+                data: data,
+                url: /*[[@{/admin/event/attendance/}]]*/"/admin/event/attendance/",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status === "OK") {
+                        console.log("success");
+                    } else {
+                        alert(data.result);
+                    }
+                }
+            })
+        }
+
+        function selectAll(source) {
+            var name = source.id;
+            var type = source.localName;
+            var selectors = $(type + "[id^='" + name + "']");
+            //<![CDATA[
+            for (var i = 0; i < selectors.length; i++) {
+                if ($(selectors[i]).val() !== $(source).val()) {
+                    $(selectors[i]).val($(source).val());
+                    save(selectors[i].name, source.value);
+                }
+            }
+            //]]>
+        }
+    </script>
 </div>
 </body>
 </html>

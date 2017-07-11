@@ -29,7 +29,7 @@
                 <ul class="collapse in" id="eventsList">
                     <th:block th:each="event : ${events}">
                         <li>
-                            <a th:href="@{'/admin/event?id='+${event.id}}" th:text="${event.name}"></a>
+                            <a th:href="@{'/admin/event/'+${event.id}+'/'}" th:text="${event.name}"></a>
                         </li>
                     </th:block>
                 </ul>

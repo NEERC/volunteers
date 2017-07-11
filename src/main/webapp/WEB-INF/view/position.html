@@ -153,8 +153,7 @@
                         if (data.status === "OK") {
                             $("#" + id).remove();
                             console.log("success");
-                        }
-                        else {
+                        } else {
                             alert(data.result);
                         }
                     }
@@ -178,8 +177,7 @@
                             if (data.status === "OK") {
                                 $("#originValue" + id).val(value);
                                 console.log("success");
-                            }
-                            else {
+                            } else {
                                 console.log("ERROR!!", data);
                                 $("#position" + id).val($("#originValue" + id).val());
                             }

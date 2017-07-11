@@ -337,9 +337,9 @@ public class AdminController {
         return hall;
     }
 
-    @GetMapping("event")
+    @GetMapping("event/{id}")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String event(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+    public String event(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
         final Event currentEvent = eventRepository.findOne(id);
         setModel(model, year);
@@ -416,7 +416,7 @@ public class AdminController {
             }
         }
         userEventRepository.save(forSave);
-        return "redirect:/admin/event?id=" + event.getId();
+        return "redirect:/admin/event/" + event.getId() + "/";
     }
 
     @PostMapping("/event/copy")
@@ -464,8 +464,8 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    @GetMapping("/event/attendance")
-    public String attendance(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+    @GetMapping("/event/{id}/attendance")
+    public String attendance(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
         model.addAttribute("attendances", Attendance.values());
         model.addAttribute("attendance", true);
@@ -521,7 +521,7 @@ public class AdminController {
         if (!users.isEmpty()) {
             userEventRepository.save(users);
         }
-        return "redirect:/admin/event?id=" + request.getParameter("event");
+        return "redirect:/admin/event/" + request.getParameter("event") + "/";
     }
 
     @PostMapping("/event/assessments/add")
@@ -538,18 +538,19 @@ public class AdminController {
 
     @PostMapping("/event/attendance")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String setAttendance(final HttpServletRequest request) {
-        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        final Set<UserEvent> users = new HashSet<>();
-        for (final UserEvent user : event.getUsers()) {
-            final String val = request.getParameter("attendance" + user.getId());
-            if (!val.equals("NONE")) {
-                user.setAttendance(Attendance.valueOf(val));
-                users.add(user);
-            }
+    public @ResponseBody
+    JsonResponse setAttendance(@RequestParam final long id, @RequestParam final String value) {
+        JsonResponse response = new JsonResponse();
+        try {
+            UserEvent user = userEventRepository.findOne(id);
+            user.setAttendance(Attendance.valueOf(value));
+            userEventRepository.save(user);
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
         }
-        userEventRepository.save(users);
-        return "redirect:/admin/event?id=" + request.getParameter("event");
+        return response;
     }
 
     @GetMapping(value = "/medals")
