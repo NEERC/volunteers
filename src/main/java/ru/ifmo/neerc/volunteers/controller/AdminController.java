@@ -363,6 +363,8 @@ public class AdminController {
 
         final HashMap<Hall, List<UserEvent>> hallUser = new HashMap<>(
                 event.getUsers().stream().collect(Collectors.groupingBy(UserEvent::getHall)));
+        hallUser.forEach((u, v) -> v.sort(Comparator.comparing(lst -> lst.getPosition().getName())));
+
 
         final Set<Hall> halls = year.getHalls();
         hallUser.putAll(halls.stream()
