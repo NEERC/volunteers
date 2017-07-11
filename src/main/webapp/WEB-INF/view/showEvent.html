@@ -46,7 +46,7 @@
                         <select class="form-control" onchange="selectAll(this)" th:id="hall">
                             <option disabled="disabled" selected="selected" value=""></option>
                             <th:block th:each="att:${attendances}">
-                                <option th:text="${att.name()}" th:value="${att.name()}"></option>
+                                <option th:text="${attendanceMap.get(att)}" th:value="${att.name()}"></option>
                             </th:block>
                         </select>
                     </td>
@@ -75,7 +75,7 @@
                             <select class="form-control" onchange="selectAll(this)" th:id="hall+${hall.id}">
                                 <option disabled="disabled" selected="selected" value=""></option>
                                 <th:block th:each="att:${attendances}">
-                                    <option th:text="${att.name()}" th:value="${att.name()}"></option>
+                                    <option th:text="${attendanceMap.get(att)}" th:value="${att.name()}"></option>
                                 </th:block>
                             </select>
                         </td>
@@ -102,12 +102,12 @@
                                     <option selected="selected" th:value="" disabled="disabled"></option>
                                 </th:block>
                                 <th:block th:each="att:${attendances}">
-                                    <option th:selected="${user.attendance}==${att}" th:text="${att.name()}"
+                                    <option th:selected="${user.attendance}==${att}" th:text="${attendanceMap.get(att)}"
                                             th:value="${att.name()}"></option>
                                 </th:block>
                             </select>
                         </td>
-                        <td th:unless="${attendance} or ${assessment}" th:text="${user.attendance}"></td>
+                    <td th:unless="${attendance} or ${assessment}" th:text="${attendanceMap.get(user.attendance)}"></td>
                         <th:block th:if="${assessment}" th:each="a: ${assessments}">
                             <td>
                                 <div class="checkbox">

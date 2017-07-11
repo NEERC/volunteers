@@ -48,7 +48,7 @@ public class AdminController {
     private final MedalRepository medalRepository;
     private final ApplicationFormRepository applicationFormRepository;
     private final MessageSource messageSource;
-    private final Locale local = LocaleContextHolder.getLocale();
+    private final Locale locale = LocaleContextHolder.getLocale();
 
     @GetMapping
     public String admin(final Model model, final Authentication authentication) {
@@ -123,7 +123,7 @@ public class AdminController {
                 result.setResult("");
             } catch (final Exception e) {
                 result.setStatus(Status.FAIL);
-                result.setResult(messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", local));
+                result.setResult(messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", locale));
             }
         } else {
             result.setStatus(Status.FAIL);
@@ -135,7 +135,7 @@ public class AdminController {
     @PostMapping("/hall/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
-    JsonResponse deleteHall(@RequestParam final long id, final RedirectAttributes attributes, final Locale locale) {
+    JsonResponse deleteHall(@RequestParam final long id) {
         JsonResponse response = new JsonResponse();
         try {
             if (!hallRepository.findOne(id).isDef()) {
@@ -304,7 +304,6 @@ public class AdminController {
             userEvent.setHall(hall);
             userEvent.setPosition(positionValue);
             userEvent.setUserYear(applicationForm);
-            userEvent.setAttendance(Attendance.YES);
             userEvents.add(userEvent);
         });
         userEventRepository.save(userEvents);
@@ -319,7 +318,7 @@ public class AdminController {
             }
         }
         if (positionValue == null) {
-            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "Reserve", local), true, 0, year);
+            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "Reserve", locale), true, 0, year);
             positionValueRepository.save(positionValue);
         }
         return positionValue;
@@ -332,7 +331,7 @@ public class AdminController {
                 hall = hall1;
         }
         if (hall == null) {
-            hall = new Hall(messageSource.getMessage("volunteers.reserve.hall", null, "Reserve", local), true, "", year);
+            hall = new Hall(messageSource.getMessage("volunteers.reserve.hall", null, "Reserve", locale), true, "", year);
             hallRepository.save(hall);
         }
         return hall;
@@ -355,7 +354,6 @@ public class AdminController {
             ue.setUserYear(af);
             ue.setHall(reserve);
             ue.setPosition(defaultPosition);
-            ue.setAttendance(Attendance.YES);
             currentEvent.addUser(ue);
             return ue;
         }).collect(Collectors.toList()));
@@ -375,6 +373,10 @@ public class AdminController {
         model.addAttribute("event", event);
         model.addAttribute("halls", halls);
         model.addAttribute("title", event.getName());
+
+        Map<Attendance, String> attendanceMap = new HashMap<>(Arrays.stream(Attendance.values())
+                .collect(Collectors.toMap(Function.identity(), attendance -> messageSource.getMessage("volunteers.attendance." + attendance.name().toLowerCase(), null, attendance.name(), locale))));
+        model.addAttribute("attendanceMap", attendanceMap);
         return "showEvent";
     }
 

@@ -4,8 +4,6 @@ import lombok.Data;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,5 +36,5 @@ public class UserEvent {
     Hall hall;
 
     @Enumerated(EnumType.STRING)
-    Attendance attendance;
+    Attendance attendance = Attendance.UNKNOWN;
 }
