@@ -593,14 +593,17 @@ public class AdminController {
         final int countEvents = year.getEvents().size();
         final Map<Long, Integer> assessments = new HashMap<>();
         final Map<Long, Double> experience = new HashMap<>();
+        final Map<ApplicationForm, Set<Hall>> halls = new HashMap<>();
         for (final ApplicationForm user : users) {
             double exp = 0;
             double totalExp = 0;
             final int[] assessment = {0};
+            halls.put(user, new HashSet<>());
             for (final UserEvent userEvent : user.getUserEvents()) {
                 if (userEvent.getAttendance() == Attendance.YES || userEvent.getAttendance() == Attendance.LATE) {
                     exp += userEvent.getPosition().getValue() / countEvents;
                 }
+                halls.get(user).add(userEvent.getHall());
                 userEvent.getAssessments().forEach(
                         userEventAssessment -> assessment[0] += userEventAssessment.getValue());
             }
@@ -642,6 +645,7 @@ public class AdminController {
         model.addAttribute("assessments", assessments);
         model.addAttribute("experience", experience);
         model.addAttribute("medals", userMedals);
+        model.addAttribute("halls", halls);
         return "results";
     }
 
