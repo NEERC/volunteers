@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
+import org.thymeleaf.util.StringUtils;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.HallForm;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
@@ -592,12 +593,14 @@ public class AdminController {
         final Set<ApplicationForm> needToSave = new HashSet<>();
         final int countEvents = year.getEvents().size();
         final Map<Long, Integer> assessments = new HashMap<>();
+        final Map<Long, List<String>> assessmentsGroupByDays = new HashMap<>();
         final Map<Long, Double> experience = new HashMap<>();
         final Map<ApplicationForm, Set<Hall>> halls = new HashMap<>();
         for (final ApplicationForm user : users) {
             double exp = 0;
             double totalExp = 0;
             final int[] assessment = {0};
+            assessmentsGroupByDays.put(user.getId(), new ArrayList<>());
             halls.put(user, new HashSet<>());
             for (final UserEvent userEvent : user.getUserEvents()) {
                 if (userEvent.getAttendance() == Attendance.YES || userEvent.getAttendance() == Attendance.LATE) {
@@ -606,6 +609,8 @@ public class AdminController {
                 halls.get(user).add(userEvent.getHall());
                 userEvent.getAssessments().forEach(
                         userEventAssessment -> assessment[0] += userEventAssessment.getValue());
+                String str = StringUtils.join(userEvent.getAssessments().stream().map(UserEventAssessment::getValue).collect(Collectors.toList()), ", ");
+                assessmentsGroupByDays.get(user.getId()).add("(" + str + ")");
             }
             for (final ApplicationForm applicationForm : user.getUser().getApplicationForms()) {
                 totalExp += applicationForm.getExperience();
@@ -643,6 +648,7 @@ public class AdminController {
         setModel(model, year);
         model.addAttribute("applicationForms", applicationForms);
         model.addAttribute("assessments", assessments);
+        model.addAttribute("assessmentsGroupByDays", assessmentsGroupByDays);
         model.addAttribute("experience", experience);
         model.addAttribute("medals", userMedals);
         model.addAttribute("halls", halls);

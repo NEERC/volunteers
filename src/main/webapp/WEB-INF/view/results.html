@@ -43,8 +43,12 @@
                     <label th:text="${medals.get(applicationForm.id).name}"></label>
                     <label th:text="'('+${experience.get(applicationForm.id)}+')'"></label>
                 </td>
-                <td th:text="${assessments.get(applicationForm.id)}">
-
+                <td>
+                    <label th:text="${assessments.get(applicationForm.id)}">
+                    </label>
+                    <th:block th:each="day: ${assessmentsGroupByDays.get(applicationForm.id)}">
+                        <span th:text="${day}"></span>
+                    </th:block>
                 </td>
             </tr>
         </th:block>

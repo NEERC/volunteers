@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,5 +39,6 @@ public class ApplicationForm {
     private double experience;
 
     @OneToMany(mappedBy = "userYear")
-    private Set<UserEvent> userEvents;
+    @OrderBy("event ASC")
+    private List<UserEvent> userEvents;
 }
