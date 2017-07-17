@@ -37,11 +37,12 @@
                     </div>
                 </td>
                 <td class="text-center">
-                    <label th:text="${applicationForm.user.badgeName}"></label>
+                    <a th:href="@{/admin/results/user/}+${applicationForm.id}"
+                       th:text="${applicationForm.user.badgeName}"></a>
                 </td>
                 <td>
                     <label th:text="${medals.get(applicationForm.id).name}"></label>
-                    <label th:text="'('+${experience.get(applicationForm.id)}+')'"></label>
+                    <span th:text="'('+${experience.get(applicationForm.id)}+')'"></span>
                 </td>
                 <td>
                     <label th:text="${assessments.get(applicationForm.id)}">

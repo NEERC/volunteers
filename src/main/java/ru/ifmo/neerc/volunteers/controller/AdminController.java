@@ -655,6 +655,17 @@ public class AdminController {
         return "results";
     }
 
+
+    @GetMapping("/results/user/{id}")
+    public String detailedResultUser(@PathVariable final long id, final Model model, final Authentication authentication) {
+        ApplicationForm applicationForm = applicationFormRepository.findOne(id);
+        List<UserEventAssessment> assessments = new ArrayList<>();
+        applicationForm.getUserEvents().forEach(user -> assessments.addAll(user.getAssessments()));
+        setModel(model, getUser(authentication).getYear());
+        model.addAttribute("table", assessments);
+        return "detailedResult";
+    }
+
     private User getUser(final Authentication authentication) {
         return userRepository.findByEmailIgnoreCase(authentication.getName());
     }
