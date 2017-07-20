@@ -308,7 +308,7 @@ public class AdminController {
             userEvents.add(userEvent);
         });
         userEventRepository.save(userEvents);
-        return "redirect:/admin/event?id=" + event.getId();
+        return "redirect:/admin/event/" + event.getId() + "/";
     }
 
     private PositionValue findOrCreateDefaultPosition(final Year year) {
@@ -377,10 +377,14 @@ public class AdminController {
         model.addAttribute("halls", halls);
         model.addAttribute("title", event.getName());
 
-        Map<Attendance, String> attendanceMap = new HashMap<>(Arrays.stream(Attendance.values())
-                .collect(Collectors.toMap(Function.identity(), attendance -> messageSource.getMessage("volunteers.attendance." + attendance.name().toLowerCase(), null, attendance.name(), locale))));
+        Map<Attendance, String> attendanceMap = getAttendaceMap();
         model.addAttribute("attendanceMap", attendanceMap);
         return "showEvent";
+    }
+
+    private Map<Attendance, String> getAttendaceMap() {
+        return new HashMap<>(Arrays.stream(Attendance.values())
+                .collect(Collectors.toMap(Function.identity(), attendance -> messageSource.getMessage("volunteers.attendance." + attendance.name().toLowerCase(), null, attendance.name(), locale))));
     }
 
     @GetMapping("/event/edit")
@@ -606,10 +610,15 @@ public class AdminController {
                 if (userEvent.getAttendance() == Attendance.YES || userEvent.getAttendance() == Attendance.LATE) {
                     exp += userEvent.getPosition().getValue() / countEvents;
                 }
+
+                Set<UserEventAssessment> allAssessments = new HashSet<>(userEvent.getAssessments());
+                allAssessments.add(getUserEventAssessmentByAttendace(userEvent.getAttendance(), userEvent.getEvent()));
+
                 halls.get(user).add(userEvent.getHall());
-                userEvent.getAssessments().forEach(
+                allAssessments.forEach(
                         userEventAssessment -> assessment[0] += userEventAssessment.getValue());
-                String str = StringUtils.join(userEvent.getAssessments().stream().map(UserEventAssessment::getValue).collect(Collectors.toList()), ", ");
+
+                String str = StringUtils.join(allAssessments.stream().map(UserEventAssessment::getValue).collect(Collectors.toList()), ", ");
                 assessmentsGroupByDays.get(user.getId()).add("(" + str + ")");
             }
             for (final ApplicationForm applicationForm : user.getUser().getApplicationForms()) {
@@ -655,12 +664,36 @@ public class AdminController {
         return "results";
     }
 
+    private UserEventAssessment getUserEventAssessmentByAttendace(Attendance attendance, Event event) {
+        UserEventAssessment back = new UserEventAssessment();
+        Map<Attendance, String> attendanceMap = getAttendaceMap();
+        back.setComment(event.getName() + " (" + attendanceMap.get(attendance) + ")");
+        switch (attendance) {
+            case YES:
+                back.setValue(event.getAttendanceValue());
+                break;
+            case LATE:
+                back.setValue(event.getAttendanceValue() / 2);
+                break;
+            case NO:
+                back.setValue(-event.getAttendanceValue());
+                break;
+            case SICK:
+                back.setValue(0);
+                break;
+        }
+        return back;
+    }
 
     @GetMapping("/results/user/{id}")
     public String detailedResultUser(@PathVariable final long id, final Model model, final Authentication authentication) {
         ApplicationForm applicationForm = applicationFormRepository.findOne(id);
         List<UserEventAssessment> assessments = new ArrayList<>();
-        applicationForm.getUserEvents().forEach(user -> assessments.addAll(user.getAssessments()));
+        applicationForm.getUserEvents().forEach(user -> {
+            assessments.addAll(user.getAssessments());
+            assessments.add(getUserEventAssessmentByAttendace(user.getAttendance(), user.getEvent()));
+        });
+
         setModel(model, getUser(authentication).getYear());
         model.addAttribute("table", assessments);
         return "detailedResult";

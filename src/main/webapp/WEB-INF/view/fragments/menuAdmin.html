@@ -86,6 +86,12 @@
                                 <span class="help-block" th:if="${#fields.hasErrors('name')}"
                                       th:text="#{volunteers.form.event.name.error.empty}"></span>
                             </div>
+                            <div class="form-group"
+                                 th:class="${#fields.hasErrors('attendanceValue')}?'has-error form-group':'form-group'">
+                                <label for="evenScore" th:text="#{volunteers.form.event.score}">Score</label>
+                                <input type="number" step="any" class="form-control" id="evenScore"
+                                       th:field="*{attendanceValue}"/>
+                            </div>
                             <div class="form-group" th:class="${#fields.hasErrors('information')}? 'has-error form-group' : 'form-group'">
                                 <label for="information"
                                        th:text="#{volunteers.form.event.information}">Information</label>

@@ -22,7 +22,7 @@ public class UserEventAssessment {
     @NotEmpty
     String comment;
 
-    int value;
+    double value;
 
     @ManyToOne
     Event event;
