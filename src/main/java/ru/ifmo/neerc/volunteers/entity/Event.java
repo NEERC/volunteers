@@ -43,7 +43,7 @@ public class Event {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "event")
     @OrderBy("id ASC")
-    Set<UserEventAssessment> assessments;
+    Set<Assessment> assessments;
 
     public void addUser(final UserEvent ue) {
         if (ue != null) {

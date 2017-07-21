@@ -1,7 +1,6 @@
 package ru.ifmo.neerc.volunteers.controller;
 
 import lombok.AllArgsConstructor;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
@@ -479,61 +478,45 @@ public class AdminController {
         return "showEvent";
     }
 
-    @GetMapping("/event/assessments")
-    public String assessments(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+    @GetMapping("/event/{id}/assessments")
+    public String assessments(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
         final Event event = eventRepository.findOne(id);
         model.addAttribute("assessment", true);
         model.addAttribute("assessments", event.getAssessments());
         if (!model.containsAttribute("newAssessment")) {
-            final UserEventAssessment assessment = new UserEventAssessment();
+            final Assessment assessment = new Assessment();
             assessment.setEvent(event);
-            model.addAttribute("newAssessment", new UserEventAssessment());
+            model.addAttribute("newAssessment", new Assessment());
         }
         return "showEvent";
     }
 
     @PostMapping("/event/assessments")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String setAssessments(final HttpServletRequest request) {
-        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        final Set<UserEventAssessment> userEventAssessments = new HashSet<>();
-        final Iterable<UserEventAssessment> assessments = event.getAssessments();
-        for (final UserEventAssessment assessment : assessments) {
-            final int val = Integer.parseInt(request.getParameter("assessmentValue" + assessment.getId()));
-            if (assessment.getValue() != val) {
-                assessment.setValue(val);
-                userEventAssessments.add(assessment);
+    public @ResponseBody
+    JsonResponse setAssessments(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, @RequestParam final long userId) {
+        JsonResponse response = new JsonResponse();
+        try {
+            if (result.hasErrors()) {
+                response.setStatus(Status.FAIL);
+                response.setResult(result.getAllErrors());
             }
+            UserEvent user = userEventRepository.findOne(userId);
+            assessment.setUser(user);
+            userEventAssessmentRepository.save(assessment);
+            response.setStatus(Status.OK);
+            response.setResult(assessment);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
         }
-        userEventAssessmentRepository.save(userEventAssessments);
-
-
-        final Set<UserEvent> users = new HashSet<>();
-        for (final UserEvent user : event.getUsers()) {
-            userEventRepository.save(user);
-            final Set<UserEventAssessment> assessmentSet = new HashSet<>();
-            for (final UserEventAssessment assessment : assessments) {
-                final boolean chosen = request.getParameter("assessment" + assessment.getId() + "user" + user.getId()) != null;
-                if (chosen) {
-                    assessmentSet.add(assessment);
-                }
-            }
-            if (!CollectionUtils.isEqualCollection(user.getAssessments(), assessmentSet)) {
-                user.getAssessments().clear();
-                user.getAssessments().addAll(assessmentSet);
-                users.add(user);
-            }
-        }
-        if (!users.isEmpty()) {
-            userEventRepository.save(users);
-        }
-        return "redirect:/admin/event/" + request.getParameter("event") + "/";
+        return response;
     }
 
     @PostMapping("/event/assessments/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addAttendance(@Valid @ModelAttribute("newAssessment") final UserEventAssessment assessment, final BindingResult result, final RedirectAttributes attributes, final HttpServletRequest request) {
+    public String addAttendance(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, final RedirectAttributes attributes, final HttpServletRequest request) {
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newAssessment", result);
             attributes.addFlashAttribute("newAssessment", assessment);
@@ -611,14 +594,14 @@ public class AdminController {
                     exp += userEvent.getPosition().getValue() / countEvents;
                 }
 
-                Set<UserEventAssessment> allAssessments = new HashSet<>(userEvent.getAssessments());
-                allAssessments.add(getUserEventAssessmentByAttendace(userEvent.getAttendance(), userEvent.getEvent()));
+                Set<Assessment> allAssessments = new HashSet<>(userEvent.getAssessments());
+                allAssessments.add(getAssessmentByAttendace(userEvent.getAttendance(), userEvent.getEvent()));
 
                 halls.get(user).add(userEvent.getHall());
                 allAssessments.forEach(
                         userEventAssessment -> assessment[0] += userEventAssessment.getValue());
 
-                String str = StringUtils.join(allAssessments.stream().map(UserEventAssessment::getValue).collect(Collectors.toList()), ", ");
+                String str = StringUtils.join(allAssessments.stream().map(Assessment::getValue).collect(Collectors.toList()), ", ");
                 assessmentsGroupByDays.get(user.getId()).add("(" + str + ")");
             }
             for (final ApplicationForm applicationForm : user.getUser().getApplicationForms()) {
@@ -664,8 +647,8 @@ public class AdminController {
         return "results";
     }
 
-    private UserEventAssessment getUserEventAssessmentByAttendace(Attendance attendance, Event event) {
-        UserEventAssessment back = new UserEventAssessment();
+    private Assessment getAssessmentByAttendace(Attendance attendance, Event event) {
+        Assessment back = new Assessment();
         Map<Attendance, String> attendanceMap = getAttendaceMap();
         back.setComment(event.getName() + " (" + attendanceMap.get(attendance) + ")");
         switch (attendance) {
@@ -688,10 +671,10 @@ public class AdminController {
     @GetMapping("/results/user/{id}")
     public String detailedResultUser(@PathVariable final long id, final Model model, final Authentication authentication) {
         ApplicationForm applicationForm = applicationFormRepository.findOne(id);
-        List<UserEventAssessment> assessments = new ArrayList<>();
+        List<Assessment> assessments = new ArrayList<>();
         applicationForm.getUserEvents().forEach(user -> {
             assessments.addAll(user.getAssessments());
-            assessments.add(getUserEventAssessmentByAttendace(user.getAttendance(), user.getEvent()));
+            assessments.add(getAssessmentByAttendace(user.getAttendance(), user.getEvent()));
         });
 
         setModel(model, getUser(authentication).getYear());

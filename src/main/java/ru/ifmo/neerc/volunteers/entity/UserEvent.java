@@ -1,6 +1,7 @@
 package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -11,7 +12,8 @@ import java.util.Set;
  */
 @Entity
 @Data
-@ToString(exclude = {"event","id"})
+@ToString(exclude = {"event", "id", "assessments"})
+@EqualsAndHashCode(exclude = {"assessments"})
 public class UserEvent {
     @Id
     @GeneratedValue
@@ -29,8 +31,8 @@ public class UserEvent {
     @JoinColumn(name = "position")
     PositionValue position;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    Set<UserEventAssessment> assessments;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    Set<Assessment> assessments;
 
     @ManyToOne
     Hall hall;
