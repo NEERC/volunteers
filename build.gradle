@@ -25,6 +25,10 @@ jar {
 	version = '0.0.1-SNAPSHOT'
 }
 
+war {
+	it.dependsOn 'copyjs'
+}
+
 sourceCompatibility = 1.8
 
 repositories {
@@ -59,10 +63,12 @@ task copyjs(type:Sync) {
 
 	def nodeExt = project.extensions.findByName("node")
 
-	from fileTree('node_modules').files
+	from 'node_modules/'
 	into "src/main/webapp/components"
 	include '**/*.min.js'
-	include '**/fonts/**'
+	eachFile {
+		details -> details.setRelativePath new RelativePath(true, details.name)
+	}
 
 	includeEmptyDirs false
 	dependsOn 'copyfonts'
