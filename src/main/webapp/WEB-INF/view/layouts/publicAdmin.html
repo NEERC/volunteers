@@ -79,33 +79,5 @@
             $('#yearForm').modal('show');
     </script>
 </th:block>
-<script th:inline="javascript">
-    $('#registration').change(function () {
-        /*<![CDATA[*/
-        var _csrf_token = /*[[${_csrf.token}]]*/ '';
-        var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
-        /*]]>*/
-
-        var requestData = {
-            'id': /*[[${year.id}]]*/1,
-        };
-        requestData['isOpen'] = !!this.checked;
-        requestData[_csrf_param_name] = _csrf_token;
-        $(this).prop("checked", !this.checked);
-
-        $.ajax({
-            type: "POST",
-            url: /*[[@{/admin/year/close}]]*/ '/admin/year/close',
-            data: requestData,
-            success: function () {
-                $('#registration').prop("checked", !$('#registration:checked').val());
-                console.log("success");
-            },
-            error: function (e) {
-                console.log("error", e);
-            }
-        })
-    })
-</script>
 </body>
 </html>

@@ -10,11 +10,13 @@
     <div class="row">
 
         <th:block th:if="${events.size()!=1}">
-            <form th:action="@{/admin/event/copy}" method="post">
-                <input type="hidden" th:name="event" th:value="${event.id}"/>
+            <!--<form th:action="@{/admin/event/copy}" method="post">-->
+            <!--<input type="hidden" name="eventId" th:value="${event.id}"/>-->
                 <div class="col-md-8">
-                    <select name="baseEvent" class="form-control">
-                        <option selected="true" value="-1" th:text="#{volunteers.event.form.copy.header}">Choose event
+                    <select name="baseEventId" class="form-control"
+                            onchange="copyEvent(this.value);">
+                        <option selected="true" value="-1" th:text="#{volunteers.event.form.copy.header}"
+                                disabled="true">Choose event
                             to copy arrangement
                         </option>
                         <th:block th:each="e:${events}">
@@ -24,10 +26,10 @@
                         </th:block>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.copy}">Copy</button>
-                </div>
-            </form>
+            <!--<div class="col-md-2">
+                <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.copy}">Copy</button>
+            </div>-->
+            <!--</form>-->
         </th:block>
     </div>
 
@@ -46,14 +48,16 @@
             </th>
             </thead>
             <tbody>
-            <form th:action="@{/admin/event/save}" method="post">
-                <input type="hidden" th:name="event" th:value="${event.id}"/>
+            <!--<form th:action="@{/admin/event/save}" method="post">-->
+            <!--<input type="hidden" th:name="event" th:value="${event.id}"/>-->
                 <th:block th:each="user:${users}">
 
                     <tr>
                         <td th:text="${user.userYear.user.badgeName}"></td>
                         <td>
-                            <select class="form-control" th:name="p+${user.id}">
+                            <select class="form-control" th:name="p+${user.id}"
+                                    th:onchange="'savePosition('+${user.id}+', this.value);'"
+                                    th:id="'position'+${user.id}">
                                 <th:block th:each="position:${positions}">
                                     <option th:value="${position.id}" th:selected="${position.id}==${user.position.id}"
                                             th:text="${position.name}"></option>
@@ -61,7 +65,9 @@
                             </select>
                         </td>
                         <td>
-                            <select class="form-control" th:name="h+${user.id}">
+                            <select class="form-control" th:name="h+${user.id}"
+                                    th:onchange="'saveHall('+${user.id}+', this.value);'"
+                                    th:id="'hall'+${user.id}">
                                 <th:block th:each="hall:${halls}">
                                     <option th:value="${hall.id}" th:selected="${hall.id}==${user.hall.id}"
                                             th:text="${hall.name}"></option>
@@ -70,17 +76,98 @@
                         </td>
                     </tr>
                 </th:block>
-                <tr>
-                    <td colspan="3" align="center">
-                        <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.save}">Save
-                        </button>
-                    </td>
-                </tr>
-            </form>
+            <!--<tr>
+                <td colspan="3" align="center">
+                    <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.save}">Save</button>
+                </td>
+            </tr>-->
+            <!--</form>-->
 
             </tbody>
         </table>
     </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var _csrf_token = /*[[${_csrf.token}]]*/ '';
+        var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
+
+        /*]]>*/
+        function savePosition(id, value) {
+            console.log(id + " " + value);
+            var data = {
+                'userId': id,
+                'positionId': value,
+                'hallId': -1
+            };
+            data[_csrf_param_name] = _csrf_token;
+            $.ajax({
+                type: "post",
+                data: data,
+                url: /*[[@{/admin/event/save/}]]*/"/admin/event/save/",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status === "OK") {
+                        console.log("success");
+                    } else {
+                        alert(data.result);
+                    }
+                }
+            })
+        }
+
+        function saveHall(id, value) {
+            console.log(id + " " + value);
+            var data = {
+                'userId': id,
+                'hallId': value,
+                'positionId': -1
+            };
+            data[_csrf_param_name] = _csrf_token;
+            $.ajax({
+                type: "post",
+                data: data,
+                url: /*[[@{/admin/event/save/}]]*/"/admin/event/save/",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status === "OK") {
+                        console.log("success");
+                    } else {
+                        alert(data.result);
+                    }
+                }
+            })
+        }
+
+        function copyEvent(id) {
+            var eventId = /*[[${event.id}]]*/-1;
+            var data = {
+                "eventId": eventId,
+                "baseEventId": id
+            };
+            data[_csrf_param_name] = _csrf_token;
+            $.ajax({
+                type: "post",
+                data: data,
+                url: /*[[@{/admin/event/copy/}]]*/"/admin/event/copy/",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status === "OK") {
+                        console.log("success");
+                        /*<![CDATA[*/
+                        for (var i = 0; i < data.result.users.length; i++) {
+                            var user = data.result.users[i];
+                            $("#hall" + user.id).val(user.hall.id);
+                            $("#position" + user.id).val(user.position.id);
+                        }
+                        /*]]>*/
+                    } else {
+                        alert(data.result);
+                    }
+                }
+            })
+        }
+    </script>
 </div>
 </body>
 </html>

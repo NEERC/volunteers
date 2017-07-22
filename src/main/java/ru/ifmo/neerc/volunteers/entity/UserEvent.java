@@ -1,5 +1,6 @@
 package ru.ifmo.neerc.volunteers.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -14,6 +15,7 @@ import java.util.Set;
 @Data
 @ToString(exclude = {"event", "id", "assessments"})
 @EqualsAndHashCode(exclude = {"assessments"})
+@JsonIgnoreProperties(value = {"event", "userYear"})
 public class UserEvent {
     @Id
     @GeneratedValue

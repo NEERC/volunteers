@@ -138,7 +138,7 @@
                 </button>
             </th:block>-->
             <th:block th:unless="${assessments} or ${attendance}">
-                <a th:href="@{'/admin/event/edit?id='+${event.id}}" class="btn btn-default"
+                <a th:href="@{'/admin/event/'+${event.id}+'/edit/'}" class="btn btn-default"
                    role="button" th:text="#{volunteers.event.button.edit}">Edit</a>
                 <a th:href="@{'/admin/event/'+${event.id}+'/attendance/'}" class="btn btn-default"
                    role="button" th:text="#{volunteers.event.button.editAttendance}">Set attendance</a>

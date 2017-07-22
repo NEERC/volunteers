@@ -386,8 +386,8 @@ public class AdminController {
                 .collect(Collectors.toMap(Function.identity(), attendance -> messageSource.getMessage("volunteers.attendance." + attendance.name().toLowerCase(), null, attendance.name(), locale))));
     }
 
-    @GetMapping("/event/edit")
-    public String editEvent(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+    @GetMapping("/event/{id}/edit")
+    public String editEvent(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
         final Event event = eventRepository.findOne(id);
         setModel(model, year);
@@ -398,39 +398,40 @@ public class AdminController {
 
     @PostMapping("/event/save")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String save(final HttpServletRequest request) {
-        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        final Set<UserEvent> users = event.getUsers();
-        final Set<UserEvent> forSave = new HashSet<>();
-        for (final UserEvent user : users) {
-            boolean flage = false;
-            final long newIdPosition = Long.parseLong(request.getParameter("p" + user.getId()));
-            long newIdHall = user.getHall().getId();
-            if (request.getParameter("h" + user.getId()) != null) {
-                newIdHall = Long.parseLong(request.getParameter("h" + user.getId()));
+    public @ResponseBody
+    JsonResponse save(@RequestParam final long userId, @RequestParam final long hallId, @RequestParam final long positionId) {
+        JsonResponse response = new JsonResponse();
+        try {
+            UserEvent user = userEventRepository.findOne(userId);
+            PositionValue positionValue = positionId == -1 ? user.getPosition() : positionValueRepository.findOne(positionId);
+            Hall hall = hallId == -1 ? user.getHall() : hallRepository.findOne(hallId);
+            boolean isChanged = false;
+            if (!user.getHall().equals(hall)) {
+                user.setHall(hall);
+                isChanged = true;
             }
-            if (user.getPosition().getId() != newIdPosition) {
-                user.setPosition(positionValueRepository.findOne(newIdPosition));
-                flage = true;
+            if (!user.getPosition().equals(positionValue)) {
+                user.setPosition(positionValue);
+                isChanged = true;
             }
-            if (user.getHall().getId() != newIdHall) {
-                user.setHall(hallRepository.findOne(newIdHall));
-                flage = true;
+            if (isChanged) {
+                userEventRepository.save(user);
             }
-            if (flage) {
-                forSave.add(user);
-            }
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setResult(e.getMessage());
+            response.setStatus(Status.FAIL);
         }
-        userEventRepository.save(forSave);
-        return "redirect:/admin/event/" + event.getId() + "/";
+        return response;
     }
 
     @PostMapping("/event/copy")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String copy(final HttpServletRequest request) {
-        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        if (Long.parseLong(request.getParameter("baseEvent")) != -1) {
-            final Event baseEvent = eventRepository.findOne(Long.parseLong(request.getParameter("baseEvent")));
+    public @ResponseBody
+    JsonResponse copy(@RequestParam final long eventId, @RequestParam final long baseEventId) {
+        JsonResponse response = new JsonResponse();
+        try {
+            final Event event = eventRepository.findOne(eventId);
+            final Event baseEvent = eventRepository.findOne(baseEventId);
             final Map<Long, UserEvent> userEventBase = new HashMap<>();
             for (final UserEvent userEvent : baseEvent.getUsers()) {
                 userEventBase.put(userEvent.getUserYear().getId(), userEvent);
@@ -455,8 +456,13 @@ public class AdminController {
                 }
             }
             userEventRepository.save(savedUsers);
+            response.setStatus(Status.OK);
+            response.setResult(eventRepository.findOne(eventId));
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
         }
-        return "redirect:/admin/event/?id=" + event.getId();
+        return response;
     }
 
     @PostMapping("/add")
