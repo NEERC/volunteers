@@ -567,21 +567,37 @@ public class AdminController {
 
     @PostMapping("/medals/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addMedals(@Valid @ModelAttribute("newMedal") final Medal medal, final BindingResult result, final RedirectAttributes attributes) {
-        if (result.hasErrors()) {
-            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newMedal", result);
-            attributes.addFlashAttribute("newMedal", medal);
-        } else {
-            medalRepository.save(medal);
+    public @ResponseBody
+    JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final Medal medal, final BindingResult result, final RedirectAttributes attributes) {
+        JsonResponse response = new JsonResponse();
+        try {
+            if (result.hasErrors()) {
+                response.setStatus(Status.FAIL);
+                response.setResult(result.getAllErrors());
+            } else {
+                medalRepository.save(medal);
+                response.setResult(medal);
+                response.setStatus(Status.OK);
+            }
+        } catch (Exception e) {
+            response.setResult(e.getMessage());
+            response.setStatus(Status.FAIL);
         }
-        return "redirect:/admin/medals";
+        return response;
     }
 
-    @GetMapping("/medals/delete")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deleteMedal(@RequestParam("id") final long id) {
-        medalRepository.delete(id);
-        return "redirect:/admin/medals";
+    @PostMapping("/medals/delete")
+    public @ResponseBody
+    JsonResponse deleteMedal(@RequestParam("id") final long id) {
+        JsonResponse response = new JsonResponse();
+        try {
+            medalRepository.delete(id);
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
+        }
+        return response;
     }
 
     @GetMapping("/results")

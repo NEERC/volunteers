@@ -22,6 +22,12 @@
     <script src="../../../components/bootstrap.min.js" th:src="@{/components/bootstrap.min.js}"></script>
     <!-- Include jQuery validate -->
     <script src="../../../components/jquery.validate.min.js" th:src="@{/components/jquery.validate.min.js}"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var _csrf_token = /*[[${_csrf.token}]]*/ '';
+        var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
+        /*]]>*/
+    </script>
 </head>
 <body>
 <div class="container">

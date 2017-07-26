@@ -10,7 +10,7 @@
                 <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#" th:href="@{'/admin/year/'+${year.id}}" th:text="#{volunteers.header}">Volunteers</a>
+            <a class="navbar-brand" href="#" th:href="@{'/admin/year/'+${year.id}+'/'}" th:text="#{volunteers.header}">Volunteers</a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
@@ -24,7 +24,7 @@
                     <ul class="dropdown-menu">
                         <th:block th:each="y : ${years}">
                             <li th:class="${year.id==y.id} ? 'active'">
-                                <a th:href="@{'/admin/year/'+${y.id}}" th:text="${y.name}"></a>
+                                <a th:href="@{'/admin/year/'+${y.id}+'/'}" th:text="${y.name}"></a>
                             </li>
                         </th:block>
                         <li>

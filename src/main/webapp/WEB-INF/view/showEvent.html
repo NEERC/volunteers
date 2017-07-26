@@ -198,11 +198,6 @@
         <script th:src="@{/js/showEvent.js}"/>
     </th:block>
     <script th:if="${attendance}" th:inline="javascript">
-        /*<![CDATA[*/
-        var _csrf_token = /*[[${_csrf.token}]]*/ '';
-        var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
-
-        /*]]>*/
         function save(id, value) {
             if (id === "")
                 return;
