@@ -466,14 +466,20 @@ public class AdminController {
     }
 
     @PostMapping("/add")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addAdmin(final HttpServletRequest request) {
-        final Long id = Long.parseLong(request.getParameter("newAdmin"));
-        final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
-        final User user = userRepository.findOne(id);
-        user.setRole(roleAdmin);
-        userRepository.save(user);
-        return "redirect:/admin";
+    public @ResponseBody
+    JsonResponse addAdmin(@RequestParam final long userId) {
+        JsonResponse response = new JsonResponse();
+        try {
+            final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
+            final User user = userRepository.findOne(userId);
+            user.setRole(roleAdmin);
+            userRepository.save(user);
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
+        }
+        return response;
     }
 
     @GetMapping("/event/{id}/attendance")
