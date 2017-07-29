@@ -34,7 +34,7 @@ public class Year {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year")
     @OrderBy("id ASC")
-    private Set<Event> events;
+    private Set<Day> days;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year")
     @OrderBy(value = "id ASC ")

@@ -14,7 +14,7 @@ import javax.persistence.ManyToOne;
  */
 @Entity
 @Data
-@JsonIgnoreProperties(value = {"event", "user"})
+@JsonIgnoreProperties(value = {"day", "user"})
 public class Assessment {
 
     @Id
@@ -27,8 +27,8 @@ public class Assessment {
     double value;
 
     @ManyToOne
-    Event event;
+    Day day;
 
     @ManyToOne
-    UserEvent user;
+    UserDay user;
 }

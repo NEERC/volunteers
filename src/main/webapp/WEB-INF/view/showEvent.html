@@ -9,24 +9,24 @@
     <form
           method="post">
         <div class="table-responsive">
-            <input type="hidden" th:value="${event.id}" name="event"/>
+            <input type="hidden" th:value="${day.id}" name="day"/>
 
             <table class="table table-hover table-bordered table-fixed">
                 <thead>
-                <th th:text="#{volunteers.event.hall}">
+                <th th:text="#{volunteers.day.hall}">
                     Hall
                 </th>
-                <th th:text="#{volunteers.event.volunteer}">
+                <th th:text="#{volunteers.day.volunteer}">
                     Volunteer
                 </th>
-                <th th:text="#{volunteers.event.position}">
+                <th th:text="#{volunteers.day.position}">
                     Position
                 </th>
-                <th th:unless="${assessment}" th:text="#{volunteers.event.attendance}">
+                <th th:unless="${assessment}" th:text="#{volunteers.day.attendance}">
                     Attendance
                 </th>
 
-                <th th:if="${assessment}" th:text="#{volunteers.event.assessments}">
+                <th th:if="${assessment}" th:text="#{volunteers.day.assessments}">
                     Assessments
                 </th>
 
@@ -52,7 +52,7 @@
                                     <label>
                                         <input type="checkbox" th:id="'assessment'+${a.id}+'hall'"
                                                onclick="selectAll(this)"/>
-                                        <span th:text="#{volunteers.event.form.selectAll}">Select all</span>
+                                        <span th:text="#{volunteers.day.form.selectAll}">Select all</span>
                                     </label>
                                 </div>
                             </td>
@@ -77,7 +77,7 @@
                                     <label>
                                         <input type="checkbox" onclick="selectAll(this)"
                                                th:id="'assessment'+${a.id}+'hall'+${hall.id}+'_'"/>
-                                        <span th:text="#{volunteers.event.form.selectAllForHall}">
+                                        <span th:text="#{volunteers.day.form.selectAllForHall}">
                                         Select all from hall</span>
                                     </label>
                                 </div>
@@ -114,7 +114,7 @@
                                 </th:block>
                                 <li class="list-group-item">
                                     <button type="button" class="btn btn-primary btn-xs" data-toggle="tooltip"
-                                            th:title="#{volunteers.event.button.addAssessment}"
+                                            th:title="#{volunteers.day.button.addAssessment}"
                                             th:onclick="'openForm('+${user.id}+');'">
                                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                                     </button>
@@ -133,17 +133,17 @@
             <!--<th:block th:if="${assessments}">
                 <input class="btn btn-primary" role="button" type="submit" value="Save assessments"/>
                 <button type="button" class="btn btn-default" data-toggle="modal"
-                        data-target="#assessmentForm" th:text="#{volunteers.event.button.addAssessment}">
+                        data-target="#assessmentForm" th:text="#{volunteers.day.button.addAssessment}">
                     Add assessments
                 </button>
             </th:block>-->
             <th:block th:unless="${assessments} or ${attendance}">
-                <a th:href="@{'/admin/event/'+${event.id}+'/edit/'}" class="btn btn-default"
-                   role="button" th:text="#{volunteers.event.button.edit}">Edit</a>
-                <a th:href="@{'/admin/event/'+${event.id}+'/attendance/'}" class="btn btn-default"
-                   role="button" th:text="#{volunteers.event.button.editAttendance}">Set attendance</a>
-                <a th:href="@{'/admin/event/'+${event.id}+'/assessments'}" class="btn btn-default"
-                   role="button" th:text="#{volunteers.event.button.editAssessments}">Set assessments</a>
+                <a th:href="@{'/admin/day/'+${day.id}+'/edit/'}" class="btn btn-default"
+                   role="button" th:text="#{volunteers.day.button.edit}">Edit</a>
+                <a th:href="@{'/admin/day/'+${day.id}+'/attendance/'}" class="btn btn-default"
+                   role="button" th:text="#{volunteers.day.button.editAttendance}">Set attendance</a>
+                <a th:href="@{'/admin/day/'+${day.id}+'/assessments'}" class="btn btn-default"
+                   role="button" th:text="#{volunteers.day.button.editAssessments}">Set assessments</a>
             </th:block>
         </div>
     </form>
@@ -153,7 +153,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <form method="post" th:object="${newAssessment}" id="newAssessment">
-                        <input th:value="${event.id}" type="hidden" name="event"/>
+                        <input th:value="${day.id}" type="hidden" name="day"/>
 
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
@@ -210,7 +210,7 @@
             $.ajax({
                 type: "post",
                 data: data,
-                url: /*[[@{/admin/event/attendance/}]]*/"/admin/event/attendance/",
+                url: /*[[@{/admin/day/attendance/}]]*/"/admin/day/attendance/",
                 dataType: "json",
                 success: function (data) {
                     if (data.status === "OK") {
@@ -273,7 +273,7 @@
                     $.ajax({
                         type: "post",
                         data: str,
-                        url: /*[[@{/admin/event/assessments/}]]*/"/admin/event/assessments/",
+                        url: /*[[@{/admin/day/assessments/}]]*/"/admin/day/assessments/",
                         dataType: "json",
                         success: function (data) {
                             if (data.status === "OK") {

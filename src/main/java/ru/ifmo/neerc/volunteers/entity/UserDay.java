@@ -13,10 +13,10 @@ import java.util.Set;
  */
 @Entity
 @Data
-@ToString(exclude = {"event", "id", "assessments"})
+@ToString(exclude = {"day", "id", "assessments"})
 @EqualsAndHashCode(exclude = {"assessments"})
-@JsonIgnoreProperties(value = {"event", "userYear"})
-public class UserEvent {
+@JsonIgnoreProperties(value = {"day", "userYear"})
+public class UserDay {
     @Id
     @GeneratedValue
     long id;
@@ -25,9 +25,9 @@ public class UserEvent {
     @ManyToOne
     ApplicationForm userYear;
 
-    @JoinColumn(name = "event")
+    @JoinColumn(name = "day")
     @ManyToOne
-    Event event;
+    Day day;
 
     @ManyToOne
     @JoinColumn(name = "position")

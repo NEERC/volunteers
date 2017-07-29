@@ -13,8 +13,8 @@ import java.util.Set;
  */
 @Entity
 @Data
-@ToString(exclude = {"id", "year", "userEvents"}, includeFieldNames = false)
-@EqualsAndHashCode(exclude = {"id", "year", "userEvents"})
+@ToString(exclude = {"id", "year", "userDays"}, includeFieldNames = false)
+@EqualsAndHashCode(exclude = {"id", "year", "userDays"})
 public class ApplicationForm {
 
     @Id
@@ -40,5 +40,5 @@ public class ApplicationForm {
 
     @OneToMany(mappedBy = "userYear")
     @OrderBy("event ASC")
-    private List<UserEvent> userEvents;
+    private List<UserDay> userDays;
 }

@@ -17,7 +17,7 @@ import java.util.Set;
 @Entity
 @EqualsAndHashCode(exclude = {"year", "users", "assessments"})
 @ToString(exclude = {"year", "users", "assessments"})
-public class Event {
+public class Day {
 
     @Id
     @GeneratedValue
@@ -37,22 +37,22 @@ public class Event {
     @NotNull
     private double attendanceValue;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "event")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "day")
     @OrderBy("id ASC")
-    Set<UserEvent> users;
+    Set<UserDay> users;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "event")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "day")
     @OrderBy("id ASC")
     Set<Assessment> assessments;
 
-    public void addUser(final UserEvent ue) {
+    public void addUser(final UserDay ue) {
         if (ue != null) {
             getUsers();
             if (users == null) {
                 users = new HashSet<>();
             }
             users.add(ue);
-            ue.setEvent(this);
+            ue.setDay(this);
         }
     }
 }

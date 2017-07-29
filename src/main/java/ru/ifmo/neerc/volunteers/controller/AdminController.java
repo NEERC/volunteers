@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     private final YearRepository yearRepository;
-    private final EventRepository eventRepository;
+    private final DayRepository dayRepository;
     private final HallRepository hallRepository;
     private final UserEventRepository userEventRepository;
     private final UserRepository userRepository;
@@ -265,10 +265,10 @@ public class AdminController {
         setModel(model, year);
         final Set<ApplicationForm> users = year.getUsers();
         model.addAttribute("users", users);
-        /*if (!model.containsAttribute("event")) {
-            Event event = new Event();
-            event.setYear(year);
-            model.addAttribute("event", event);
+        /*if (!model.containsAttribute("day")) {
+            Day day = new Day();
+            day.setYear(year);
+            model.addAttribute("day", day);
         }*/
         model.addAttribute("title", year.getName());
         return "year";
@@ -276,38 +276,38 @@ public class AdminController {
 
     @PostMapping("/event/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addEvent(@Valid @ModelAttribute("newEvent") final Event event, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
+    public String addEvent(@Valid @ModelAttribute("newEvent") final Day day, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
         final User user = getUser(authentication);
-        Year year = event.getYear();
+        Year year = day.getYear();
         if (year == null) {
             year = user.getYear();
-            event.setYear(year);
+            day.setYear(year);
         }
         if (result.hasErrors()) {
             if (year != null) {
                 attributes.addFlashAttribute("org.springframework.validation.BindingResult.newEvent", result);
-                attributes.addFlashAttribute("newEvent", event);
+                attributes.addFlashAttribute("newEvent", day);
                 return "redirect:/admin/year/" + year.getId();
             } else {
                 return "redirect:/admin";
             }
         }
-        eventRepository.save(event);
+        dayRepository.save(day);
         final Set<ApplicationForm> users = year.getUsers();
-        event.setUsers(new HashSet<>());
+        day.setUsers(new HashSet<>());
         final PositionValue positionValue = findOrCreateDefaultPosition(year);
         final Hall hall = findOrCreateDefaultHall(year);
-        final List<UserEvent> userEvents = new ArrayList<>();
+        final List<UserDay> userDays = new ArrayList<>();
         users.forEach(applicationForm -> {
-            final UserEvent userEvent = new UserEvent();
-            userEvent.setEvent(event);
-            userEvent.setHall(hall);
-            userEvent.setPosition(positionValue);
-            userEvent.setUserYear(applicationForm);
-            userEvents.add(userEvent);
+            final UserDay userDay = new UserDay();
+            userDay.setDay(day);
+            userDay.setHall(hall);
+            userDay.setPosition(positionValue);
+            userDay.setUserYear(applicationForm);
+            userDays.add(userDay);
         });
-        userEventRepository.save(userEvents);
-        return "redirect:/admin/event/" + event.getId() + "/";
+        userEventRepository.save(userDays);
+        return "redirect:/admin/day/" + day.getId() + "/";
     }
 
     private PositionValue findOrCreateDefaultPosition(final Year year) {
@@ -341,28 +341,28 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String event(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
-        final Event currentEvent = eventRepository.findOne(id);
+        final Day currentDay = dayRepository.findOne(id);
         setModel(model, year);
         final Set<ApplicationForm> yearUsers = new HashSet<>(year.getUsers());
-        yearUsers.removeAll(currentEvent.getUsers().stream().map(UserEvent::getUserYear).collect(Collectors.toSet()));
+        yearUsers.removeAll(currentDay.getUsers().stream().map(UserDay::getUserYear).collect(Collectors.toSet()));
         final Hall reserve = findOrCreateDefaultHall(year);
 
         final PositionValue defaultPosition = findOrCreateDefaultPosition(year);
 
         userEventRepository.save(yearUsers.stream().map(af -> {
-            final UserEvent ue = new UserEvent();
+            final UserDay ue = new UserDay();
             ue.setUserYear(af);
             ue.setHall(reserve);
             ue.setPosition(defaultPosition);
-            currentEvent.addUser(ue);
+            currentDay.addUser(ue);
             return ue;
         }).collect(Collectors.toList()));
 
-        final Event event = eventRepository.save(currentEvent);
+        final Day day = dayRepository.save(currentDay);
 
 
-        final HashMap<Hall, List<UserEvent>> hallUser = new HashMap<>(
-                event.getUsers().stream().collect(Collectors.groupingBy(UserEvent::getHall)));
+        final HashMap<Hall, List<UserDay>> hallUser = new HashMap<>(
+                day.getUsers().stream().collect(Collectors.groupingBy(UserDay::getHall)));
         hallUser.forEach((u, v) -> v.sort(Comparator.comparing(lst -> lst.getPosition().getName())));
 
 
@@ -372,9 +372,9 @@ public class AdminController {
                 .collect(Collectors.toMap(Function.identity(), hall -> new ArrayList<>())));
 
         model.addAttribute("hallUser", hallUser);
-        model.addAttribute("event", event);
+        model.addAttribute("event", day);
         model.addAttribute("halls", halls);
-        model.addAttribute("title", event.getName());
+        model.addAttribute("title", day.getName());
 
         Map<Attendance, String> attendanceMap = getAttendaceMap();
         model.addAttribute("attendanceMap", attendanceMap);
@@ -389,11 +389,11 @@ public class AdminController {
     @GetMapping("/event/{id}/edit")
     public String editEvent(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
-        final Event event = eventRepository.findOne(id);
+        final Day day = dayRepository.findOne(id);
         setModel(model, year);
-        model.addAttribute("event", event);
-        model.addAttribute("users", event.getUsers());
-        return "event";
+        model.addAttribute("event", day);
+        model.addAttribute("users", day.getUsers());
+        return "day";
     }
 
     @PostMapping("/event/save")
@@ -402,7 +402,7 @@ public class AdminController {
     JsonResponse save(@RequestParam final long userId, @RequestParam final long hallId, @RequestParam final long positionId) {
         JsonResponse response = new JsonResponse();
         try {
-            UserEvent user = userEventRepository.findOne(userId);
+            UserDay user = userEventRepository.findOne(userId);
             PositionValue positionValue = positionId == -1 ? user.getPosition() : positionValueRepository.findOne(positionId);
             Hall hall = hallId == -1 ? user.getHall() : hallRepository.findOne(hallId);
             boolean isChanged = false;
@@ -430,15 +430,15 @@ public class AdminController {
     JsonResponse copy(@RequestParam final long eventId, @RequestParam final long baseEventId) {
         JsonResponse response = new JsonResponse();
         try {
-            final Event event = eventRepository.findOne(eventId);
-            final Event baseEvent = eventRepository.findOne(baseEventId);
-            final Map<Long, UserEvent> userEventBase = new HashMap<>();
-            for (final UserEvent userEvent : baseEvent.getUsers()) {
-                userEventBase.put(userEvent.getUserYear().getId(), userEvent);
+            final Day day = dayRepository.findOne(eventId);
+            final Day baseDay = dayRepository.findOne(baseEventId);
+            final Map<Long, UserDay> userEventBase = new HashMap<>();
+            for (final UserDay userDay : baseDay.getUsers()) {
+                userEventBase.put(userDay.getUserYear().getId(), userDay);
             }
-            final Set<UserEvent> users = event.getUsers();
-            final Set<UserEvent> savedUsers = new HashSet<>();
-            for (final UserEvent user : users) {
+            final Set<UserDay> users = day.getUsers();
+            final Set<UserDay> savedUsers = new HashSet<>();
+            for (final UserDay user : users) {
                 final Long form = user.getUserYear().getId();
                 if (userEventBase.get(form) != null) {
                     boolean needToSave = false;
@@ -457,7 +457,7 @@ public class AdminController {
             }
             userEventRepository.save(savedUsers);
             response.setStatus(Status.OK);
-            response.setResult(eventRepository.findOne(eventId));
+            response.setResult(dayRepository.findOne(eventId));
         } catch (Exception e) {
             response.setStatus(Status.FAIL);
             response.setResult(e.getMessage());
@@ -493,12 +493,12 @@ public class AdminController {
     @GetMapping("/event/{id}/assessments")
     public String assessments(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
-        final Event event = eventRepository.findOne(id);
+        final Day day = dayRepository.findOne(id);
         model.addAttribute("assessment", true);
-        model.addAttribute("assessments", event.getAssessments());
+        model.addAttribute("assessments", day.getAssessments());
         if (!model.containsAttribute("newAssessment")) {
             final Assessment assessment = new Assessment();
-            assessment.setEvent(event);
+            assessment.setDay(day);
             model.addAttribute("newAssessment", new Assessment());
         }
         return "showEvent";
@@ -514,7 +514,7 @@ public class AdminController {
                 response.setStatus(Status.FAIL);
                 response.setResult(result.getAllErrors());
             }
-            UserEvent user = userEventRepository.findOne(userId);
+            UserDay user = userEventRepository.findOne(userId);
             assessment.setUser(user);
             userEventAssessmentRepository.save(assessment);
             response.setStatus(Status.OK);
@@ -535,7 +535,7 @@ public class AdminController {
         } else {
             userEventAssessmentRepository.save(assessment);
         }
-        return "redirect:/admin/event/assessments?id=" + request.getParameter("event");
+        return "redirect:/admin/day/assessments?id=" + request.getParameter("day");
     }
 
     @PostMapping("/event/attendance")
@@ -544,7 +544,7 @@ public class AdminController {
     JsonResponse setAttendance(@RequestParam final long id, @RequestParam final String value) {
         JsonResponse response = new JsonResponse();
         try {
-            UserEvent user = userEventRepository.findOne(id);
+            UserDay user = userEventRepository.findOne(id);
             user.setAttendance(Attendance.valueOf(value));
             userEventRepository.save(user);
             response.setStatus(Status.OK);
@@ -606,7 +606,7 @@ public class AdminController {
         final Year year = getUser(authentication).getYear();
         final Set<ApplicationForm> users = year.getUsers();
         final Set<ApplicationForm> needToSave = new HashSet<>();
-        final int countEvents = year.getEvents().size();
+        final int countEvents = year.getDays().size();
         final Map<Long, Integer> assessments = new HashMap<>();
         final Map<Long, List<String>> assessmentsGroupByDays = new HashMap<>();
         final Map<Long, Double> experience = new HashMap<>();
@@ -617,15 +617,15 @@ public class AdminController {
             final int[] assessment = {0};
             assessmentsGroupByDays.put(user.getId(), new ArrayList<>());
             halls.put(user, new HashSet<>());
-            for (final UserEvent userEvent : user.getUserEvents()) {
-                if (userEvent.getAttendance() == Attendance.YES || userEvent.getAttendance() == Attendance.LATE) {
-                    exp += userEvent.getPosition().getValue() / countEvents;
+            for (final UserDay userDay : user.getUserDays()) {
+                if (userDay.getAttendance() == Attendance.YES || userDay.getAttendance() == Attendance.LATE) {
+                    exp += userDay.getPosition().getValue() / countEvents;
                 }
 
-                Set<Assessment> allAssessments = new HashSet<>(userEvent.getAssessments());
-                allAssessments.add(getAssessmentByAttendace(userEvent.getAttendance(), userEvent.getEvent()));
+                Set<Assessment> allAssessments = new HashSet<>(userDay.getAssessments());
+                allAssessments.add(getAssessmentByAttendace(userDay.getAttendance(), userDay.getDay()));
 
-                halls.get(user).add(userEvent.getHall());
+                halls.get(user).add(userDay.getHall());
                 allAssessments.forEach(
                         userEventAssessment -> assessment[0] += userEventAssessment.getValue());
 
@@ -675,19 +675,19 @@ public class AdminController {
         return "results";
     }
 
-    private Assessment getAssessmentByAttendace(Attendance attendance, Event event) {
+    private Assessment getAssessmentByAttendace(Attendance attendance, Day day) {
         Assessment back = new Assessment();
         Map<Attendance, String> attendanceMap = getAttendaceMap();
-        back.setComment(event.getName() + " (" + attendanceMap.get(attendance) + ")");
+        back.setComment(day.getName() + " (" + attendanceMap.get(attendance) + ")");
         switch (attendance) {
             case YES:
-                back.setValue(event.getAttendanceValue());
+                back.setValue(day.getAttendanceValue());
                 break;
             case LATE:
-                back.setValue(event.getAttendanceValue() / 2);
+                back.setValue(day.getAttendanceValue() / 2);
                 break;
             case NO:
-                back.setValue(-event.getAttendanceValue());
+                back.setValue(-day.getAttendanceValue());
                 break;
             case SICK:
                 back.setValue(0);
@@ -700,9 +700,9 @@ public class AdminController {
     public String detailedResultUser(@PathVariable final long id, final Model model, final Authentication authentication) {
         ApplicationForm applicationForm = applicationFormRepository.findOne(id);
         List<Assessment> assessments = new ArrayList<>();
-        applicationForm.getUserEvents().forEach(user -> {
+        applicationForm.getUserDays().forEach(user -> {
             assessments.addAll(user.getAssessments());
-            assessments.add(getAssessmentByAttendace(user.getAttendance(), user.getEvent()));
+            assessments.add(getAssessmentByAttendace(user.getAttendance(), user.getDay()));
         });
 
         setModel(model, getUser(authentication).getYear());
@@ -721,7 +721,7 @@ public class AdminController {
         }
         model.addAttribute("years", yearRepository.findAll());
         if (year != null) {
-            model.addAttribute("events", year.getEvents());
+            model.addAttribute("events", year.getDays());
             model.addAttribute("positions", year.getPositionValues());
             model.addAttribute("halls", year.getHalls());
         } else {
@@ -730,9 +730,9 @@ public class AdminController {
             model.addAttribute("halls", Collections.EMPTY_LIST);
         }
         if (!model.containsAttribute("newEvent")) {
-            final Event newEvent = new Event();
-            newEvent.setYear(year);
-            model.addAttribute("newEvent", newEvent);
+            final Day newDay = new Day();
+            newDay.setYear(year);
+            model.addAttribute("newEvent", newDay);
         }
         if (!model.containsAttribute("newPosition")) {
             model.addAttribute("newPosition", new PositionForm());

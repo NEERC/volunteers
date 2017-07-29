@@ -2,25 +2,25 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8"/>
-    <title th:text="${event.name}">Title</title>
+    <title th:text="${day.name}">Title</title>
 </head>
 <body>
 <div th:fragment="content" class="col-md-10">
 
     <div class="row">
 
-        <th:block th:if="${events.size()!=1}">
-            <!--<form th:action="@{/admin/event/copy}" method="post">-->
-            <!--<input type="hidden" name="eventId" th:value="${event.id}"/>-->
+        <th:block th:if="${days.size()!=1}">
+            <!--<form th:action="@{/admin/day/copy}" method="post">-->
+            <!--<input type="hidden" name="eventId" th:value="${day.id}"/>-->
                 <div class="col-md-8">
                     <select name="baseEventId" class="form-control"
                             onchange="copyEvent(this.value);">
-                        <option selected="true" value="-1" th:text="#{volunteers.event.form.copy.header}"
-                                disabled="true">Choose event
+                        <option selected="true" value="-1" th:text="#{volunteers.day.form.copy.header}"
+                                disabled="true">Choose day
                             to copy arrangement
                         </option>
-                        <th:block th:each="e:${events}">
-                            <th:block th:if="${e.id}!=${event.id}">
+                        <th:block th:each="e:${days}">
+                            <th:block th:if="${e.id}!=${day.id}">
                                 <option th:value="${e.id}" th:text="${e.name}"></option>
                             </th:block>
                         </th:block>
@@ -37,19 +37,19 @@
     <div class="table-responsive">
         <table class="table">
             <thead>
-            <th th:text="#{volunteers.event.volunteer}">
+            <th th:text="#{volunteers.day.volunteer}">
                 User
             </th>
-            <th th:text="#{volunteers.event.position}">
+            <th th:text="#{volunteers.day.position}">
                 Position
             </th>
-            <th th:text="#{volunteers.event.hall}">
+            <th th:text="#{volunteers.day.hall}">
                 Hall
             </th>
             </thead>
             <tbody>
-            <!--<form th:action="@{/admin/event/save}" method="post">-->
-            <!--<input type="hidden" th:name="event" th:value="${event.id}"/>-->
+            <!--<form th:action="@{/admin/day/save}" method="post">-->
+            <!--<input type="hidden" th:name="day" th:value="${day.id}"/>-->
                 <th:block th:each="user:${users}">
 
                     <tr>
@@ -99,7 +99,7 @@
             $.ajax({
                 type: "post",
                 data: data,
-                url: /*[[@{/admin/event/save/}]]*/"/admin/event/save/",
+                url: /*[[@{/admin/day/save/}]]*/"/admin/day/save/",
                 dataType: "json",
                 success: function (data) {
                     if (data.status === "OK") {
@@ -122,7 +122,7 @@
             $.ajax({
                 type: "post",
                 data: data,
-                url: /*[[@{/admin/event/save/}]]*/"/admin/event/save/",
+                url: /*[[@{/admin/day/save/}]]*/"/admin/day/save/",
                 dataType: "json",
                 success: function (data) {
                     if (data.status === "OK") {
@@ -135,7 +135,7 @@
         }
 
         function copyEvent(id) {
-            var eventId = /*[[${event.id}]]*/-1;
+            var eventId = /*[[${day.id}]]*/-1;
             var data = {
                 "eventId": eventId,
                 "baseEventId": id
@@ -144,7 +144,7 @@
             $.ajax({
                 type: "post",
                 data: data,
-                url: /*[[@{/admin/event/copy/}]]*/"/admin/event/copy/",
+                url: /*[[@{/admin/day/copy/}]]*/"/admin/day/copy/",
                 dataType: "json",
                 success: function (data) {
                     if (data.status === "OK") {

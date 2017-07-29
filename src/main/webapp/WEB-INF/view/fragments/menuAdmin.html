@@ -21,15 +21,15 @@
             <li><a href="#eventsList" data-toggle="collapse" aria-expanded="true" aria-controls="eventsList">
                 <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
                 <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
-                <span th:text="#{volunteers.admin.menu.events}">Events</span>
+                <span th:text="#{volunteers.admin.menu.days}">Events</span>
             </a>
                 <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                 </button>
                 <ul class="collapse in" id="eventsList">
-                    <th:block th:each="event : ${events}">
+                    <th:block th:each="day : ${days}">
                         <li>
-                            <a th:href="@{'/admin/event/'+${event.id}+'/'}" th:text="${event.name}"></a>
+                            <a th:href="@{'/admin/day/'+${day.id}+'/'}" th:text="${day.name}"></a>
                         </li>
                     </th:block>
                 </ul>
@@ -73,31 +73,31 @@
         <div class="modal fade" id="eventForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <form method="post" th:action="@{/admin/event/add}" th:object="${newEvent}">
+                    <form method="post" th:action="@{/admin/day/add}" th:object="${newDay}">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="eventLabel" th:text="#{volunteers.form.event.header}">Add
-                                event</h4>
+                            <h4 class="modal-title" id="eventLabel" th:text="#{volunteers.form.day.header}">Add
+                                day</h4>
                         </div>
                         <div class="modal-body">
                             <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
-                                <label for="eventName" th:text="#{volunteers.form.event.name}">Event name</label>
+                                <label for="eventName" th:text="#{volunteers.form.day.name}">Event name</label>
                                 <input type="text" class="form-control" id="eventName" th:field="*{name}" />
                                 <span class="help-block" th:if="${#fields.hasErrors('name')}"
-                                      th:text="#{volunteers.form.event.name.error.empty}"></span>
+                                      th:text="#{volunteers.form.day.name.error.empty}"></span>
                             </div>
                             <div class="form-group"
                                  th:class="${#fields.hasErrors('attendanceValue')}?'has-error form-group':'form-group'">
-                                <label for="evenScore" th:text="#{volunteers.form.event.score}">Score</label>
+                                <label for="evenScore" th:text="#{volunteers.form.day.score}">Score</label>
                                 <input type="number" step="any" class="form-control" id="evenScore"
                                        th:field="*{attendanceValue}"/>
                             </div>
                             <div class="form-group" th:class="${#fields.hasErrors('information')}? 'has-error form-group' : 'form-group'">
                                 <label for="information"
-                                       th:text="#{volunteers.form.event.information}">Information</label>
+                                       th:text="#{volunteers.form.day.information}">Information</label>
                                 <input type="text" class="form-control" id="information" th:field="*{information}" />
                                 <span class="help-block" th:if="${#fields.hasErrors('information')}"
-                                      th:text="#{volunteers.form.event.information.error.empty}"></span>
+                                      th:text="#{volunteers.form.day.information.error.empty}"></span>
                             </div>
                         </div>
                         <div class="modal-footer">
