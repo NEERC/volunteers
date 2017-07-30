@@ -162,7 +162,7 @@
                         </div>
                         <div class="modal-body">
                             <input type="hidden" th:field="*{id}" id="assessmentId"/>
-                            <input type="hidden" name="userId" id="userId"/>
+                            <input type="hidden" name="userId" id="userIdAssessment"/>
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <div class="form-group"
                                  th:class="${#fields.hasErrors('comment')}? 'has-error form-group' : 'form-group'">
@@ -302,7 +302,7 @@
         function showForm(userId, assessmentId, value, comment) {
             $("#assessmentForm").modal("show");
             $("#assessmentId").val(assessmentId);
-            $("#userId").val(userId);
+            $("#userIdAssessment").val(userId);
             $("#assessmentComment").val(comment);
             $("#assessmentValue").val(value);
             var lblBtn = "";

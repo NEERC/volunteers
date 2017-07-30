@@ -274,7 +274,7 @@ public class AdminController {
         return "year";
     }
 
-    @PostMapping("/event/add")
+    @PostMapping("/day/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addEvent(@Valid @ModelAttribute("newEvent") final Day day, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
         final User user = getUser(authentication);
@@ -337,7 +337,7 @@ public class AdminController {
         return hall;
     }
 
-    @GetMapping("event/{id}")
+    @GetMapping("day/{id}")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String event(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
@@ -372,7 +372,7 @@ public class AdminController {
                 .collect(Collectors.toMap(Function.identity(), hall -> new ArrayList<>())));
 
         model.addAttribute("hallUser", hallUser);
-        model.addAttribute("event", day);
+        model.addAttribute("day", day);
         model.addAttribute("halls", halls);
         model.addAttribute("title", day.getName());
 
@@ -386,17 +386,17 @@ public class AdminController {
                 .collect(Collectors.toMap(Function.identity(), attendance -> messageSource.getMessage("volunteers.attendance." + attendance.name().toLowerCase(), null, attendance.name(), locale))));
     }
 
-    @GetMapping("/event/{id}/edit")
+    @GetMapping("/day/{id}/edit")
     public String editEvent(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
         final Day day = dayRepository.findOne(id);
         setModel(model, year);
-        model.addAttribute("event", day);
+        model.addAttribute("day", day);
         model.addAttribute("users", day.getUsers());
         return "day";
     }
 
-    @PostMapping("/event/save")
+    @PostMapping("/day/save")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse save(@RequestParam final long userId, @RequestParam final long hallId, @RequestParam final long positionId) {
@@ -425,7 +425,7 @@ public class AdminController {
         return response;
     }
 
-    @PostMapping("/event/copy")
+    @PostMapping("/day/copy")
     public @ResponseBody
     JsonResponse copy(@RequestParam final long eventId, @RequestParam final long baseEventId) {
         JsonResponse response = new JsonResponse();
@@ -482,7 +482,7 @@ public class AdminController {
         return response;
     }
 
-    @GetMapping("/event/{id}/attendance")
+    @GetMapping("/day/{id}/attendance")
     public String attendance(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
         model.addAttribute("attendances", Attendance.values());
@@ -490,7 +490,7 @@ public class AdminController {
         return "showEvent";
     }
 
-    @GetMapping("/event/{id}/assessments")
+    @GetMapping("/day/{id}/assessments")
     public String assessments(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
         final Day day = dayRepository.findOne(id);
@@ -504,7 +504,7 @@ public class AdminController {
         return "showEvent";
     }
 
-    @PostMapping("/event/assessments")
+    @PostMapping("/day/assessments")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse setAssessments(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, @RequestParam final long userId) {
@@ -526,7 +526,7 @@ public class AdminController {
         return response;
     }
 
-    @PostMapping("/event/assessments/add")
+    @PostMapping("/day/assessments/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addAttendance(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, final RedirectAttributes attributes, final HttpServletRequest request) {
         if (result.hasErrors()) {
@@ -538,7 +538,7 @@ public class AdminController {
         return "redirect:/admin/day/assessments?id=" + request.getParameter("day");
     }
 
-    @PostMapping("/event/attendance")
+    @PostMapping("/day/attendance")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse setAttendance(@RequestParam final long id, @RequestParam final String value) {
@@ -721,18 +721,18 @@ public class AdminController {
         }
         model.addAttribute("years", yearRepository.findAll());
         if (year != null) {
-            model.addAttribute("events", year.getDays());
+            model.addAttribute("days", year.getDays());
             model.addAttribute("positions", year.getPositionValues());
             model.addAttribute("halls", year.getHalls());
         } else {
-            model.addAttribute("events", Collections.EMPTY_LIST);
+            model.addAttribute("days", Collections.EMPTY_LIST);
             model.addAttribute("positions", Collections.EMPTY_LIST);
             model.addAttribute("halls", Collections.EMPTY_LIST);
         }
-        if (!model.containsAttribute("newEvent")) {
+        if (!model.containsAttribute("newDay")) {
             final Day newDay = new Day();
             newDay.setYear(year);
-            model.addAttribute("newEvent", newDay);
+            model.addAttribute("newDay", newDay);
         }
         if (!model.containsAttribute("newPosition")) {
             model.addAttribute("newPosition", new PositionForm());
