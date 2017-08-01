@@ -9,19 +9,21 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Calendar;
-import com.google.api.services.calendar.model.CalendarList;
-import com.google.api.services.calendar.model.CalendarListEntry;
+import com.google.api.services.calendar.model.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.stereotype.Component;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import ru.ifmo.neerc.volunteers.repository.EventRepository;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,8 +36,7 @@ import java.util.stream.Collectors;
  * Created by Lapenok Akesej on 29.07.2017.
  */
 @Service
-@Component
-@RequiredArgsConstructor
+@RequiredArgsConstructor()
 public class CalendarServiceImpl implements CalendarService {
 
     private static final String APPLICATION_NAME = "Volunteers";
@@ -75,13 +76,16 @@ public class CalendarServiceImpl implements CalendarService {
     private final MessageSource messageSource;
     private final Locale locale = LocaleContextHolder.getLocale();
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final EventRepository eventRepository;
+
+    private com.google.api.services.calendar.Calendar service;
     private Map<ru.ifmo.neerc.volunteers.entity.Calendar, String> names;
 
-    //@PostConstruct
+    @PostConstruct
     @Override
     public void init() throws IOException {
         //Initialize calendar with valid OAuth credentials
-        com.google.api.services.calendar.Calendar service = new com.google.api.services.calendar.Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, authorize())
+        service = new com.google.api.services.calendar.Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, authorize())
                 .setApplicationName(APPLICATION_NAME).build();
 
         names = Arrays.stream(ru.ifmo.neerc.volunteers.entity.Calendar.values()).collect(Collectors.toMap(Function.identity(), calendar -> messageSource.getMessage("volunteers.calendar." + calendar.name().toLowerCase() + ".name", null, locale)));
@@ -111,5 +115,82 @@ public class CalendarServiceImpl implements CalendarService {
             }
         }
         logger.info("Google initialize done");
+
+    }
+
+    @Override
+    public String addEvent(ru.ifmo.neerc.volunteers.entity.Event myEvent) throws IOException {
+        Calendar calendar = calendarMap.get(myEvent.getCalendar());
+        Event event = new Event();
+
+        updateFields(event, myEvent);
+
+        event = service.events().insert(calendar.getId(), event).execute();
+        logger.info("Event created: " + event.getHtmlLink());
+        return event.getId();
+    }
+
+    @Override
+    public void updateEvent(ru.ifmo.neerc.volunteers.entity.Event myEvent) throws IOException {
+        Calendar calendar = calendarMap.get(myEvent.getCalendar());
+        Event event = service.events().get(calendar.getId(), myEvent.getEventId()).execute();
+
+        updateFields(event, myEvent);
+
+        service.events().update(calendar.getId(), myEvent.getEventId(), event);
+    }
+
+    private void updateFields(Event googleEvent, ru.ifmo.neerc.volunteers.entity.Event myEvent) {
+        googleEvent.setSummary(myEvent.getSummery())
+                .setLocation(myEvent.getLocation());
+
+        DateTime startDataTime = new DateTime(myEvent.getStart(), TimeZone.getDefault());
+        EventDateTime start = new EventDateTime()
+                .setDateTime(startDataTime)
+                .setTimeZone(TimeZone.getDefault().getID());
+        googleEvent.setStart(start);
+
+        DateTime endDateTime = new DateTime(myEvent.getEnd(), TimeZone.getDefault());
+        EventDateTime end = new EventDateTime()
+                .setDateTime(endDateTime)
+                .setTimeZone(TimeZone.getDefault().getID());
+        googleEvent.setEnd(end);
+    }
+
+    @Scheduled(fixedDelay = 5000)
+    public void synchronizeEvents() {
+        Collection<ru.ifmo.neerc.volunteers.entity.Event> allEvents = eventRepository.findAll();
+        Set<ru.ifmo.neerc.volunteers.entity.Event> events = allEvents.stream().filter(event -> !event.isSaved()).collect(Collectors.toSet());
+        Set<ru.ifmo.neerc.volunteers.entity.Event> forSave = new HashSet<>(events.size());
+        for (ru.ifmo.neerc.volunteers.entity.Event event : events) {
+            try {
+                event.setEventId(addEvent(event));
+                event.setSaved(true);
+                forSave.add(event);
+            } catch (IOException e) {
+                logger.error("Error, while add event: " + event.toString(), e);
+            }
+        }
+        events = allEvents.stream().filter(ru.ifmo.neerc.volunteers.entity.Event::isChanged).collect(Collectors.toSet());
+        for (ru.ifmo.neerc.volunteers.entity.Event event : events) {
+            try {
+                updateEvent(event);
+                event.setChanged(false);
+                forSave.add(event);
+            } catch (IOException e) {
+                logger.error("Error, while updated event: " + event.toString(), e);
+            }
+        }
+        eventRepository.save(forSave);
+
+        Set<ru.ifmo.neerc.volunteers.entity.Event> forDelete = allEvents.stream().filter(ru.ifmo.neerc.volunteers.entity.Event::isDeleted).collect(Collectors.toSet());
+        for (ru.ifmo.neerc.volunteers.entity.Event event : forDelete) {
+            try {
+                service.events().delete(calendarMap.get(event.getCalendar()).getId(), event.getEventId()).execute();
+            } catch (IOException e) {
+                logger.error("Error, while deleted event: " + event.toString(), e);
+            }
+        }
+        eventRepository.delete(forDelete);
     }
 }

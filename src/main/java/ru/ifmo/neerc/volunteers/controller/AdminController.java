@@ -21,7 +21,6 @@ import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
 import java.util.function.Function;
@@ -48,6 +47,7 @@ public class AdminController {
     private final MedalRepository medalRepository;
     private final ApplicationFormRepository applicationFormRepository;
     private final MessageSource messageSource;
+    private final EventRepository eventRepository;
     private final Locale locale = LocaleContextHolder.getLocale();
 
     @GetMapping
@@ -74,7 +74,7 @@ public class AdminController {
     @PostMapping("/position/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
-    JsonResponse addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, /*final RedirectAttributes attributes,*/ final Authentication authentication) {
+    JsonResponse addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, final Authentication authentication) {
         JsonResponse response = new JsonResponse();
         if (result.hasErrors()) {
             response.setStatus(Status.FAIL);
@@ -276,7 +276,7 @@ public class AdminController {
 
     @PostMapping("/day/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addEvent(@Valid @ModelAttribute("newEvent") final Day day, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
+    public String addEvent(@Valid @ModelAttribute("newDay") final Day day, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
         final User user = getUser(authentication);
         Year year = day.getYear();
         if (year == null) {
@@ -526,7 +526,7 @@ public class AdminController {
         return response;
     }
 
-    @PostMapping("/day/assessments/add")
+    /*@PostMapping("/day/assessments/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addAttendance(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, final RedirectAttributes attributes, final HttpServletRequest request) {
         if (result.hasErrors()) {
@@ -536,7 +536,7 @@ public class AdminController {
             userEventAssessmentRepository.save(assessment);
         }
         return "redirect:/admin/day/assessments?id=" + request.getParameter("day");
-    }
+    }*/
 
     @PostMapping("/day/attendance")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -568,7 +568,7 @@ public class AdminController {
     @PostMapping("/medals/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
-    JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final Medal medal, final BindingResult result, final RedirectAttributes attributes) {
+    JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final Medal medal, final BindingResult result) {
         JsonResponse response = new JsonResponse();
         try {
             if (result.hasErrors()) {
@@ -708,6 +708,53 @@ public class AdminController {
         setModel(model, getUser(authentication).getYear());
         model.addAttribute("table", assessments);
         return "detailedResult";
+    }
+
+    @GetMapping("/admin/event")
+    public String events(final Model model, Authentication authentication) {
+        setModel(model, getUser(authentication).getYear());
+        model.addAttribute("events", eventRepository.findAll());
+        return "event";
+    }
+
+    @PostMapping("/admin/event/add")
+    public @ResponseBody
+    JsonResponse addEvent(@Valid @ModelAttribute("newEvent") final Event event, final BindingResult result) {
+        JsonResponse response = new JsonResponse();
+        if (result.hasErrors()) {
+            response.setStatus(Status.FAIL);
+            response.setResult(result.getAllErrors());
+            return response;
+        }
+        eventRepository.save(event);
+        response.setStatus(Status.OK);
+        return response;
+    }
+
+    @PostMapping("/admin/event/delete")
+    public @ResponseBody
+    JsonResponse deleteEvent(@RequestParam("id") final long id) {
+        JsonResponse response = new JsonResponse();
+        Event event = eventRepository.findOne(id);
+        event.setDeleted(true);
+        eventRepository.save(event);
+        response.setStatus(Status.OK);
+        return response;
+    }
+
+    @PostMapping("/admin/event/update")
+    public @ResponseBody
+    JsonResponse updateEvent(@Valid @ModelAttribute("event") final Event event, final BindingResult result) {
+        JsonResponse response = new JsonResponse();
+        if (result.hasErrors()) {
+            response.setStatus(Status.FAIL);
+            response.setResult(result.getAllErrors());
+            return response;
+        }
+        event.setChanged(true);
+        eventRepository.save(event);
+        response.setStatus(Status.OK);
+        return response;
     }
 
     private User getUser(final Authentication authentication) {
