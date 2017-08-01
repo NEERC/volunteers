@@ -23,7 +23,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.ifmo.neerc.volunteers.repository.EventRepository;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,7 +80,7 @@ public class CalendarServiceImpl implements CalendarService {
     private com.google.api.services.calendar.Calendar service;
     private Map<ru.ifmo.neerc.volunteers.entity.Calendar, String> names;
 
-    @PostConstruct
+    //    @PostConstruct
     @Override
     public void init() throws IOException {
         //Initialize calendar with valid OAuth credentials
