@@ -47,7 +47,6 @@ public class AdminController {
     private final MedalRepository medalRepository;
     private final ApplicationFormRepository applicationFormRepository;
     private final MessageSource messageSource;
-    private final EventRepository eventRepository;
     private final Locale locale = LocaleContextHolder.getLocale();
 
     @GetMapping
@@ -708,53 +707,6 @@ public class AdminController {
         setModel(model, getUser(authentication).getYear());
         model.addAttribute("table", assessments);
         return "detailedResult";
-    }
-
-    @GetMapping("/admin/event")
-    public String events(final Model model, Authentication authentication) {
-        setModel(model, getUser(authentication).getYear());
-        model.addAttribute("events", eventRepository.findAll());
-        return "event";
-    }
-
-    @PostMapping("/admin/event/add")
-    public @ResponseBody
-    JsonResponse addEvent(@Valid @ModelAttribute("newEvent") final Event event, final BindingResult result) {
-        JsonResponse response = new JsonResponse();
-        if (result.hasErrors()) {
-            response.setStatus(Status.FAIL);
-            response.setResult(result.getAllErrors());
-            return response;
-        }
-        eventRepository.save(event);
-        response.setStatus(Status.OK);
-        return response;
-    }
-
-    @PostMapping("/admin/event/delete")
-    public @ResponseBody
-    JsonResponse deleteEvent(@RequestParam("id") final long id) {
-        JsonResponse response = new JsonResponse();
-        Event event = eventRepository.findOne(id);
-        event.setDeleted(true);
-        eventRepository.save(event);
-        response.setStatus(Status.OK);
-        return response;
-    }
-
-    @PostMapping("/admin/event/update")
-    public @ResponseBody
-    JsonResponse updateEvent(@Valid @ModelAttribute("event") final Event event, final BindingResult result) {
-        JsonResponse response = new JsonResponse();
-        if (result.hasErrors()) {
-            response.setStatus(Status.FAIL);
-            response.setResult(result.getAllErrors());
-            return response;
-        }
-        event.setChanged(true);
-        eventRepository.save(event);
-        response.setStatus(Status.OK);
-        return response;
     }
 
     private User getUser(final Authentication authentication) {
