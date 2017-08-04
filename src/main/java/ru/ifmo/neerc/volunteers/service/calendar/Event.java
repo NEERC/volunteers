@@ -29,4 +29,8 @@ public class Event {
         start = parser.parse(data.get("start"));
         end = parser.parse(data.get("end"));
     }
+
+    public Event(String str) {
+
+    }
 }

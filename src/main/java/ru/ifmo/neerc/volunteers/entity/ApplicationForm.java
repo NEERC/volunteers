@@ -39,6 +39,6 @@ public class ApplicationForm {
     private double experience;
 
     @OneToMany(mappedBy = "userYear")
-    @OrderBy("event ASC")
+    @OrderBy("day ASC")
     private List<UserDay> userDays;
 }
