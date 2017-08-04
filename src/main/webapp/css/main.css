@@ -2288,3 +2288,23 @@ body { /* Margin bottom by footer height */ margin-bottom: 60px; }
   border-bottom-left-radius: 0;
   border-right-width: 1px;
 }
+
+a:hover {
+  background: #ffffff; /*необходимо для IE6*/
+  text-decoration: none;
+}
+
+a.mytooltip span {
+  display: none;
+  padding: 2px 3px;
+  margin-left: 8px;
+  text-align: left;
+}
+
+a.mytooltip:hover span {
+  display: inline;
+  position: absolute;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  color: #6c6c6c;
+}
