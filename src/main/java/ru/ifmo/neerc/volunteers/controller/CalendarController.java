@@ -5,7 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.ifmo.neerc.volunteers.entity.Year;
 import ru.ifmo.neerc.volunteers.repository.YearRepository;
 import ru.ifmo.neerc.volunteers.service.calendar.CalendarService;
 
@@ -23,12 +22,20 @@ public class CalendarController {
     private final YearRepository yearRepository;
 
     @GetMapping("{id}")
-    public void getCalendar(@PathVariable final long id, HttpServletResponse response) throws IOException {
-        Year year = yearRepository.findOne(id);
-        response.getOutputStream().print(calendarService.getCalendar(year));
+    public void getCalendars(@PathVariable final long id, HttpServletResponse response) throws IOException {
+        response.getOutputStream().print(calendarService.getCalendars(id));
         response.setContentType("data:text/ics;charset=utf-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"calendar.ics\"");
 
         response.flushBuffer();
+    }
+
+    @GetMapping("{id}/{calendarName}")
+    public void getCalendar(@PathVariable final long id, @PathVariable final String calendarName, HttpServletResponse response) throws IOException {
+        response.getOutputStream().print(calendarService.getCalendar(id, calendarName));
+        response.setContentType("data:text/ics;charset=utf-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"calendar.ics\"");
+        response.flushBuffer();
+        ;
     }
 }
