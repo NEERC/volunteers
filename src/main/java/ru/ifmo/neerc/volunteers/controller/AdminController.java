@@ -504,9 +504,8 @@ public class AdminController {
         event(id, model, authentication);
         final Day day = dayRepository.findOne(id);
         model.addAttribute("assessment", true);
-        model.addAttribute("assessments", day.getAssessments());
+        model.addAttribute("assessments", day.getUsers().stream().map(UserDay::getAssessments).flatMap(Collection::stream).collect(Collectors.toSet()));
         if (!model.containsAttribute("newAssessment")) {
-            final Assessment assessment = new Assessment();
             model.addAttribute("newAssessment", new Assessment());
         }
         return "showEvent";
