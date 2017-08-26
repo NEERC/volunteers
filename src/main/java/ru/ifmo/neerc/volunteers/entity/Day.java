@@ -15,8 +15,8 @@ import java.util.Set;
  */
 @Data
 @Entity
-@EqualsAndHashCode(exclude = {"year", "users", "assessments"})
-@ToString(exclude = {"year", "users", "assessments"})
+@EqualsAndHashCode(exclude = {"year", "users"})
+@ToString(exclude = {"year", "users"})
 public class Day {
 
     @Id
@@ -40,10 +40,6 @@ public class Day {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "day")
     @OrderBy("id ASC")
     Set<UserDay> users;
-
-    /*@OneToMany(fetch = FetchType.LAZY, mappedBy = "day")
-    @OrderBy("id ASC")
-    Set<Assessment> assessments;*/
 
     public void addUser(final UserDay ue) {
         if (ue != null) {
