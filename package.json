@@ -5,6 +5,7 @@
   "description": "NEERC volunteers",
   "dependencies": {
     "bootstrap-sass": "latest",
-    "jquery": "latest"
+    "jquery": "latest",
+    "jquery-validation": "latest"
   }
 }

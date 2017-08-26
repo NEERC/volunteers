@@ -1,5 +1,6 @@
 package ru.ifmo.neerc.volunteers.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -13,7 +14,8 @@ import javax.persistence.ManyToOne;
  */
 @Entity
 @Data
-public class UserEventAssessment {
+@JsonIgnoreProperties(value = {"day", "user"})
+public class Assessment {
 
     @Id
     @GeneratedValue
@@ -22,8 +24,8 @@ public class UserEventAssessment {
     @NotEmpty
     String comment;
 
-    int value;
+    double value;
 
     @ManyToOne
-    Event event;
+    UserDay user;
 }

@@ -1,11 +1,11 @@
 package ru.ifmo.neerc.volunteers.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -13,8 +13,10 @@ import java.util.Set;
  */
 @Entity
 @Data
-@ToString(exclude = {"event","id"})
-public class UserEvent {
+@ToString(exclude = {"day", "id", "assessments"})
+@EqualsAndHashCode(exclude = {"assessments"})
+@JsonIgnoreProperties(value = {"day", "userYear"})
+public class UserDay {
     @Id
     @GeneratedValue
     long id;
@@ -23,20 +25,20 @@ public class UserEvent {
     @ManyToOne
     ApplicationForm userYear;
 
-    @JoinColumn(name = "event")
+    @JoinColumn(name = "day")
     @ManyToOne
-    Event event;
+    Day day;
 
     @ManyToOne
     @JoinColumn(name = "position")
     PositionValue position;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    Set<UserEventAssessment> assessments;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    Set<Assessment> assessments;
 
     @ManyToOne
     Hall hall;
 
     @Enumerated(EnumType.STRING)
-    Attendance attendance;
+    Attendance attendance = Attendance.UNKNOWN;
 }

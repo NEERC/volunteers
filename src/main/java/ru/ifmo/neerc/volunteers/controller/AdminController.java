@@ -1,22 +1,8 @@
 package ru.ifmo.neerc.volunteers.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
-import org.apache.commons.collections.CollectionUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -24,39 +10,30 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
-
-import lombok.AllArgsConstructor;
-import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
-import ru.ifmo.neerc.volunteers.entity.Attendance;
-import ru.ifmo.neerc.volunteers.entity.Event;
-import ru.ifmo.neerc.volunteers.entity.Hall;
-import ru.ifmo.neerc.volunteers.entity.Medal;
-import ru.ifmo.neerc.volunteers.entity.Position;
-import ru.ifmo.neerc.volunteers.entity.PositionValue;
-import ru.ifmo.neerc.volunteers.entity.Role;
-import ru.ifmo.neerc.volunteers.entity.User;
-import ru.ifmo.neerc.volunteers.entity.UserEvent;
-import ru.ifmo.neerc.volunteers.entity.UserEventAssessment;
-import ru.ifmo.neerc.volunteers.entity.Year;
+import org.thymeleaf.util.StringUtils;
+import ru.ifmo.neerc.volunteers.entity.*;
+import ru.ifmo.neerc.volunteers.form.HallForm;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
-import ru.ifmo.neerc.volunteers.repository.ApplicationFormRepository;
-import ru.ifmo.neerc.volunteers.repository.EventRepository;
-import ru.ifmo.neerc.volunteers.repository.HallRepository;
-import ru.ifmo.neerc.volunteers.repository.MedalRepository;
-import ru.ifmo.neerc.volunteers.repository.PositionRepository;
-import ru.ifmo.neerc.volunteers.repository.PositionValueRepository;
-import ru.ifmo.neerc.volunteers.repository.RoleRepository;
-import ru.ifmo.neerc.volunteers.repository.UserEventAssessmentRepository;
-import ru.ifmo.neerc.volunteers.repository.UserEventRepository;
-import ru.ifmo.neerc.volunteers.repository.UserRepository;
-import ru.ifmo.neerc.volunteers.repository.YearRepository;
+import ru.ifmo.neerc.volunteers.modal.JsonResponse;
+import ru.ifmo.neerc.volunteers.modal.Status;
+import ru.ifmo.neerc.volunteers.repository.*;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by Lapenok Akesej on 25.02.2017.
@@ -68,28 +45,29 @@ import ru.ifmo.neerc.volunteers.repository.YearRepository;
 @AllArgsConstructor
 public class AdminController {
 
-    YearRepository yearRepository;
-    EventRepository eventRepository;
-    PositionRepository positionRepository;
-    HallRepository hallRepository;
-    UserEventRepository userEventRepository;
-    UserRepository userRepository;
-    PositionValueRepository positionValueRepository;
-    RoleRepository roleRepository;
-    UserEventAssessmentRepository userEventAssessmentRepository;
-    MedalRepository medalRepository;
-    ApplicationFormRepository applicationFormRepository;
-    MessageSource messageSource;
+    private final YearRepository yearRepository;
+    private final DayRepository dayRepository;
+    private final HallRepository hallRepository;
+    private final UserEventRepository userEventRepository;
+    private final UserRepository userRepository;
+    private final PositionValueRepository positionValueRepository;
+    private final RoleRepository roleRepository;
+    private final UserEventAssessmentRepository userEventAssessmentRepository;
+    private final MedalRepository medalRepository;
+    private final ApplicationFormRepository applicationFormRepository;
+    private final MessageSource messageSource;
+    private final Locale locale = LocaleContextHolder.getLocale();
+    private final ServletContext context;
 
     @GetMapping
     public String admin(final Model model, final Authentication authentication) {
         final User user = getUser(authentication);
         if (user.getYear() != null) {
-            return "redirect:/admin/year?id=" + user.getYear().getId();
+            return "redirect:/admin/year/" + user.getYear().getId();
         }
         final List<Year> years = yearRepository.findAll();
         if (years.size() != 0) {
-            return "redirect:/admin/year?id=" + years.get(years.size() - 1).getId();
+            return "redirect:/admin/year/" + years.get(years.size() - 1).getId();
         }
         setModel(model, null);
         return "admin";
@@ -102,89 +80,139 @@ public class AdminController {
         return "position";
     }
 
-    @RequestMapping(value = "/position/add", method = RequestMethod.POST)
+    @PostMapping("/position/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
-        final User user = getUser(authentication);
-        final Year year = user.getYear();
+    public @ResponseBody
+    JsonResponse addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, final Authentication authentication) {
+        JsonResponse response = new JsonResponse();
         if (result.hasErrors()) {
-            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newPosition", result);
-            attributes.addFlashAttribute("newPosition", positionForm);
+            response.setStatus(Status.FAIL);
+            response.setResult(result.getAllErrors());
+            /*attributes.addFlashAttribute("org.springframework.validation.BindingResult.newPosition", result);
+            attributes.addFlashAttribute("newPosition", positionForm);*/
         } else {
-            final Position position = new Position(positionForm);
-            positionRepository.save(position);
-            final PositionValue positionValue = new PositionValue(position, year, positionForm.getValue());
+            final User user = getUser(authentication);
+            final Year year = user.getYear();
+            final PositionValue positionValue = new PositionValue(positionForm, year);
             positionValueRepository.save(positionValue);
+            response.setStatus(Status.OK);
+            response.setResult(positionValue);
         }
-        return "redirect:/admin/position";
+        return response;
     }
 
-    @RequestMapping(value = "/position/values", method = RequestMethod.POST)
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String setPositionValues(final HttpServletRequest request, final Authentication authentication) {
-        final Year year = getUser(authentication).getYear();
-        final Set<PositionValue> positionValues = year.getPositionValues();
-        for (final PositionValue positionValue : positionValues) {
-            final Double value = Double.parseDouble(request.getParameter("v" + positionValue.getId()));
+    @PostMapping("/position/value")
+    public @ResponseBody
+    JsonResponse setPositionValue(@RequestParam final long id, @RequestParam final double value) {
+        JsonResponse response = new JsonResponse();
+        try {
+            PositionValue positionValue = positionValueRepository.findOne(id);
             if (positionValue.getValue() != value) {
                 positionValue.setValue(value);
                 positionValueRepository.save(positionValue);
             }
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
         }
-        return "redirect:/admin/position";
+        return response;
+
     }
 
-    @RequestMapping(value = "/position/delete")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deletePosition(@RequestParam("id") final long id, final RedirectAttributes attributes, final Locale locale) {
-        final Position position = positionValueRepository.findOne(id).getPosition();
-        if (position.getId() != 1) {
+    @PostMapping("/position/delete")
+    //@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public @ResponseBody
+    JsonResponse deletePosition(@RequestParam final long id) {
+        final PositionValue position = positionValueRepository.findOne(id);
+        JsonResponse result = new JsonResponse();
+        if (position != null && !position.isDef()) {
             try {
                 positionValueRepository.delete(id);
+                result.setStatus(Status.OK);
+                result.setResult("");
             } catch (final Exception e) {
-                attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", locale));
+                result.setStatus(Status.FAIL);
+                result.setResult(messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", locale));
             }
+        } else {
+            result.setStatus(Status.FAIL);
+            result.setResult("Error!!!");
         }
-        return "redirect:/admin/position";
+        return result;
     }
 
-    @RequestMapping(value = "/hall/delete")
+    @PostMapping("/hall/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deleteHall(@RequestParam("id") final long id, final RedirectAttributes attributes, final Locale locale) {
+    public @ResponseBody
+    JsonResponse deleteHall(@RequestParam final long id) {
+        JsonResponse response = new JsonResponse();
         try {
-            if (id != 1L) {
+            if (!hallRepository.findOne(id).isDef()) {
                 hallRepository.delete(id);
+                response.setStatus(Status.OK);
+            } else {
+                response.setStatus(Status.FAIL);
             }
         } catch (final Exception e) {
             final Hall hall = hallRepository.findOne(id);
-            attributes.addFlashAttribute("message", messageSource.getMessage("volunteers.hall.error.delete", new Object[]{hall.getName()}, "Error to delete hall", locale));
+            response.setStatus(Status.FAIL);
+            response.setResult(messageSource.getMessage("volunteers.hall.error.delete", new Object[]{hall.getName()}, "Error to delete hall", locale));
         }
-        return "redirect:/admin/hall";
+        return response;
     }
 
-    @RequestMapping(value = "/hall")
+    @GetMapping("/hall")
     public String hall(final Model model, final Authentication authentication) {
         setModel(model, getUser(authentication).getYear());
         model.addAttribute("title", "Halls");
         return "hall";
     }
 
-    @RequestMapping(value = "/hall/add", method = RequestMethod.POST)
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addHall(@Valid @ModelAttribute("newHall") final Hall hall, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
-        final User user = getUser(authentication);
-        final Year year = user.getYear();
-        if (result.hasErrors()) {
-            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newHall", result);
-            attributes.addFlashAttribute("newHall", hall);
-        } else {
-            hall.setYear(year);
-            hallRepository.save(hall);
+    @PostMapping("hall/edit")
+    public @ResponseBody
+    JsonResponse editHall(@RequestParam final long id, @RequestParam final String name, @RequestParam final String description) {
+        JsonResponse response = new JsonResponse();
+        try {
+            Hall hall = hallRepository.findOne(id);
+            boolean isChanged = false;
+            if (!description.isEmpty() && !hall.getDescription().equals(description)) {
+                hall.setDescription(description);
+                isChanged = true;
+            }
+            if (!name.isEmpty() && !hall.getName().equals(name)) {
+                hall.setName(name);
+                isChanged = true;
+            }
+            if (isChanged) {
+                hallRepository.save(hall);
+            }
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
         }
-        return "redirect:/admin/hall";
+        return response;
     }
 
-    @RequestMapping(value = "/year/add", method = RequestMethod.POST)
+    @PostMapping("/hall/add")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public @ResponseBody
+    JsonResponse addHall(@Valid @ModelAttribute("newHall") final HallForm hall, final BindingResult result, final Authentication authentication) {
+        JsonResponse response = new JsonResponse();
+        if (result.hasErrors()) {
+            response.setStatus(Status.FAIL);
+            response.setResult(result.getAllErrors());
+        } else {
+            final Year year = getUser(authentication).getYear();
+            Hall newHall = new Hall(hall, year);
+            hallRepository.save(newHall);
+            response.setStatus(Status.OK);
+            response.setResult(newHall);
+        }
+        return response;
+    }
+
+    @PostMapping("/year/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addYear(@Valid @ModelAttribute("newYear") final Year year, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
         final Year yearOld = getUser(authentication).getYear();
@@ -192,19 +220,18 @@ public class AdminController {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newYear", result);
             attributes.addFlashAttribute("newYear", year);
             if (yearOld != null) {
-                return "redirect:/admin/year?id=" + yearOld.getId();
+                return "redirect:/admin/year/" + yearOld.getId();
             } else {
                 return "redirect:/admin";
             }
         }
-        final Set<Position> positions = positionRepository.findAll();
-        year.setOpenForRegistration(true);
+        year.setOpenForRegistration(false);
         yearRepository.save(year);
-        if (yearOld != null) {
+        /*if (yearOld != null) {
             final Set<PositionValue> positionValuesOld = yearOld.getPositionValues();
             final Map<Long, Double> positionValueMap = new HashMap<>();
             for (final PositionValue positionValue : positionValuesOld) {
-                positionValueMap.put(positionValue.getPosition().getId(), positionValue.getValue());
+                positionValueMap.put(positionValue.getId(), positionValue.getValue());
             }
 
             final Set<PositionValue> positionValues = new HashSet<>();
@@ -221,20 +248,22 @@ public class AdminController {
                 positionValues.add(new PositionValue(position, year, 0));
             }
             positionValueRepository.save(positionValues);
-        }
-        return "redirect:/admin/year?id=" + year.getId();
+        }*/
+        return "redirect:/admin/year/" + year.getId();
     }
 
-    @RequestMapping(value = "/year/close")
-    public String closeYear(final Authentication authentication) {
-        final Year year = getUser(authentication).getYear();
-        year.setOpenForRegistration(false);
+    @PostMapping("/year/close")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public String closeYear(@RequestParam final long id, @RequestParam final boolean isOpen) {
+
+        final Year year = yearRepository.findOne(id);
+        year.setOpenForRegistration(isOpen);
         yearRepository.save(year);
-        return "redirect:/admin/year?id=" + year.getId();
+        return "redirect:/admin/year/" + year.getId();
     }
 
-    @RequestMapping(value = "/year")
-    public String showYear(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+    @GetMapping("/year/{id}")
+    public String showYear(@PathVariable final long id, final Model model, final Authentication authentication) {
         final User user = getUser(authentication);
 
         final Year year = yearRepository.findOne(id);
@@ -245,93 +274,106 @@ public class AdminController {
         setModel(model, year);
         final Set<ApplicationForm> users = year.getUsers();
         model.addAttribute("users", users);
-        /*if (!model.containsAttribute("event")) {
-            Event event = new Event();
-            event.setYear(year);
-            model.addAttribute("event", event);
+        /*if (!model.containsAttribute("day")) {
+            Day day = new Day();
+            day.setYear(year);
+            model.addAttribute("day", day);
         }*/
         model.addAttribute("title", year.getName());
         return "year";
     }
 
-    @RequestMapping(value = "/event/add")
+    @PostMapping("/day/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addEvent(@Valid @ModelAttribute("newEvent") final Event event, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
+    public String addEvent(@Valid @ModelAttribute("newDay") final Day day, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
         final User user = getUser(authentication);
-        Year year = event.getYear();
+        Year year = day.getYear();
         if (year == null) {
             year = user.getYear();
-            event.setYear(year);
+            day.setYear(year);
         }
         if (result.hasErrors()) {
             if (year != null) {
                 attributes.addFlashAttribute("org.springframework.validation.BindingResult.newEvent", result);
-                attributes.addFlashAttribute("newEvent", event);
-                return "redirect:/admin/year?id=" + year.getId();
+                attributes.addFlashAttribute("newEvent", day);
+                return "redirect:/admin/year/" + year.getId();
             } else {
                 return "redirect:/admin";
             }
         }
-        eventRepository.save(event);
+        dayRepository.save(day);
         final Set<ApplicationForm> users = year.getUsers();
-        event.setUsers(new HashSet<>());
+        day.setUsers(new HashSet<>());
         final PositionValue positionValue = findOrCreateDefaultPosition(year);
-        final Hall hall = hallRepository.findOne(1L);//default hall
-        final List<UserEvent> userEvents = new ArrayList<>();
-        final PositionValue finalPositionValue = positionValue;
+        final Hall hall = findOrCreateDefaultHall(year);
+        final List<UserDay> userDays = new ArrayList<>();
         users.forEach(applicationForm -> {
-            final UserEvent userEvent = new UserEvent();
-            userEvent.setEvent(event);
-            userEvent.setHall(hall);
-            userEvent.setPosition(finalPositionValue);
-            userEvent.setUserYear(applicationForm);
-            userEvent.setAttendance(Attendance.YES);
-            userEvents.add(userEvent);
+            final UserDay userDay = new UserDay();
+            userDay.setDay(day);
+            userDay.setHall(hall);
+            userDay.setPosition(positionValue);
+            userDay.setUserYear(applicationForm);
+            userDays.add(userDay);
         });
-        userEventRepository.save(userEvents);
-        return "redirect:/admin/event?id=" + event.getId();
+        userEventRepository.save(userDays);
+        return "redirect:/admin/day/" + day.getId() + "/";
     }
 
     private PositionValue findOrCreateDefaultPosition(final Year year) {
         PositionValue positionValue = null;
         for (final PositionValue positionValue1 : year.getPositionValues()) {
-            if (positionValue1.getPosition().isDef()) {
+            if (positionValue1.isDef()) {
                 positionValue = positionValue1;
             }
         }
         if (positionValue == null) {
-            positionValue = new PositionValue(positionRepository.findOne(1L), year, 0);
+            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "Reserve", locale), true, 0, year);
             positionValueRepository.save(positionValue);
         }
         return positionValue;
     }
 
-    @RequestMapping(value = "event")
-    public String event(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+    private Hall findOrCreateDefaultHall(final Year year) {
+        Hall hall = null;
+        for (final Hall hall1 : year.getHalls()) {
+            if (hall1.isDef())
+                hall = hall1;
+        }
+        if (hall == null) {
+            hall = new Hall(messageSource.getMessage("volunteers.reserve.hall", null, "Reserve", locale), true, "", year);
+            hallRepository.save(hall);
+        }
+        return hall;
+    }
+
+    @GetMapping("day/{id}")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public String event(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
-        final Event currentEvent = eventRepository.findOne(id);
+        final Day currentDay = dayRepository.findOne(id);
         setModel(model, year);
         final Set<ApplicationForm> yearUsers = new HashSet<>(year.getUsers());
-        yearUsers.removeAll(currentEvent.getUsers().stream().map(UserEvent::getUserYear).collect(Collectors.toSet()));
-        final Hall reserve = hallRepository.findOne(1L);
+        yearUsers.removeAll(currentDay.getUsers().stream().map(UserDay::getUserYear).collect(Collectors.toSet()));
+        final Hall reserve = findOrCreateDefaultHall(year);
 
         final PositionValue defaultPosition = findOrCreateDefaultPosition(year);
 
         userEventRepository.save(yearUsers.stream().map(af -> {
-            final UserEvent ue = new UserEvent();
+            final UserDay ue = new UserDay();
             ue.setUserYear(af);
             ue.setHall(reserve);
             ue.setPosition(defaultPosition);
-            ue.setAttendance(Attendance.YES );
-            currentEvent.addUser(ue);
+            currentDay.addUser(ue);
             return ue;
         }).collect(Collectors.toList()));
 
-        final Event event = eventRepository.save(currentEvent);
+        final Day day = dayRepository.save(currentDay);
 
 
-        final HashMap<Hall, List<UserEvent>> hallUser = new HashMap<>(
-                event.getUsers().stream().collect(Collectors.groupingBy(ue -> ue.getHall())));
+        final HashMap<Hall, List<UserDay>> hallUser = new HashMap<>(
+                day.getUsers().stream().collect(Collectors.groupingBy(UserDay::getHall)));
+        hallUser.forEach((u, v) -> v.sort(Comparator.comparing(lst -> lst.getPosition().getName())));
+
 
         final Set<Hall> halls = year.getHalls();
         hallUser.putAll(halls.stream()
@@ -339,64 +381,73 @@ public class AdminController {
                 .collect(Collectors.toMap(Function.identity(), hall -> new ArrayList<>())));
 
         model.addAttribute("hallUser", hallUser);
-        model.addAttribute("event", event);
+        model.addAttribute("day", day);
         model.addAttribute("halls", halls);
-        model.addAttribute("title", event.getName());
+        model.addAttribute("title", day.getName());
+
+        Map<Attendance, String> attendanceMap = getAttendaceMap();
+        model.addAttribute("attendanceMap", attendanceMap);
         return "showEvent";
     }
 
-    @RequestMapping(value = "/event/edit")
-    public String editEvent(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+    private Map<Attendance, String> getAttendaceMap() {
+        return new HashMap<>(Arrays.stream(Attendance.values())
+                .collect(Collectors.toMap(Function.identity(), attendance -> messageSource.getMessage("volunteers.attendance." + attendance.name().toLowerCase(), null, attendance.name(), locale))));
+    }
+
+    @GetMapping("/day/{id}/edit")
+    public String editEvent(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final Year year = getUser(authentication).getYear();
-        final Event event = eventRepository.findOne(id);
+        final Day day = dayRepository.findOne(id);
         setModel(model, year);
-        model.addAttribute("event", event);
-        model.addAttribute("users", event.getUsers());
-        return "event";
+        model.addAttribute("day", day);
+        model.addAttribute("users", day.getUsers());
+        return "day";
     }
 
-    @RequestMapping(value = "/event/save")
+    @PostMapping("/day/save")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String save(final HttpServletRequest request) {
-        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        final Set<UserEvent> users = event.getUsers();
-        final Set<UserEvent> forSave = new HashSet<>();
-        for (final UserEvent user : users) {
-            boolean flage = false;
-            final long newIdPosition = Long.parseLong(request.getParameter("p" + user.getId()));
-            long newIdHall = user.getHall().getId();
-            if (request.getParameter("h" + user.getId()) != null) {
-                newIdHall = Long.parseLong(request.getParameter("h" + user.getId()));
+    public @ResponseBody
+    JsonResponse save(@RequestParam final long userId, @RequestParam final long hallId, @RequestParam final long positionId) {
+        JsonResponse response = new JsonResponse();
+        try {
+            UserDay user = userEventRepository.findOne(userId);
+            PositionValue positionValue = positionId == -1 ? user.getPosition() : positionValueRepository.findOne(positionId);
+            Hall hall = hallId == -1 ? user.getHall() : hallRepository.findOne(hallId);
+            boolean isChanged = false;
+            if (!user.getHall().equals(hall)) {
+                user.setHall(hall);
+                isChanged = true;
             }
-            if (user.getPosition().getId() != newIdPosition) {
-                user.setPosition(positionValueRepository.findOne(newIdPosition));
-                flage = true;
+            if (!user.getPosition().equals(positionValue)) {
+                user.setPosition(positionValue);
+                isChanged = true;
             }
-            if (user.getHall().getId() != newIdHall) {
-                user.setHall(hallRepository.findOne(newIdHall));
-                flage = true;
+            if (isChanged) {
+                userEventRepository.save(user);
             }
-            if (flage) {
-                forSave.add(user);
-            }
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setResult(e.getMessage());
+            response.setStatus(Status.FAIL);
         }
-        userEventRepository.save(forSave);
-        return "redirect:/admin/event?id=" + event.getId();
+        return response;
     }
 
-    @RequestMapping(value = "/event/copy")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String copy(final HttpServletRequest request) {
-        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        if (Long.parseLong(request.getParameter("baseEvent")) != -1) {
-            final Event baseEvent = eventRepository.findOne(Long.parseLong(request.getParameter("baseEvent")));
-            final Map<Long, UserEvent> userEventBase = new HashMap<>();
-            for (final UserEvent userEvent : baseEvent.getUsers()) {
-                userEventBase.put(userEvent.getUserYear().getId(), userEvent);
+    @PostMapping("/day/copy")
+    public @ResponseBody
+    JsonResponse copy(@RequestParam final long eventId, @RequestParam final long baseEventId) {
+        JsonResponse response = new JsonResponse();
+        try {
+            final Day day = dayRepository.findOne(eventId);
+            final Day baseDay = dayRepository.findOne(baseEventId);
+            final Map<Long, UserDay> userEventBase = new HashMap<>();
+            for (final UserDay userDay : baseDay.getUsers()) {
+                userEventBase.put(userDay.getUserYear().getId(), userDay);
             }
-            final Set<UserEvent> users = event.getUsers();
-            final Set<UserEvent> savedUsers = new HashSet<>();
-            for (final UserEvent user : users) {
+            final Set<UserDay> users = day.getUsers();
+            final Set<UserDay> savedUsers = new HashSet<>();
+            for (final UserDay user : users) {
                 final Long form = user.getUserYear().getId();
                 if (userEventBase.get(form) != null) {
                     boolean needToSave = false;
@@ -414,110 +465,104 @@ public class AdminController {
                 }
             }
             userEventRepository.save(savedUsers);
+            response.setStatus(Status.OK);
+            response.setResult(dayRepository.findOne(eventId));
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
         }
-        return "redirect:/admin/event/?id=" + event.getId();
+        return response;
     }
 
-    @RequestMapping(value = "/add")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addAdmin(final HttpServletRequest request) {
-        final Long id = Long.parseLong(request.getParameter("newAdmin"));
-        final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
-        final User user = userRepository.findOne(id);
-        user.setRole(roleAdmin);
-        userRepository.save(user);
-        return "redirect:/admin";
+    @PostMapping("/add")
+    public @ResponseBody
+    JsonResponse addAdmin(@RequestParam final long userId) {
+        JsonResponse response = new JsonResponse();
+        try {
+            final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
+            final User user = userRepository.findOne(userId);
+            user.setRole(roleAdmin);
+            userRepository.save(user);
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
+        }
+        return response;
     }
 
-    @RequestMapping(value = "/event/attendance", method = RequestMethod.GET)
-    public String attendance(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+    @GetMapping("/day/{id}/attendance")
+    public String attendance(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
         model.addAttribute("attendances", Attendance.values());
         model.addAttribute("attendance", true);
         return "showEvent";
     }
 
-    @RequestMapping(value = "/event/assessments", method = RequestMethod.GET)
-    public String assessments(@RequestParam(value = "id") final long id, final Model model, final Authentication authentication) {
+    @GetMapping("/day/{id}/assessments")
+    public String assessments(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
-        final Event event = eventRepository.findOne(id);
+        final Day day = dayRepository.findOne(id);
         model.addAttribute("assessment", true);
-        model.addAttribute("assessments", event.getAssessments());
+        model.addAttribute("assessments", day.getUsers().stream().map(UserDay::getAssessments).flatMap(Collection::stream).collect(Collectors.toSet()));
         if (!model.containsAttribute("newAssessment")) {
-            final UserEventAssessment assessment = new UserEventAssessment();
-            assessment.setEvent(event);
-            model.addAttribute("newAssessment", new UserEventAssessment());
+            model.addAttribute("newAssessment", new Assessment());
         }
         return "showEvent";
     }
 
-    @RequestMapping(value = "/event/assessments", method = RequestMethod.POST)
+    @PostMapping("/day/assessments")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String setAssessments(final HttpServletRequest request) {
-        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        final Set<UserEventAssessment> userEventAssessments = new HashSet<>();
-        final Iterable<UserEventAssessment> assessments = event.getAssessments();
-        for (final UserEventAssessment assessment : assessments) {
-            final int val = Integer.parseInt(request.getParameter("assessmentValue" + assessment.getId()));
-            if (assessment.getValue() != val) {
-                assessment.setValue(val);
-                userEventAssessments.add(assessment);
+    public @ResponseBody
+    JsonResponse setAssessments(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, @RequestParam final long userId) {
+        JsonResponse response = new JsonResponse();
+        try {
+            if (result.hasErrors()) {
+                response.setStatus(Status.FAIL);
+                response.setResult(result.getAllErrors());
             }
+            UserDay user = userEventRepository.findOne(userId);
+            assessment.setUser(user);
+            userEventAssessmentRepository.save(assessment);
+            response.setStatus(Status.OK);
+            response.setResult(assessment);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
         }
-        userEventAssessmentRepository.save(userEventAssessments);
-
-
-        final Set<UserEvent> users = new HashSet<>();
-        for (final UserEvent user : event.getUsers()) {
-            userEventRepository.save(user);
-            final Set<UserEventAssessment> assessmentSet = new HashSet<>();
-            for (final UserEventAssessment assessment : assessments) {
-                final boolean chosen = request.getParameter("assessment" + assessment.getId() + "user" + user.getId()) != null;
-                if (chosen) {
-                    assessmentSet.add(assessment);
-                }
-            }
-            if (!CollectionUtils.isEqualCollection(user.getAssessments(), assessmentSet)) {
-                user.getAssessments().clear();
-                user.getAssessments().addAll(assessmentSet);
-                users.add(user);
-            }
-        }
-        if (!users.isEmpty()) {
-            userEventRepository.save(users);
-        }
-        return "redirect:/admin/event?id=" + request.getParameter("event");
+        return response;
     }
 
-    @RequestMapping(value = "/event/assessments/add", method = RequestMethod.POST)
+    /*@PostMapping("/day/assessments/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addAttendance(@Valid @ModelAttribute("newAssessment") final UserEventAssessment assessment, final BindingResult result, final RedirectAttributes attributes, final HttpServletRequest request) {
+    public String addAttendance(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, final RedirectAttributes attributes, final HttpServletRequest request) {
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newAssessment", result);
             attributes.addFlashAttribute("newAssessment", assessment);
         } else {
             userEventAssessmentRepository.save(assessment);
         }
-        return "redirect:/admin/event/assessments?id=" + request.getParameter("event");
-    }
+        return "redirect:/admin/day/assessments?id=" + request.getParameter("day");
+    }*/
 
-    @RequestMapping(value = "/event/attendance", method = RequestMethod.POST)
+    @PostMapping("/day/attendance")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String setAttendance(final HttpServletRequest request) {
-        final Event event = eventRepository.findOne(Long.parseLong(request.getParameter("event")));
-        final Set<UserEvent> users = new HashSet<>();
-        for (final UserEvent user : event.getUsers()) {
-            final String val = request.getParameter("attendance" + user.getId());
-            if (!val.equals("NONE")) {
-                user.setAttendance(Attendance.valueOf(val));
-                users.add(user);
-            }
+    public @ResponseBody
+    JsonResponse setAttendance(@RequestParam final long id, @RequestParam final String value) {
+        JsonResponse response = new JsonResponse();
+        try {
+            UserDay user = userEventRepository.findOne(id);
+            user.setAttendance(Attendance.valueOf(value));
+            userEventRepository.save(user);
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
         }
-        userEventRepository.save(users);
-        return "redirect:/admin/event?id=" + request.getParameter("event");
+        return response;
     }
 
-    @RequestMapping(value = "/medals")
+    @GetMapping(value = "/medals")
     public String medals(final Model model, final Authentication authentication) {
         setModel(model, getUser(authentication).getYear());
         model.addAttribute("medals", medalRepository.findAll());
@@ -527,44 +572,72 @@ public class AdminController {
         return "medals";
     }
 
-    @RequestMapping(value = "/medals/add", method = RequestMethod.POST)
+    @PostMapping("/medals/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addMedals(@Valid @ModelAttribute("newMedal") final Medal medal, final BindingResult result, final RedirectAttributes attributes) {
-        if (result.hasErrors()) {
-            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newMedal", result);
-            attributes.addFlashAttribute("newMedal", medal);
-        } else {
-            medalRepository.save(medal);
+    public @ResponseBody
+    JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final Medal medal, final BindingResult result) {
+        JsonResponse response = new JsonResponse();
+        try {
+            if (result.hasErrors()) {
+                response.setStatus(Status.FAIL);
+                response.setResult(result.getAllErrors());
+            } else {
+                medalRepository.save(medal);
+                response.setResult(medal);
+                response.setStatus(Status.OK);
+            }
+        } catch (Exception e) {
+            response.setResult(e.getMessage());
+            response.setStatus(Status.FAIL);
         }
-        return "redirect:/admin/medals";
+        return response;
     }
 
-    @RequestMapping(value = "/medals/delete")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String deleteMedal(@RequestParam("id") final long id) {
-        medalRepository.delete(id);
-        return "redirect:/admin/medals";
+    @PostMapping("/medals/delete")
+    public @ResponseBody
+    JsonResponse deleteMedal(@RequestParam("id") final long id) {
+        JsonResponse response = new JsonResponse();
+        try {
+            medalRepository.delete(id);
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
+        }
+        return response;
     }
 
-    @RequestMapping(value = "/results", method = RequestMethod.GET)
+    @GetMapping("/results")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String showResults(final Model model, final Authentication authentication, final Locale locale) {
         final Year year = getUser(authentication).getYear();
         final Set<ApplicationForm> users = year.getUsers();
         final Set<ApplicationForm> needToSave = new HashSet<>();
-        final int countEvents = year.getEvents().size();
+        final int countEvents = year.getDays().size();
         final Map<Long, Integer> assessments = new HashMap<>();
+        final Map<Long, List<String>> assessmentsGroupByDays = new HashMap<>();
         final Map<Long, Double> experience = new HashMap<>();
+        final Map<ApplicationForm, Set<Hall>> halls = new HashMap<>();
         for (final ApplicationForm user : users) {
             double exp = 0;
             double totalExp = 0;
             final int[] assessment = {0};
-            for (final UserEvent userEvent : user.getUserEvents()) {
-                if (userEvent.getAttendance() == Attendance.YES || userEvent.getAttendance() == Attendance.LATE) {
-                    exp += userEvent.getPosition().getValue() / countEvents;
+            assessmentsGroupByDays.put(user.getId(), new ArrayList<>());
+            halls.put(user, new HashSet<>());
+            for (final UserDay userDay : user.getUserDays()) {
+                if (userDay.getAttendance() == Attendance.YES || userDay.getAttendance() == Attendance.LATE) {
+                    exp += userDay.getPosition().getValue() / countEvents;
                 }
-                userEvent.getAssessments().forEach(
+
+                Set<Assessment> allAssessments = new HashSet<>(userDay.getAssessments());
+                allAssessments.add(getAssessmentByAttendace(userDay.getAttendance(), userDay.getDay()));
+
+                halls.get(user).add(userDay.getHall());
+                allAssessments.forEach(
                         userEventAssessment -> assessment[0] += userEventAssessment.getValue());
+
+                String str = StringUtils.join(allAssessments.stream().map(Assessment::getValue).collect(Collectors.toList()), ", ");
+                assessmentsGroupByDays.get(user.getId()).add("(" + str + ")");
             }
             for (final ApplicationForm applicationForm : user.getUser().getApplicationForms()) {
                 totalExp += applicationForm.getExperience();
@@ -602,9 +675,86 @@ public class AdminController {
         setModel(model, year);
         model.addAttribute("applicationForms", applicationForms);
         model.addAttribute("assessments", assessments);
+        model.addAttribute("assessmentsGroupByDays", assessmentsGroupByDays);
         model.addAttribute("experience", experience);
         model.addAttribute("medals", userMedals);
+        model.addAttribute("halls", halls);
         return "results";
+    }
+
+    private Assessment getAssessmentByAttendace(Attendance attendance, Day day) {
+        Assessment back = new Assessment();
+        Map<Attendance, String> attendanceMap = getAttendaceMap();
+        back.setComment(day.getName() + " (" + attendanceMap.get(attendance) + ")");
+        switch (attendance) {
+            case YES:
+                back.setValue(day.getAttendanceValue());
+                break;
+            case LATE:
+                back.setValue(day.getAttendanceValue() / 2);
+                break;
+            case NO:
+                back.setValue(-day.getAttendanceValue());
+                break;
+            case SICK:
+                back.setValue(0);
+                break;
+        }
+        return back;
+    }
+
+    @GetMapping("/results/user/{id}")
+    public String detailedResultUser(@PathVariable final long id, final Model model, final Authentication authentication) {
+        ApplicationForm applicationForm = applicationFormRepository.findOne(id);
+        List<Assessment> assessments = new ArrayList<>();
+        applicationForm.getUserDays().forEach(user -> {
+            assessments.addAll(user.getAssessments());
+            assessments.add(getAssessmentByAttendace(user.getAttendance(), user.getDay()));
+        });
+
+        setModel(model, getUser(authentication).getYear());
+        model.addAttribute("table", assessments);
+        return "detailedResult";
+    }
+
+    @GetMapping("/events")
+    public String getEvents(final Model model, final Authentication authentication, final HttpServletRequest request) throws IOException {
+        Year year = getUser(authentication).getYear();
+        setModel(model, year);
+        Path path = Paths.get("calendar" + year.getId());
+        try {
+            if (!Files.exists(path))
+                Files.createFile(path);
+        } catch (FileAlreadyExistsException e) {
+            //ok
+        }
+        String file = new String(Files.readAllBytes(path), "UTF-8");
+        model.addAttribute("file", file);
+        URL url = new URL(request.getRequestURL().toString());
+        String baseUrl = url.getProtocol() + "://" + url.getHost() + (url.getPort() == 80 ? "" : ":" + url.getPort());
+        model.addAttribute("baseUrl", baseUrl);
+        return "events";
+    }
+
+    @PostMapping("/events")
+    public @ResponseBody
+    JsonResponse editEvents(@RequestParam("file") final String file, Authentication authentication) {
+        Year year = getUser(authentication).getYear();
+        JsonResponse response = new JsonResponse();
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter("calendar" + year.getId(), "UTF-8");
+            writer.write(file);
+            response.setStatus(Status.OK);
+
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e);
+        } finally {
+            if (writer != null)
+                writer.close();
+        }
+        return response;
     }
 
     private User getUser(final Authentication authentication) {
@@ -618,34 +768,28 @@ public class AdminController {
         }
         model.addAttribute("years", yearRepository.findAll());
         if (year != null) {
-            model.addAttribute("events", year.getEvents());
+            model.addAttribute("days", year.getDays());
             model.addAttribute("positions", year.getPositionValues());
-            final Set<Hall> halls = year.getHalls();
-            halls.add(hallRepository.findOne(1L));
-            model.addAttribute("halls", halls);
+            model.addAttribute("halls", year.getHalls());
         } else {
-            model.addAttribute("events", Collections.EMPTY_LIST);
+            model.addAttribute("days", Collections.EMPTY_LIST);
             model.addAttribute("positions", Collections.EMPTY_LIST);
             model.addAttribute("halls", Collections.EMPTY_LIST);
         }
-        if (!model.containsAttribute("newEvent")) {
-            final Event newEvent = new Event();
-            newEvent.setYear(year);
-            model.addAttribute("newEvent", newEvent);
+        if (!model.containsAttribute("newDay")) {
+            final Day newDay = new Day();
+            newDay.setYear(year);
+            model.addAttribute("newDay", newDay);
         }
         if (!model.containsAttribute("newPosition")) {
             model.addAttribute("newPosition", new PositionForm());
         }
         if (!model.containsAttribute("newHall")) {
-            final Hall newHall = new Hall();
-            newHall.setYear(year);
-            model.addAttribute("newHall", newHall);
+            model.addAttribute("newHall", new HallForm());
         }
         final Role roleUser = roleRepository.findByName("ROLE_USER");
         final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
         model.addAttribute("roleAdmin", roleAdmin.getUsers());
         model.addAttribute("roleUsers", roleUser.getUsers());
     }
-
-
 }

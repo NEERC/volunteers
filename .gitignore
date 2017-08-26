@@ -34,3 +34,5 @@ database.puml
 src/main/java/ru/ifmo/neerc/volunteers/bean/
 src/main/java/ru/ifmo/neerc/volunteers/lib/
 src/main/webapp/fonts/
+
+data.sql

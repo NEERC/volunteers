@@ -1,9 +1,7 @@
 package ru.ifmo.neerc.volunteers.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import org.hibernate.validator.constraints.NotEmpty;
+import lombok.*;
+import ru.ifmo.neerc.volunteers.form.HallForm;
 
 import javax.persistence.*;
 
@@ -14,18 +12,31 @@ import javax.persistence.*;
 @Data
 @ToString(exclude = {"id","year"})
 @EqualsAndHashCode(exclude = {"year"})
+@RequiredArgsConstructor
 public class Hall {
 
     @Id
     @GeneratedValue
     long id;
 
-    @NotEmpty
-    String name;
+    @NonNull
+    private String name;
 
-    @NotEmpty
-    String description;
+    @NonNull
+    private boolean def;
+
+    @NonNull
+    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    Year year;
+    @NonNull
+    private Year year;
+
+    public Hall(HallForm form, Year year) {
+        this(form.getName(), false, form.getDescription(), year);
+    }
+
+    public Hall() {
+
+    }
 }

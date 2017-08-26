@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,8 +13,8 @@ import java.util.Set;
  */
 @Entity
 @Data
-@ToString(exclude = {"id", "year", "userEvents"}, includeFieldNames = false)
-@EqualsAndHashCode(exclude = {"id", "year", "userEvents"})
+@ToString(exclude = {"id", "year", "userDays"}, includeFieldNames = false)
+@EqualsAndHashCode(exclude = {"id", "year", "userDays"})
 public class ApplicationForm {
 
     @Id
@@ -28,7 +29,7 @@ public class ApplicationForm {
     private Year year;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    private Set<Position> position;
+    private Set<PositionValue> positions;
 
     private String suggestions;
 
@@ -38,5 +39,6 @@ public class ApplicationForm {
     private double experience;
 
     @OneToMany(mappedBy = "userYear")
-    private Set<UserEvent> userEvents;
+    @OrderBy("day ASC")
+    private List<UserDay> userDays;
 }

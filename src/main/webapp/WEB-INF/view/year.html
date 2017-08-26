@@ -13,8 +13,8 @@
             <tr>
                 <td>
                     <ul>
-                        <th:block th:each="event : ${events}">
-                            <li><a th:href="@{'/admin/event?id='+${event.id}}" th:text="${event.name}"></a></li>
+                        <th:block th:each="day : ${days}">
+                            <li><a th:href="@{'/admin/day?id='+${day.id}}" th:text="${day.name}"></a></li>
                         </th:block>
                     </ul>
 
@@ -29,7 +29,7 @@
             </tr>
             <tr>
                 <td>
-                    <form th:action="@{/admin/event/add}" method="post" th:object="${event}">
+                    <form th:action="@{/admin/day/add}" method="post" th:object="${day}">
                         <input type="hidden" th:field="*{year}" />
                         <table>
                             <tr>
