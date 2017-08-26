@@ -27,8 +27,5 @@ public class Assessment {
     double value;
 
     @ManyToOne
-    Day day;
-
-    @ManyToOne
     UserDay user;
 }

@@ -507,7 +507,6 @@ public class AdminController {
         model.addAttribute("assessments", day.getAssessments());
         if (!model.containsAttribute("newAssessment")) {
             final Assessment assessment = new Assessment();
-            assessment.setDay(day);
             model.addAttribute("newAssessment", new Assessment());
         }
         return "showEvent";

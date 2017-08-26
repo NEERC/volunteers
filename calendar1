@@ -1,21 +1,23 @@
-events:
-    test:
-      location: ITMO
-      summery: food
-      description: ...
-      start: 2017-08-04 16:15
-      end: 2017-08-05 17:15
+Food:
+  test:
+    location: ITMO
+    description: ...
+    start: 2017-08-04 16:15
+    end: 2017-08-05 17:15
 
-    test2:
-      location: ITMO
-      summery: eat
-      description: .......
-      start: 2017-08-04 15:00
-      end: 2017-08-04 16:35
+  test2:
+    location: ITMO
+    description: .......
+    start: 2017-08-04 15:00
+    end: 2017-08-04 16:35
 
-    test3:
-       location: ITMO
-       summery: test
-       description: test
-       start: 2017-09-03 00:00
-       end: 2017-09-03 23:59
+  test3:
+     location: ITMO
+     description: test
+     start: 2017-09-03 00:00
+     end: 2017-09-03 23:59
+
+volunteers:
+  test1:
+    start: 2017-08-04 15:15
+    end: 2017-08-04 15:16
