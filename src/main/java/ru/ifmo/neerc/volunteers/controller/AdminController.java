@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
@@ -21,7 +22,6 @@ import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.*;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class AdminController {
     private final ApplicationFormRepository applicationFormRepository;
     private final MessageSource messageSource;
     private final Locale locale = LocaleContextHolder.getLocale();
-    private final ServletContext context;
+    //private final ServletContext context;
 
     @GetMapping
     public String admin(final Model model, final Authentication authentication) {
@@ -79,21 +79,24 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, final Authentication authentication) {
-        JsonResponse response = new JsonResponse();
+
         if (result.hasErrors()) {
+            JsonResponse<List<ObjectError>> response = new JsonResponse<>();
             response.setStatus(Status.FAIL);
             response.setResult(result.getAllErrors());
+            return response;
             /*attributes.addFlashAttribute("org.springframework.validation.BindingResult.newPosition", result);
             attributes.addFlashAttribute("newPosition", positionForm);*/
         } else {
+            JsonResponse<PositionValue> response = new JsonResponse<>();
             final User user = getUser(authentication);
             final Year year = user.getYear();
             final PositionValue positionValue = new PositionValue(positionForm, year);
             positionValueRepository.save(positionValue);
             response.setStatus(Status.OK);
             response.setResult(positionValue);
+            return response;
         }
-        return response;
     }
 
     @PostMapping("/position/value")
@@ -119,7 +122,7 @@ public class AdminController {
     public @ResponseBody
     JsonResponse deletePosition(@RequestParam final long id) {
         final PositionValue position = positionValueRepository.findOne(id);
-        JsonResponse result = new JsonResponse();
+        JsonResponse<String> result = new JsonResponse<>();
         if (position != null && !position.isDef()) {
             try {
                 positionValueRepository.delete(id);
@@ -140,7 +143,7 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse deleteHall(@RequestParam final long id) {
-        JsonResponse response = new JsonResponse();
+        JsonResponse<String> response = new JsonResponse<>();
         try {
             if (!hallRepository.findOne(id).isDef()) {
                 hallRepository.delete(id);
@@ -166,7 +169,7 @@ public class AdminController {
     @PostMapping("hall/edit")
     public @ResponseBody
     JsonResponse editHall(@RequestParam final long id, @RequestParam final String name, @RequestParam final String description) {
-        JsonResponse response = new JsonResponse();
+        JsonResponse<String> response = new JsonResponse<>();
         try {
             Hall hall = hallRepository.findOne(id);
             boolean isChanged = false;
@@ -193,18 +196,21 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse addHall(@Valid @ModelAttribute("newHall") final HallForm hall, final BindingResult result, final Authentication authentication) {
-        JsonResponse response = new JsonResponse();
+
         if (result.hasErrors()) {
+            JsonResponse<List<ObjectError>> response = new JsonResponse<>();
             response.setStatus(Status.FAIL);
             response.setResult(result.getAllErrors());
+            return response;
         } else {
+            JsonResponse<Hall> response = new JsonResponse<>();
             final Year year = getUser(authentication).getYear();
             Hall newHall = new Hall(hall, year);
             hallRepository.save(newHall);
             response.setStatus(Status.OK);
             response.setResult(newHall);
+            return response;
         }
-        return response;
     }
 
     @PostMapping("/year/add")
@@ -249,12 +255,19 @@ public class AdminController {
 
     @PostMapping("/year/close")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String closeYear(@RequestParam final long id, @RequestParam final boolean isOpen) {
-
-        final Year year = yearRepository.findOne(id);
-        year.setOpenForRegistration(isOpen);
-        yearRepository.save(year);
-        return "redirect:/admin/year/" + year.getId();
+    public @ResponseBody
+    JsonResponse closeYear(@RequestParam final long id, @RequestParam final boolean isOpen) {
+        JsonResponse<String> response = new JsonResponse<>();
+        try {
+            final Year year = yearRepository.findOne(id);
+            year.setOpenForRegistration(isOpen);
+            yearRepository.save(year);
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
+        }
+        return response;
     }
 
     @GetMapping("/year/{id}")
@@ -278,9 +291,10 @@ public class AdminController {
         return "year";
     }
 
-    @PostMapping("/day/add")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addEvent(@Valid @ModelAttribute("newDay") final Day day, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
+    @PostMapping("/day/edit")
+    public @ResponseBody
+    JsonResponse<Day> saveEvent(@Valid @ModelAttribute final Day day, final BindingResult result, final Authentication authentication) {
+        JsonResponse<Day> response = new JsonResponse<>();
         final User user = getUser(authentication);
         Year year = day.getYear();
         if (year == null) {
@@ -289,14 +303,34 @@ public class AdminController {
         }
         if (result.hasErrors()) {
             if (year != null) {
-                attributes.addFlashAttribute("org.springframework.validation.BindingResult.newEvent", result);
-                attributes.addFlashAttribute("newEvent", day);
-                return "redirect:/admin/year/" + year.getId();
+                response.setStatus(Status.FAIL);
+                response.setResult(day);
             } else {
-                return "redirect:/admin";
+                response.setStatus(Status.FAIL);
+                response.setResult(null);
             }
+            return response;
         }
         dayRepository.save(day);
+        response.setStatus(Status.OK);
+        response.setResult(day);
+        return response;
+    }
+
+    @PostMapping("/day/add")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public String addEvent(@Valid @ModelAttribute("newDay") final Day dayForm, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) throws Exception {
+        JsonResponse<Day> response = saveEvent(dayForm, result, authentication);
+        if (response.getStatus() == Status.FAIL) {
+            if (response.getResult() != null) {
+                attributes.addFlashAttribute("org.springframework.validation.BindingResult.newEvent", result);
+                attributes.addFlashAttribute("newEvent", dayForm);
+                return "redirect:/admin/year/" + response.getResult().getYear().getId();
+            }
+            return "redirect:/admin/";
+        }
+        Day day = response.getResult();
+        Year year = day.getYear();
         final Set<ApplicationForm> users = year.getUsers();
         day.setUsers(new HashSet<>());
         final PositionValue positionValue = findOrCreateDefaultPosition(year);
@@ -364,11 +398,9 @@ public class AdminController {
 
         final Day day = dayRepository.save(currentDay);
 
-
         final HashMap<Hall, List<UserDay>> hallUser = new HashMap<>(
                 day.getUsers().stream().collect(Collectors.groupingBy(UserDay::getHall)));
         hallUser.forEach((u, v) -> v.sort(Comparator.comparing(lst -> lst.getPosition().getName())));
-
 
         final Set<Hall> halls = year.getHalls();
         hallUser.putAll(halls.stream()
@@ -404,7 +436,7 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse save(@RequestParam final long userId, @RequestParam final long hallId, @RequestParam final long positionId) {
-        JsonResponse response = new JsonResponse();
+        JsonResponse<String> response = new JsonResponse<>();
         try {
             UserDay user = userEventRepository.findOne(userId);
             PositionValue positionValue = positionId == -1 ? user.getPosition() : positionValueRepository.findOne(positionId);
@@ -432,7 +464,6 @@ public class AdminController {
     @PostMapping("/day/copy")
     public @ResponseBody
     JsonResponse copy(@RequestParam final long eventId, @RequestParam final long baseEventId) {
-        JsonResponse response = new JsonResponse();
         try {
             final Day day = dayRepository.findOne(eventId);
             final Day baseDay = dayRepository.findOne(baseEventId);
@@ -460,19 +491,22 @@ public class AdminController {
                 }
             }
             userEventRepository.save(savedUsers);
+            JsonResponse<Day> response = new JsonResponse<>();
             response.setStatus(Status.OK);
             response.setResult(dayRepository.findOne(eventId));
+            return response;
         } catch (Exception e) {
+            JsonResponse<String> response = new JsonResponse<>();
             response.setStatus(Status.FAIL);
             response.setResult(e.getMessage());
+            return response;
         }
-        return response;
     }
 
     @PostMapping("/add")
     public @ResponseBody
     JsonResponse addAdmin(@RequestParam final long userId) {
-        JsonResponse response = new JsonResponse();
+        JsonResponse<String> response = new JsonResponse<>();
         try {
             final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
             final User user = userRepository.findOne(userId);
@@ -510,22 +544,27 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse setAssessments(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, @RequestParam final long userId) {
-        JsonResponse response = new JsonResponse();
+
         try {
             if (result.hasErrors()) {
+                JsonResponse<List<ObjectError>> response = new JsonResponse<>();
                 response.setStatus(Status.FAIL);
                 response.setResult(result.getAllErrors());
+                return response;
             }
             UserDay user = userEventRepository.findOne(userId);
             assessment.setUser(user);
             userEventAssessmentRepository.save(assessment);
+            JsonResponse<Assessment> response = new JsonResponse<>();
             response.setStatus(Status.OK);
             response.setResult(assessment);
+            return response;
         } catch (Exception e) {
+            JsonResponse<String> response = new JsonResponse<>();
             response.setStatus(Status.FAIL);
             response.setResult(e.getMessage());
+            return response;
         }
-        return response;
     }
 
     /*@PostMapping("/day/assessments/add")
@@ -544,7 +583,7 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse setAttendance(@RequestParam final long id, @RequestParam final String value) {
-        JsonResponse response = new JsonResponse();
+        JsonResponse<String> response = new JsonResponse<>();
         try {
             UserDay user = userEventRepository.findOne(id);
             user.setAttendance(Attendance.valueOf(value));
@@ -571,27 +610,31 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final Medal medal, final BindingResult result) {
-        JsonResponse response = new JsonResponse();
         try {
             if (result.hasErrors()) {
+                JsonResponse<List<ObjectError>> response = new JsonResponse<>();
                 response.setStatus(Status.FAIL);
                 response.setResult(result.getAllErrors());
+                return response;
             } else {
+                JsonResponse<Medal> response = new JsonResponse<>();
                 medalRepository.save(medal);
                 response.setResult(medal);
                 response.setStatus(Status.OK);
+                return response;
             }
         } catch (Exception e) {
+            JsonResponse<String> response = new JsonResponse<>();
             response.setResult(e.getMessage());
             response.setStatus(Status.FAIL);
+            return response;
         }
-        return response;
     }
 
     @PostMapping("/medals/delete")
     public @ResponseBody
     JsonResponse deleteMedal(@RequestParam("id") final long id) {
-        JsonResponse response = new JsonResponse();
+        JsonResponse<String> response = new JsonResponse<>();
         try {
             medalRepository.delete(id);
             response.setStatus(Status.OK);

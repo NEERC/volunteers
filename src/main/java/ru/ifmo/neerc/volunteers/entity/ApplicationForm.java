@@ -21,7 +21,7 @@ public class ApplicationForm {
     @GeneratedValue
     private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
