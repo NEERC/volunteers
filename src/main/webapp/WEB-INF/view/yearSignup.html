@@ -13,7 +13,7 @@
                 <label class="control-label" th:text="#{volunteers.form.yearSignUp.events}">Events</label>
 
                 <div class="list-group">
-                    <div class="list-group-item" th:each="event : ${year.events}">
+                    <div class="list-group-item" th:each="event : ${year.days}">
                         <h4 class="list-group-item-heading" th:text="${event.name}"></h4>
                         <p class="list-group-item-text" th:text="${event.information}"></p>
                     </div>
@@ -29,19 +29,19 @@
                       th:text="#{volunteers.form.yearSignUp.group.error.empty}">Group can't be empty</span>
             </div>
 
-            <div class="form-group" th:classappend="${#fields.hasErrors('position')} ? 'has-error'">
+            <div class="form-group" th:classappend="${#fields.hasErrors('positions')} ? 'has-error'">
                 <label class="control-label" th:text="#{volunteers.form.yearSignUp.positions}">Positions Desired</label>
 
                 <div class="list-group">
                     <div class="list-group-item" th:each="position : ${positions}">
                         <label class="list-group-item-text">
-                            <input type="checkbox" th:field="*{position}" th:value="${position.id}" />
+                            <input type="checkbox" th:field="*{positions}" th:value="${position.id}"/>
                             <span th:text="${position.name}" th:remove="tag"></span>
                         </label>
                     </div>
                 </div>
 
-                <span class="help-block" th:if="${#fields.hasErrors('position')}"
+                <span class="help-block" th:if="${#fields.hasErrors('positions')}"
                       th:text="#{volunteers.form.yearSignUp.positions.error.empty}">Choose at least one position</span>
             </div>
 

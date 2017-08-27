@@ -23,7 +23,7 @@
                 </div>
                 <div th:id="collapse + ${year.id}" class="panel-collapse collapse" th:classappend="${year.openForRegistration} ? 'in'">
                     <div class="list-group">
-                        <div class="list-group-item" th:each="event : ${year.events}">
+                        <div class="list-group-item" th:each="event : ${year.days}">
                             <h4 class="list-group-item-heading" th:text="${event.name}"></h4>
                             <p class="list-group-item-text" th:text="${event.information}"></p>
                         </div>
