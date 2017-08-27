@@ -9,9 +9,9 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.ifmo.neerc.volunteers.repository.YearRepository;
 
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,7 @@ import java.util.TimeZone;
 @AllArgsConstructor
 public class CalendarServiceImpl implements CalendarService {
 
+    private final YearRepository yearRepository;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
@@ -89,7 +90,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     private Map<String, Map<String, Map<String, String>>> readYaml(final long id) throws FileNotFoundException, YamlException {
-        YamlReader reader = new YamlReader(new FileReader("calendar" + id));
+        YamlReader reader = new YamlReader(yearRepository.findOne(id).getCalendar());
         Object result = reader.read();
         if (result instanceof Map) {
             return (Map<String, Map<String, Map<String, String>>>) result;

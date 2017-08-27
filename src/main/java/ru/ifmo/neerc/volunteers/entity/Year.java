@@ -47,6 +47,9 @@ public class Year {
     @OneToMany(mappedBy = "year")
     private Set<PositionValue> positionValues;
 
+    @Lob
+    private String calendar = "";
+
     public Year(String name) {
         this.name = name;
     }

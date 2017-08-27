@@ -25,12 +25,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URL;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -721,17 +716,10 @@ public class AdminController {
     public String getEvents(final Model model, final Authentication authentication, final HttpServletRequest request) throws IOException {
         Year year = getUser(authentication).getYear();
         setModel(model, year);
-        Path path = Paths.get("calendar" + year.getId());
-        try {
-            if (!Files.exists(path))
-                Files.createFile(path);
-        } catch (FileAlreadyExistsException e) {
-            //ok
-        }
-        String file = new String(Files.readAllBytes(path), "UTF-8");
+        String file = year.getCalendar();
         model.addAttribute("file", file);
         URL url = new URL(request.getRequestURL().toString());
-        String baseUrl = url.getProtocol() + "://" + url.getHost() + (url.getPort() == 80 ? "" : ":" + url.getPort());
+        String baseUrl = url.getProtocol() + "://" + url.getHost() + (url.getPort() == 80 || url.getPort() < 0 ? "" : ":" + url.getPort());
         model.addAttribute("baseUrl", baseUrl);
         return "events";
     }
@@ -741,19 +729,9 @@ public class AdminController {
     JsonResponse editEvents(@RequestParam("file") final String file, Authentication authentication) {
         Year year = getUser(authentication).getYear();
         JsonResponse response = new JsonResponse();
-        PrintWriter writer = null;
-        try {
-            writer = new PrintWriter("calendar" + year.getId(), "UTF-8");
-            writer.write(file);
-            response.setStatus(Status.OK);
-
-        } catch (Exception e) {
-            response.setStatus(Status.FAIL);
-            response.setResult(e);
-        } finally {
-            if (writer != null)
-                writer.close();
-        }
+        year.setCalendar(file);
+        yearRepository.save(year);
+        response.setStatus(Status.OK);
         return response;
     }
 
