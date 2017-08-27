@@ -25,6 +25,10 @@ jar {
 	version = '0.0.1-SNAPSHOT'
 }
 
+war {
+	it.dependsOn 'copyjs'
+}
+
 sourceCompatibility = 1.8
 
 repositories {
@@ -45,6 +49,12 @@ dependencies {
 	compile('commons-beanutils:commons-beanutils')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-security')
+
+	compile('org.mnode.ical4j:ical4j:1.0.5')
+	compile('net.sf.biweekly:biweekly:0.2.0')
+
+	compile('com.esotericsoftware.yamlbeans:yamlbeans:1.06')
+
 	runtime('mysql:mysql-connector-java')
 	compileOnly('org.projectlombok:lombok')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
@@ -59,10 +69,12 @@ task copyjs(type:Sync) {
 
 	def nodeExt = project.extensions.findByName("node")
 
-	from fileTree('node_modules').files
+	from 'node_modules/'
 	into "src/main/webapp/components"
 	include '**/*.min.js'
-	include '**/fonts/**'
+	eachFile {
+		details -> details.setRelativePath new RelativePath(true, details.name)
+	}
 
 	includeEmptyDirs false
 	dependsOn 'copyfonts'

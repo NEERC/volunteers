@@ -1,6 +1,7 @@
 package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import ru.ifmo.neerc.volunteers.form.UserForm;
 
@@ -8,13 +9,15 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Алексей on 21.02.2017.
  */
 @Entity
 @Data
-@ToString(exclude = {"password","role","id"})
+@EqualsAndHashCode(exclude = {"password", "role", "id", "applicationForms"})
+@ToString(exclude = {"password", "role", "id", "applicationForms"})
 @Table(indexes = {@Index(columnList = "email", unique = true)})
 public class User {
 
@@ -47,6 +50,9 @@ public class User {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Year year;
+
+    @OneToMany(mappedBy = "user")
+    private Set<ApplicationForm> applicationForms;
 
     public User(){}
 

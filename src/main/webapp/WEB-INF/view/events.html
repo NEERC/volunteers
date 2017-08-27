@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="content" class="col-md-10">
+    <div class="input-group">
+        <span class="input-group-addon" th:text="#{volunteers.calendar.url}">Url:</span>
+        <input type="text" class="form-control" th:value="${baseUrl}+@{'/api/calendar/'}+${year.id}+'/'"/>
+        <input type="text" class="form-control" th:value="${baseUrl}+@{'/api/calendar/'}+${year.id}+'/{CalendarId}/'"/>
+
+    </div>
+    <a class="glyphicon glyphicon-question-sign mytooltip">
+            <span>
+                <pre>
+File: &lt;Calendar&gt;*
+Calendar:
+  &lt;CalendarId&gt;:
+    &lt;Event&gt;*
+Event:
+  &lt;Event summery&gt;:
+    location: &lt;location&gt;
+    description: &lt;description&gt;
+    start: &lt;start date-time. Format: yyyy-MM-dd HH:mm&gt;
+    end: &lt;end date-time. Format: yyyy-MM-dd HH:mm&gt;
+                </pre>
+            </span>
+    </a>
+    <textarea class="form-control" th:placeholder="#{volunteers.calendar.placeholder}" placeholder="write yaml data"
+              rows="25" onblur="sendFile(this.value);" th:text="${file}"></textarea>
+
+    <script th:inline="javascript">
+        function sendFile(file) {
+            var data = {
+                "file": file
+            };
+            data[_csrf_param_name] = _csrf_token;
+            $.ajax({
+                type: "post",
+                data: data,
+                url: /*[[@{/admin/events/}]]*/"/admin/events/",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status !== "OK") {
+                        console.log(data.result);
+                    }
+                }
+            })
+        }
+
+        $(function () {
+            $('#tooltip').tooltip();
+        });
+    </script>
+</div>
+</body>
+</html>

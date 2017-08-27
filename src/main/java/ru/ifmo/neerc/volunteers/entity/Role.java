@@ -5,10 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -27,6 +24,7 @@ public class Role implements Serializable, GrantedAuthority {
 
     private String name;
 
+    @OrderBy("badgeName ASC")
     @OneToMany(mappedBy = "role")
     Set<User> users;
 

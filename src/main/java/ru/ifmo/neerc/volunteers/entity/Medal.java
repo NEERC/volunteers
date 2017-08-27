@@ -16,10 +16,18 @@ public class Medal {
 
     @Id
     @GeneratedValue
-    int id;
+    long id;
 
     @NotEmpty
     String name;
 
     int value;
+
+    public Medal() {
+    }
+
+    public Medal(String name, int value) {
+        this.name = name;
+        this.value = value;
+    }
 }

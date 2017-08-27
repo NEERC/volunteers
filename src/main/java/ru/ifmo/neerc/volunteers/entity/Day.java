@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -16,7 +17,7 @@ import java.util.Set;
 @Entity
 @EqualsAndHashCode(exclude = {"year", "users"})
 @ToString(exclude = {"year", "users"})
-public class Event {
+public class Day {
 
     @Id
     @GeneratedValue
@@ -34,9 +35,20 @@ public class Event {
     private String information;
 
     @NotNull
-    private int attendanceValue;
+    private double attendanceValue;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "event")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "day")
     @OrderBy("id ASC")
-    Set<UserEvent> users;
+    Set<UserDay> users;
+
+    public void addUser(final UserDay ue) {
+        if (ue != null) {
+            getUsers();
+            if (users == null) {
+                users = new HashSet<>();
+            }
+            users.add(ue);
+            ue.setDay(this);
+        }
+    }
 }

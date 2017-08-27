@@ -31,4 +31,8 @@ node_modules
 **/webapp/components
 **/webapp/fonts/bootstrap
 database.puml
+src/main/java/ru/ifmo/neerc/volunteers/bean/
+src/main/java/ru/ifmo/neerc/volunteers/lib/
+src/main/webapp/fonts/
+
 data.sql

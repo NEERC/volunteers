@@ -1,20 +1,20 @@
 package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.Set;
-
 import javax.persistence.*;
-
-import org.hibernate.validator.constraints.NotEmpty;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Lapenok Akesej on 26.02.2017.
  */
 @Entity
 @Data
-@ToString(exclude = {"id","year"}, includeFieldNames = false)
+@ToString(exclude = {"id", "year", "userDays"}, includeFieldNames = false)
+@EqualsAndHashCode(exclude = {"id", "year", "userDays"})
 public class ApplicationForm {
 
     @Id
@@ -28,13 +28,17 @@ public class ApplicationForm {
     @JoinColumn(name = "year")
     private Year year;
 
-    @NotEmpty
     @ManyToMany(fetch = FetchType.LAZY)
-    private Set<Position> position;
+    private Set<PositionValue> positions;
 
     private String suggestions;
 
-    @NotEmpty
     @Column(name = "`group`")
     private String group;
+
+    private double experience;
+
+    @OneToMany(mappedBy = "userYear")
+    @OrderBy("day ASC")
+    private List<UserDay> userDays;
 }
