@@ -55,6 +55,8 @@ public class SignupController {
         if (userRepository.findByEmailIgnoreCase(userForm.getEmail()) != null) {
             result.rejectValue("emailExist", "exist.user.email", "");
         }
+        userForm.setBadgeName(userForm.getFirstName() + " " + userForm.getLastName());
+        userForm.setBadgeNameCyr(userForm.getFirstNameCyr() + " " + userForm.getLastNameCyr());
         if (result.hasErrors()) {
             return "signup";
         }

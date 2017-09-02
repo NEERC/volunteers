@@ -6,52 +6,7 @@
 </head>
 <body>
     <div th:fragment="content" class="col-md-8">
-        <!--
-        <a th:href="@{/admin}">Back</a><br />
 
-        <table>
-            <tr>
-                <td>
-                    <ul>
-                        <th:block th:each="day : ${days}">
-                            <li><a th:href="@{'/admin/day?id='+${day.id}}" th:text="${day.name}"></a></li>
-                        </th:block>
-                    </ul>
-
-                </td>
-                <td>
-                    <ul>
-                        <th:block th:each="user: ${users}">
-                            <li th:text="${user}"></li>
-                        </th:block>
-                    </ul>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <form th:action="@{/admin/day/add}" method="post" th:object="${day}">
-                        <input type="hidden" th:field="*{year}" />
-                        <table>
-                            <tr>
-                                <td>Имя:</td>
-                                <td><input type="text" th:field="*{name}" /></td>
-                                <td th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></td>
-                            </tr>
-                            <tr>
-                                <td>Информация:</td>
-                                <td><textarea th:field="*{information}" multiple="multiple"></textarea></td>
-                                <td th:if="${#fields.hasErrors('information')}" th:errors="*{information}"></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button type="submit">Add</button>
-                                </td>
-                            </tr>
-                        </table>
-                    </form>
-                </td>
-            </tr>
-        </table>-->
     </div>
 </body>
 </html>

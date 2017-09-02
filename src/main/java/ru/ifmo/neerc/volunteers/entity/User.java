@@ -44,6 +44,8 @@ public class User {
 
     private String email;
 
+    private String phone;
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     //@Column(firstName = "role_id", nullable = false)
     private Role role;
@@ -65,6 +67,7 @@ public class User {
         badgeName=userForm.getBadgeName();
         badgeNameCyr=userForm.getBadgeNameCyr();
         email=userForm.getEmail();
+        phone = userForm.getPhone();
     }
 
     public Collection<Role> getAuth() {

@@ -6,6 +6,7 @@
   "dependencies": {
     "bootstrap-sass": "latest",
     "jquery": "latest",
-    "jquery-validation": "latest"
+    "jquery-validation": "latest",
+    "jquery-mask-plugin": "latest"
   }
 }
