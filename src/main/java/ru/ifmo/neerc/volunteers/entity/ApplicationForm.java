@@ -3,6 +3,7 @@ package ru.ifmo.neerc.volunteers.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import ru.ifmo.neerc.volunteers.form.UserYearForm;
 
 import javax.persistence.*;
 import java.util.List;
@@ -41,4 +42,15 @@ public class ApplicationForm {
     @OneToMany(mappedBy = "userYear")
     @OrderBy("day ASC")
     private List<UserDay> userDays;
+
+    public ApplicationForm() {
+
+    }
+
+    public ApplicationForm(UserYearForm form, User user, Year year) {
+        this.user = user;
+        this.year = year;
+        this.positions = form.getPositions();
+        this.group = form.getGroup();
+    }
 }

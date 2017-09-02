@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import ru.ifmo.neerc.volunteers.form.UserForm;
+import ru.ifmo.neerc.volunteers.form.UserYearForm;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -56,17 +57,18 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<ApplicationForm> applicationForms;
 
-    public User(){}
+    public User() {
+    }
 
     public User(UserForm userForm) {
-        firstName=userForm.getFirstName();
-        lastName=userForm.getLastName();
-        firstNameCyr=userForm.getFirstNameCyr();
-        lastNameCyr=userForm.getLastNameCyr();
-        password=userForm.getPassword();
-        badgeName=userForm.getBadgeName();
-        badgeNameCyr=userForm.getBadgeNameCyr();
-        email=userForm.getEmail();
+        firstName = userForm.getFirstName();
+        lastName = userForm.getLastName();
+        firstNameCyr = userForm.getFirstNameCyr();
+        lastNameCyr = userForm.getLastNameCyr();
+        password = userForm.getPassword();
+        badgeName = userForm.getBadgeName();
+        badgeNameCyr = userForm.getBadgeNameCyr();
+        email = userForm.getEmail();
         phone = userForm.getPhone();
     }
 
@@ -74,6 +76,41 @@ public class User {
         final List<Role> roles = new ArrayList<>(1);
         roles.add(getRole());
         return roles;
+    }
+
+    public boolean changeUserInformation(UserYearForm form) {
+        boolean result = false;
+        if (!firstName.equals(form.getFirstName())) {
+            firstName = form.getFirstName();
+            result = true;
+        }
+        if (!lastName.equals(form.getLastName())) {
+            lastName = form.getLastName();
+            result = true;
+        }
+
+        if (!firstNameCyr.equals(form.getFirstNameCyr())) {
+            firstNameCyr = form.getFirstNameCyr();
+            result = true;
+        }
+        if (!lastNameCyr.equals(form.getLastNameCyr())) {
+            lastNameCyr = form.getLastNameCyr();
+            result = true;
+        }
+        if (result) {
+            badgeNameCyr = firstNameCyr + " " + lastNameCyr;
+            badgeName = firstName + " " + lastName;
+        }
+
+        if (!email.equals(form.getEmail())) {
+            email = form.getEmail();
+            result = true;
+        }
+        if (!phone.equals(form.getPhone())) {
+            phone = form.getPhone();
+            result = true;
+        }
+        return result;
     }
 
 }
