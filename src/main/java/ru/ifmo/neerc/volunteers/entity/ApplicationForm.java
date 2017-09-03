@@ -47,10 +47,19 @@ public class ApplicationForm {
 
     }
 
+    public ApplicationForm(User user, Year year) {
+        setUser(user);
+        setYear(year);
+    }
+
     public ApplicationForm(UserYearForm form, User user, Year year) {
-        this.user = user;
-        this.year = year;
+        this(user, year);
+        setValues(form);
+    }
+
+    public void setValues(UserYearForm form) {
         this.positions = form.getPositions();
         this.group = form.getGroup();
+        this.suggestions = form.getSuggestions();
     }
 }

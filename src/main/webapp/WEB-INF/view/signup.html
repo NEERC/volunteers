@@ -66,7 +66,7 @@
                           th:text="#{volunteers.form.signUp.email.error.exist}">This email already exist</span>
                 </div>
             </div>
-            <div class="form-group" th:class="(${#fields.hasErrors('phone')})? 'has-error':'form-group'">
+            <div class="form-group" th:class="(${#fields.hasErrors('phone')})? 'has-error form-group':'form-group'">
                 <label for="inputPhone" class="col-sm-4 control-label"
                        th:text="#{volunteers.form.signUp.phone}">Phone</label>
                 <div class="col-sm-8">

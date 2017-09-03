@@ -1,5 +1,6 @@
 package ru.ifmo.neerc.volunteers.service.year;
 
+import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
 import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
@@ -13,4 +14,6 @@ public interface YearService {
     Optional<Year> getLastYear();
 
     void regUser(User user, UserYearForm form, Year year);
+
+    ApplicationForm getApplicationForm(User user, Year year);
 }

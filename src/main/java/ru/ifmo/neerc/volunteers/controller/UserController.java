@@ -7,7 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
+import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
 import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
@@ -63,16 +65,23 @@ public class UserController {
         Year year = yearRepository.findOne(id);
         userService.setUserYear(user, year);
         utils.setModelForUser(model, year);
-        model.addAttribute("applicationForm", new UserYearForm(user));
+        if (!model.containsAttribute("applicationForm")) {
+            ApplicationForm form = yearService.getApplicationForm(user, year);
+            model.addAttribute("applicationForm", new UserYearForm(form));
+            model.addAttribute("isSaved", form.getId() != 0);
+        }
+        model.addAttribute("isUser", true);
         return "year";
     }
 
     @PostMapping("/year/{id}/signup")
-    public String signupForYear(@PathVariable final long id, @Valid @ModelAttribute("applicationForm") final UserYearForm applicationForm, final BindingResult result, final Authentication authentication) {
+    public String signupForYear(@PathVariable final long id, @Valid @ModelAttribute("applicationForm") final UserYearForm applicationForm, final BindingResult result, final Model model, final Authentication authentication, final RedirectAttributes attributes) {
         if (result.hasErrors()) {
-            return "yearSignup";
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.applicationForm", result);
+            attributes.addFlashAttribute("applicationForm", applicationForm);
+            return "redirect:/year/" + id;
         }
         yearService.regUser(userService.getUserByAuthentication(authentication), applicationForm, yearRepository.findOne(id));
-        return "redirect:/years/";
+        return "redirect:/year/" + id;
     }
 }

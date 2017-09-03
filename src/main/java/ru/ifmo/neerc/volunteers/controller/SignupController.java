@@ -67,6 +67,6 @@ public class SignupController {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         securityService.autologin(user.getEmail(), userForm.getPassword());
-        return "redirect:/years";
+        return "redirect:/";
     }
 }

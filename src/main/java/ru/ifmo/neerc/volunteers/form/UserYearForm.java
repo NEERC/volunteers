@@ -3,6 +3,7 @@ package ru.ifmo.neerc.volunteers.form;
 import lombok.Data;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
+import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
 import ru.ifmo.neerc.volunteers.entity.PositionValue;
 import ru.ifmo.neerc.volunteers.entity.User;
 
@@ -44,7 +45,7 @@ public class UserYearForm {
     private String group;
 
     @AssertTrue
-    private boolean isAgree;
+    private boolean agree;
 
     public UserYearForm(User user) {
         firstName = user.getFirstName();
@@ -57,5 +58,12 @@ public class UserYearForm {
 
     public UserYearForm() {
 
+    }
+
+    public UserYearForm(ApplicationForm applicationForm) {
+        this(applicationForm.getUser());
+        positions = applicationForm.getPositions();
+        group = applicationForm.getGroup();
+        suggestions = applicationForm.getSuggestions();
     }
 }

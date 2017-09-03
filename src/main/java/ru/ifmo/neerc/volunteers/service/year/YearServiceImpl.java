@@ -30,11 +30,22 @@ public class YearServiceImpl implements YearService {
     }
 
     @Override
+    public ApplicationForm getApplicationForm(User user, Year year) {
+        Optional<ApplicationForm> result = user.getApplicationForms().stream().filter(u -> u.getYear().getId() == year.getId()).findFirst();
+        if (!result.isPresent()) {
+            result = Optional.of(new ApplicationForm(user, year));
+        }
+        return result.get();
+    }
+
+    @Override
     public void regUser(final User user, final UserYearForm form, final Year year) {
         if (user.changeUserInformation(form)) {
             userRepository.save(user);
         }
-        ApplicationForm applicationForm = new ApplicationForm(form, user, year);
+        ApplicationForm applicationForm = getApplicationForm(user, year);
+        applicationForm.setValues(form);
+
         applicationFormRepository.save(applicationForm);
     }
 }
