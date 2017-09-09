@@ -11,6 +11,7 @@ import ru.ifmo.neerc.volunteers.form.PositionForm;
 import ru.ifmo.neerc.volunteers.repository.RoleRepository;
 import ru.ifmo.neerc.volunteers.repository.YearRepository;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 
 /**
@@ -24,8 +25,15 @@ public class Utils {
     final RoleRepository roleRepository;
 
     public void setModelForUser(Model model, Year year) {
+        setModel(model, year);
+        model.addAttribute("user", true);
+    }
+
+
+    private void setModel(Model model, Year year) {
         model.addAttribute("year", year);
         model.addAttribute("years", yearRepository.findAll());
+
         if (year != null) {
             model.addAttribute("days", year.getDays());
             model.addAttribute("positions", year.getPositionValues());
@@ -38,7 +46,7 @@ public class Utils {
     }
 
     public void setModelForAdmin(Model model, Year year) {
-        setModelForUser(model, year);
+        setModel(model, year);
         if (!model.containsAttribute("newYear")) {
             model.addAttribute("newYear", new Year());
         }
@@ -57,5 +65,9 @@ public class Utils {
         final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
         model.addAttribute("roleAdmin", roleAdmin.getUsers());
         model.addAttribute("roleUsers", roleUser.getUsers());
+    }
+
+    public String getAppUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 }

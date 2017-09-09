@@ -1,9 +1,8 @@
 package ru.ifmo.neerc.volunteers.controller;
 
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Propagation;
@@ -13,12 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.thymeleaf.spring.support.Layout;
-import ru.ifmo.neerc.volunteers.entity.Role;
-import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.form.UserForm;
-import ru.ifmo.neerc.volunteers.repository.RoleRepository;
 import ru.ifmo.neerc.volunteers.repository.UserRepository;
-import ru.ifmo.neerc.volunteers.service.SecurityService;
+import ru.ifmo.neerc.volunteers.service.user.UserService;
 
 import javax.validation.Valid;
 
@@ -28,21 +24,14 @@ import javax.validation.Valid;
 @Controller
 @Layout("empty")
 @EnableTransactionManagement
+@AllArgsConstructor
 public class SignupController {
 
     private static final Logger logger = LoggerFactory.getLogger(SignupController.class);
 
-    @Autowired
-    UserRepository userRepository;
+    final UserRepository userRepository;
 
-    @Autowired
-    RoleRepository roleRepository;
-
-    @Autowired
-    SecurityService securityService;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    final UserService userService;
 
     @GetMapping("/signup")
     public String signup(@ModelAttribute("user") UserForm user) {
@@ -60,13 +49,7 @@ public class SignupController {
         if (result.hasErrors()) {
             return "signup";
         }
-        User user = new User(userForm);
-        logger.debug(String.format("User created %s", user.toString()));
-        Role role = roleRepository.findByName("ROLE_USER");//ROLE_USER
-        user.setRole(role);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-        securityService.autologin(user.getEmail(), userForm.getPassword());
+        userService.registrateUser(userForm);
         return "redirect:/";
     }
 }

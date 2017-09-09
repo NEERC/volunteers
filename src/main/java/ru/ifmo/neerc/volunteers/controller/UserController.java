@@ -70,7 +70,6 @@ public class UserController {
             model.addAttribute("applicationForm", new UserYearForm(form));
             model.addAttribute("isSaved", form.getId() != 0);
         }
-        model.addAttribute("isUser", true);
         return "year";
     }
 
