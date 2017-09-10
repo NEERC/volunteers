@@ -26,7 +26,7 @@ public class Utils {
 
     public void setModelForUser(Model model, Year year) {
         setModel(model, year);
-        model.addAttribute("user", true);
+        model.addAttribute("isUser", true);
     }
 
 

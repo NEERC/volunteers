@@ -102,10 +102,10 @@ public class User {
             badgeName = firstName + " " + lastName;
         }
 
-        if (!email.equals(form.getEmail())) {
+        /*if (!email.equals(form.getEmail())) {
             email = form.getEmail();
             result = true;
-        }
+        }*/
         if (!phone.equals(form.getPhone())) {
             phone = form.getPhone();
             result = true;

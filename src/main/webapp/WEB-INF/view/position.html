@@ -10,11 +10,11 @@
         <div class="has-error form-group" th:if="${message!=null}">
             <label th:text="${message}" class="help-block"></label>
         </div>
-        <table class="table table-hover" id="positions">
+        <table class="table table-hover text-center" id="positions">
             <thead>
-            <th th:text="#{volunteers.position.name}">Position</th>
-            <th th:text="#{volunteers.position.value}" class="text-center">Value</th>
-            <th></th>
+            <th th:text="#{volunteers.position.name}" class="text-center">Position</th>
+            <th th:text="#{volunteers.position.value}" class="text-center" th:unless="${isUser}">Value</th>
+            <th th:unless="${isUser}"></th>
             </thead>
             <tbody>
             <th:block th:each="position : ${positions}">
@@ -23,7 +23,7 @@
                         <label th:text="${position.name}" th:for="position+${position.id}">
                         </label>
                     </td>
-                    <td>
+                    <td th:unless="${isUser}">
                         <input type="number" step="any" class="form-control"
                                th:value="${position.value}" th:id="position+${position.id}"
                                th:name="v+${position.id}" min="0"
@@ -31,7 +31,7 @@
                         <input type="hidden" th:value="${position.value}"
                                th:id="originValue+${position.id}"/>
                     </td>
-                    <td>
+                    <td th:unless="${isUser}">
                         <a th:unless="${position.def}"
                            th:onclick="'deletePosition('+${position.id}+'); return false;'"
                            class="btn btn-default" role="button"
@@ -41,7 +41,7 @@
                     </td>
                 </tr>
             </th:block>
-            <tr>
+            <tr th:unless="${isUser}">
                 <td colspan="3" class="text-center">
                     <a href="#" data-toggle="modal" data-target="#positionForm" class="btn btn-default "
                        role="button" th:text="#{volunteers.hall.button.add}">Add</a></td>
@@ -50,7 +50,8 @@
         </table>
     </div>
     <!-- Modal -->
-    <div class="modal fade" id="positionForm" tabindex="-1" role="dialog" aria-labelledby="positionLabel">
+    <div class="modal fade" id="positionForm" tabindex="-1" role="dialog" aria-labelledby="positionLabel"
+         th:unless="${isUser}">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form method="post" th:object="${newPosition}" id="position">
@@ -89,7 +90,7 @@
             </div>
         </div>
     </div>
-    <script th:inline="javascript">
+    <script th:inline="javascript" th:unless="${isUser}">
         $(function () {
             $('#position').validate({
                 rules: {

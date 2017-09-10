@@ -14,7 +14,7 @@
                 <thead>
                 <th th:text="#{volunteers.hall.hallName}">Hall name</th>
                 <th th:text="#{volunteers.hall.hallDescription}">Hall description</th>
-                <th></th>
+                <th th:if="${isUser}"></th>
                 </thead>
                 <tbody>
                     <th:block th:each="hall : ${halls}">
@@ -22,17 +22,18 @@
                             <td>
                                 <input type="text" th:value="${hall.name}" class="form-control"
                                        th:onblur="'changeName('+${hall.id}+', this.value);'"
-                                       th:id="'hallName'+${hall.id}"/>
-                                <input type="hidden" th:value="${hall.name}" th:id="'originHallName'+${hall.id}"/>
+                                       th:id="'hallName'+${hall.id}" th:disabled="${isUser}"/>
+                                <input type="hidden" th:value="${hall.name}" th:id="'originHallName'+${hall.id}"
+                                       th:unless="${isUser}"/>
                             </td>
                             <td>
                                 <input type="text" th:value="${hall.description}" class="form-control"
                                        th:onblur="'changeDescription('+${hall.id}+', this.value);'"
-                                       th:id="'hallDescription'+${hall.id}"/>
+                                       th:id="'hallDescription'+${hall.id}" th:disabled="${isUser}"/>
                                 <input type="hidden" th:value="${hall.description}"
-                                       th:id="'originHallDescription'+${hall.id}"/>
+                                       th:id="'originHallDescription'+${hall.id}" th:unless="${isUser}"/>
                             </td>
-                            <td>
+                            <td th:unless="${isUser}">
                                 <a th:if="${hall.def}" class="btn btn-default" role="button"
                                    th:text="#{volunteers.form.button.delete}" disabled="true">Delete</a>
                                 <a th:unless="${hall.def}" class="btn btn-default"
@@ -41,7 +42,7 @@
                             </td>
                         </tr>
                     </th:block>
-                    <tr>
+                    <tr th:unless="${isUser}">
                         <td colspan="3" class="text-center">
                             <a href="#" data-toggle="modal" data-target="#hallForm" class="btn btn-default"
                                role="button" th:text="#{volunteers.hall.button.add}">Add</a>
@@ -51,7 +52,8 @@
             </table>
         </div>
         <!-- Modal -->
-        <div class="modal fade" id="hallForm" tabindex="-1" role="dialog" aria-labelledby="hallLabel">
+        <div class="modal fade" id="hallForm" tabindex="-1" role="dialog" aria-labelledby="hallLabel"
+             th:unless="${isUser}">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <form method="post" th:object="${newHall}" id="hall">
@@ -90,7 +92,7 @@
             </div>
         </div>
 
-        <script th:inline="javascript">
+        <script th:inline="javascript" th:unless="${isUser}">
             $(function () {
                 $("#hall").validate({
                     rules: {

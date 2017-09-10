@@ -12,7 +12,10 @@
         <link rel="stylesheet" type="text/css" media="screen"
               href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css"/>
         <script src="../../components/bootstrap-select.min.js" th:src="@{/components/bootstrap-select.min.js}"></script>
-        <h2 class="col-sm-offset-4" th:text="#{volunteers.form.yearSignUp.header(${year.name})}">Sign up</h2>
+        <h2 class="col-sm-offset-4" th:text="#{volunteers.form.yearSignUp.header(${year.name})}" th:unless="${isSaved}">
+            Sign up</h2>
+        <h2 class="col-sm-offset-4" th:text="#{volunteers.form.yearSignUp.header.update(${year.name})}"
+            th:if="${isSaved}">Update form</h2>
 
         <div class="form-group" th:class="${#fields.hasErrors('firstName')}? 'has-error form-group' : 'form-group'">
             <label for="inputFirstName" class="col-sm-4 control-label"
@@ -58,18 +61,23 @@
                       th:text="#{volunteers.form.signUp.lastNameCyr.error.empty}">Не может быть пустым</span>
             </div>
         </div>
-        <div class="form-group" th:class="(${#fields.hasErrors('email')}) ? 'has-error form-group' : 'form-group'">
+        <div class="form-group"
+             th:class="(${#fields.hasErrors('email')} or ${#fields.hasErrors('emailCorrect')}) ? 'has-error form-group' : 'form-group'">
             <label for="inputEmail" class="col-sm-4 control-label"
                    th:text="#{volunteers.form.signUp.email}">Email</label>
             <div class="col-sm-8">
                 <input type="email" th:field="*{email}" class="form-control" id="inputEmail"
-                       placeholder="Email" th:placeholder="#{volunteers.form.signUp.email}"/>
+                       placeholder="Email" th:placeholder="#{volunteers.form.signUp.email}" disabled="disabled"/>
                 <span class="help-block" th:if="${#fields.hasErrors('email')}"
                       th:text="#{volunteers.form.signUp.email.error.empty}">Can't be empty</span>
-                <!--<span class="help-block" th:if="${#fields.hasErrors('emailExist')}"
-                      th:text="#{volunteers.form.signUp.email.error.exist}">This email already exist</span>-->
+                <input type="checkbox" th:field="*{emailCorrect}" id="emailCorrect" value="true"/>
+                <label for="emailCorrect" th:text="#{volunteers.form.yearSignUp.emailCorrect}" class="control-label">Correct
+                    email</label>
+                <span class="help-block" th:if="${#fields.hasErrors('emailCorrect')}"
+                      th:text="#{volunteers.form.yearSignUp.emailCorrect.error}"></span>
             </div>
         </div>
+
         <div class="form-group" th:class="(${#fields.hasErrors('phone')})? 'has-error form-group':'form-group'">
             <label for="inputPhone" class="col-sm-4 control-label"
                    th:text="#{volunteers.form.signUp.phone}">Phone</label>

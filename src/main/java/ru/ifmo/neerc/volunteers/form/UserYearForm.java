@@ -1,7 +1,6 @@
 package ru.ifmo.neerc.volunteers.form;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
 import ru.ifmo.neerc.volunteers.entity.PositionValue;
@@ -33,9 +32,10 @@ public class UserYearForm {
     @Pattern(regexp = "\\+7[\\(]\\d{3}[\\)]\\d{3}[\\-]\\d{2}[\\-]\\d{2}")
     private String phone;
 
-    @NotEmpty
-    @Email
     private String email;
+
+    @AssertTrue
+    private boolean emailCorrect;
 
     Set<PositionValue> positions;
 

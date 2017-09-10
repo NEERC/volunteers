@@ -75,6 +75,8 @@ public class UserController {
 
     @PostMapping("/year/{id}/signup")
     public String signupForYear(@PathVariable final long id, @Valid @ModelAttribute("applicationForm") final UserYearForm applicationForm, final BindingResult result, final Model model, final Authentication authentication, final RedirectAttributes attributes) {
+        User user = userService.getUserByAuthentication(authentication);
+        applicationForm.setEmail(user.getEmail());
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.applicationForm", result);
             attributes.addFlashAttribute("applicationForm", applicationForm);
@@ -82,5 +84,19 @@ public class UserController {
         }
         yearService.regUser(userService.getUserByAuthentication(authentication), applicationForm, yearRepository.findOne(id));
         return "redirect:/year/" + id;
+    }
+
+    @GetMapping("/position")
+    public String positions(final Model model, final Authentication authentication) {
+        utils.setModelForUser(model, userService.getUserByAuthentication(authentication).getYear());
+        model.addAttribute("title", "Positions");
+        return "position";
+    }
+
+    @GetMapping("/hall")
+    public String hall(final Model model, final Authentication authentication) {
+        utils.setModelForUser(model, userService.getUserByAuthentication(authentication).getYear());
+        model.addAttribute("title", "Halls");
+        return "hall";
     }
 }

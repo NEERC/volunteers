@@ -23,9 +23,6 @@
             <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
             <span th:text="#{volunteers.admin.menu.days}">Events</span>
         </a>
-            <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-            </button>
             <ul class="collapse in" id="eventsList">
                 <th:block th:each="day : ${days}">
                     <li>
