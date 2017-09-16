@@ -3,3 +3,20 @@ spring:
     database: HSQL
   datasource:
     initialize: false
+
+  mail:
+    host: smtp.mailgun.org
+    port: 587
+    username: postmaster@sandboxe2cd4e974bf04c8a989d79557f6f5b34.mailgun.org
+    password: 38a70b02fae5f20bced6eda943f342ca
+
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required: true
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
