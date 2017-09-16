@@ -21,8 +21,6 @@ public class ResetPasswordToken {
 
     private String token;
 
-    private boolean used = false;
-
     @ManyToOne(fetch = FetchType.EAGER)
     private User user;
 

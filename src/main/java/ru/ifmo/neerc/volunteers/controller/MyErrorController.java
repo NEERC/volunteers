@@ -58,7 +58,7 @@ public class MyErrorController implements ErrorController, AccessDeniedHandler {
         errorMap.put("status", "403");
         errorMap.put("message", "AccessDenied");
         model.addAttribute("errors", errorMap);
-        utils.setModelForUser(model, userService.getUserByAuthentication(authentication).getYear());
+        utils.setModelForUser(model, yearService.getYear(userService.getUserByAuthentication(authentication)));
         return "error";
     }
 

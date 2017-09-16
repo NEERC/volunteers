@@ -74,7 +74,6 @@ public class UserServiceImpl implements UserService {
         ResetPasswordToken token = new ResetPasswordToken(user);
         token.setExpiryDay(new Date());
         token.setToken(UUID.randomUUID().toString());
-        token.setUsed(false);
         resetPasswordTokenRepository.save(token);
         return Optional.of(token);
     }
@@ -110,19 +109,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<String> validateResetPasswordToken(final long userId, final String token) {
         ResetPasswordToken passwordToken = resetPasswordTokenRepository.findByToken(token);
-        if (passwordToken == null || passwordToken.isUsed() || passwordToken.getUser().getId() != userId) {
+        if (passwordToken == null || passwordToken.getUser().getId() != userId) {
             return Optional.of("InvalidToken");
         }
         Date now = new Date();
         if (now.getTime() - passwordToken.getExpiryDay().getTime() > ResetPasswordToken.EXPIRATION) {
+            resetPasswordTokenRepository.delete(passwordToken);
             return Optional.of("Expired");
         }
         User user = passwordToken.getUser();
         Authentication authentication = new UsernamePasswordAuthenticationToken(user, null,
                 Arrays.asList(new SimpleGrantedAuthority(SecurityConfig.PASSWORD_RESET_AUTHORITY)));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        passwordToken.setUsed(true);
-        resetPasswordTokenRepository.save(passwordToken);
+        resetPasswordTokenRepository.delete(passwordToken);
         return Optional.empty();
     }
 }

@@ -18,7 +18,7 @@ import java.util.Set;
 @Entity
 @Data
 @EqualsAndHashCode(exclude = {"password", "role", "id", "applicationForms"})
-@ToString(exclude = {"password", "role", "id", "applicationForms"})
+@ToString(exclude = {"password", "role", "id", "applicationForms", "year"})
 @Table(indexes = {@Index(columnList = "email", unique = true)})
 public class User {
 
