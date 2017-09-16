@@ -34,17 +34,26 @@
 <body>
 <div class="container">
     <th:block th:if="${year}!=null">
-        <div class="page-header" th:replace="fragments/headerUser :: header">Header goes here!</div>
+        <div class="page-header" th:replace="fragments/header :: header">Header goes here!</div>
 
         <div class="row">
-            <div class="col-md-2" th:replace="fragments/menuUser :: menu">Menu goes here!</div>
+            <div class="col-md-2" th:replace="fragments/menu :: menu">Menu goes here!</div>
             <div th:replace="${view} :: content" class="col-md-8">Content goes here!</div>
         </div>
 
     </th:block>
     <th:block th:unless="${year}!=null">
-
+        <div class="page-header" th:replace="fragments/headerBase :: header">Header goes here!</div>
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-8" th:replace="${view} :: content">Content goes here!</div>
+        </div>
     </th:block>
 </div>
+<footer class="footer">
+    <div class="container">
+        <div th:replace="fragments/footer :: footer">Footer goes here!</div>
+    </div>
+</footer>
 </body>
 </html>

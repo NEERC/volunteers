@@ -14,7 +14,7 @@
                 </span>
                 <div class="material-switch pull-right collapsed">
                     <input type="checkbox" id="registration" name="registration"
-                           th:checked="${year.openForRegistration}"/>
+                           th:checked="${year.openForRegistration}" th:disabled="${isUser}"/>
                     <label for="registration" class="label-success"></label>
                 </div>
             </li>
@@ -23,42 +23,48 @@
                 <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
                 <span th:text="#{volunteers.admin.menu.days}">Events</span>
             </a>
-                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm">
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm"
+                        th:unless="${isUser}">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                 </button>
                 <ul class="collapse in" id="eventsList">
                     <th:block th:each="day : ${days}">
                         <li>
-                            <a th:href="@{'/admin/day/'+${day.id}+'/'}" th:text="${day.name}"
+                            <a th:href="@{(${isUser}? '/':'/admin/')+'day/'+${day.id}+'/'}" th:text="${day.name}"
                                th:id="'day'+${day.id}+'name'"></a>
-                            <span class="glyphicon glyphicon-pencil" th:onclick="'editDay('+${day.id}+');'"></span>
-                            <input type="hidden" th:value="${day.information}" th:id="'day'+${day.id}+'information'"/>
-                            <input type="hidden" th:value="${day.attendanceValue}" th:id="'day'+${day.id}+'value'"/>
+                            <span class="glyphicon glyphicon-pencil" th:onclick="'editDay('+${day.id}+');'"
+                                  th:unless="${isUser}"></span>
+                            <input type="hidden" th:value="${day.information}" th:id="'day'+${day.id}+'information'"
+                                   th:unless="${isUser}"/>
+                            <input type="hidden" th:value="${day.attendanceValue}" th:id="'day'+${day.id}+'value'"
+                                   th:unless="${isUser}"/>
                         </li>
                     </th:block>
                 </ul>
             </li>
-            <li>
+            <li th:unless="${isUser}">
                 <a th:href="@{/admin/events/}" class="collapsed" th:text="#{volunteers.calendar.events.edit}">Edit
                     events</a>
             </li>
             <li>
-                <a th:href="@{/admin/position/}" class="collapsed" th:text="#{volunteers.admin.menu.positions}">
+                <a th:href="@{${isUser}? '/position/':'/admin/position/'}" class="collapsed"
+                   th:text="#{volunteers.admin.menu.positions}">
                     Positions</a>
             </li>
             <li>
-                <a th:href="@{/admin/hall/}" class="collapsed" th:text="#{volunteers.admin.menu.halls}">
+                <a th:href="@{${isUser}?'/hall/':'/admin/hall/'}" class="collapsed"
+                   th:text="#{volunteers.admin.menu.halls}">
                     Halls</a>
             </li>
-            <li>
+            <li th:unless="${isUser}">
                 <a th:href="@{/admin/medals/}" class="collapsed" th:text="#{volunteers.admin.menu.medals}">Medals</a>
             </li>
 
-            <li>
+            <li th:unless="${isUser}">
                 <a th:href="@{/admin/results/}" class="collapsed" th:text="#{volunteers.admin.menu.results}">Show
                     results</a>
             </li>
-            <li>
+            <li th:unless="${isUser}">
                 <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">
                     <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
                     <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
@@ -78,7 +84,8 @@
         </ul>
         <!-- Modal -->
 
-        <div class="modal fade" id="eventForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel">
+        <div class="modal fade" id="eventForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel"
+             th:unless="${isUser}">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <form method="post" th:action="@{/admin/day/add}" th:object="${newDay}">
@@ -120,7 +127,8 @@
             </div>
         </div>
 
-        <div class="modal fade" id="adminForm" tabindex="-1" role="dialog" aria-labelledby="adminLabel">
+        <div class="modal fade" id="adminForm" tabindex="-1" role="dialog" aria-labelledby="adminLabel"
+             th:unless="${isUser}">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <form method="post" id="formAdmin">
@@ -149,7 +157,8 @@
             </div>
         </div>
 
-        <div class="modal fade" id="editDayForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel">
+        <div class="modal fade" id="editDayForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel"
+             th:unless="${isUser}">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <form method="post" th:object="${newDay}" id="formEditDay">
@@ -196,7 +205,7 @@
             </div>
         </div>
 
-        <script th:inline="javascript">
+        <script th:inline="javascript" th:unless="${isUser}">
             function editDay(id) {
                 $("#idDay").val(id);
                 $("#dayName").val($("#day" + id + "name").text());

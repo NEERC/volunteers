@@ -49,7 +49,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByAuthentication(final Authentication authentication) {
-        return userRepository.findByEmailIgnoreCase(authentication.getName());
+        String name = "";
+        if (authentication != null) {
+            name = authentication.getName();
+        }
+        return userRepository.findByEmailIgnoreCase(name);
     }
 
     @Override

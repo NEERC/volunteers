@@ -16,4 +16,6 @@ public interface YearService {
     void regUser(User user, UserYearForm form, Year year);
 
     ApplicationForm getApplicationForm(User user, Year year);
+
+    Year getYear(User user);
 }

@@ -48,4 +48,11 @@ public class YearServiceImpl implements YearService {
 
         applicationFormRepository.save(applicationForm);
     }
+
+    @Override
+    public Year getYear(User user) {
+        if (user == null)
+            return null;
+        return user.getYear();
+    }
 }
