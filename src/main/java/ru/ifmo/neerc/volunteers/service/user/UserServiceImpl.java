@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,12 +28,14 @@ import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.security.SecurityService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Lapenok Akesej on 03.09.2017.
  */
 @Service
 @AllArgsConstructor
+@EnableScheduling
 public class UserServiceImpl implements UserService {
 
     final UserRepository userRepository;
@@ -74,6 +78,9 @@ public class UserServiceImpl implements UserService {
         ResetPasswordToken token = new ResetPasswordToken(user);
         token.setExpiryDay(new Date());
         token.setToken(UUID.randomUUID().toString());
+        while (resetPasswordTokenRepository.findByToken(token.getToken()) != null) {
+            token.setToken(UUID.randomUUID().toString());
+        }
         resetPasswordTokenRepository.save(token);
         return Optional.of(token);
     }
@@ -123,5 +130,13 @@ public class UserServiceImpl implements UserService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         resetPasswordTokenRepository.delete(passwordToken);
         return Optional.empty();
+    }
+
+    @Scheduled(fixedDelay = 24 * 60 * 60 * 1000)
+    public void deleteExpiredTokens() {
+        Set<ResetPasswordToken> tokens = resetPasswordTokenRepository.findAll();
+        Date now = new Date();
+        tokens = tokens.stream().filter(token -> now.getTime() - token.getExpiryDay().getTime() > ResetPasswordToken.EXPIRATION).collect(Collectors.toSet());
+        resetPasswordTokenRepository.delete(tokens);
     }
 }

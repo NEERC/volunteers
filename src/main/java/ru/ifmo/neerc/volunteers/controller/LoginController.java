@@ -45,9 +45,9 @@ public class LoginController {
             model.addAttribute("error", "");
             model.addAttribute("resetPasswordForm", new ResetPasswordForm());
         }
-        if (logout != null) {
+        /*if (logout != null) {
             model.addAttribute("message", "");
-        }
+        }*/
         if (reset != null) {
             model.addAttribute("reset", "");
         }
