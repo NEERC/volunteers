@@ -12,11 +12,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.thymeleaf.spring.support.Layout;
+import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.form.UserForm;
 import ru.ifmo.neerc.volunteers.repository.UserRepository;
+import ru.ifmo.neerc.volunteers.service.Utils;
+import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Locale;
 
 /**
  * Created by Алексей on 16.02.2017.
@@ -33,6 +38,12 @@ public class SignupController {
 
     final UserService userService;
 
+    final EmailService emailService;
+
+    final Utils utils;
+
+    private final Locale locale = Locale.getDefault();
+
     @GetMapping("/signup")
     public String signup(@ModelAttribute("user") UserForm user) {
         return "signup";
@@ -40,7 +51,7 @@ public class SignupController {
 
     @PostMapping("/signup")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String processSignup(@Valid @ModelAttribute("user") UserForm userForm, BindingResult result) {
+    public String processSignup(@Valid @ModelAttribute("user") UserForm userForm, BindingResult result, HttpServletRequest request) {
         if (userRepository.findByEmailIgnoreCase(userForm.getEmail()) != null) {
             result.rejectValue("emailExist", "exist.user.email", "");
         }
@@ -49,7 +60,8 @@ public class SignupController {
         if (result.hasErrors()) {
             return "signup";
         }
-        userService.registrateUser(userForm);
+        User user = userService.registrateUser(userForm);
+        emailService.sendSimpleMessage(userService.constructConfirmEmail(user, utils.getAppUrl(request), locale));
         return "redirect:/";
     }
 }

@@ -67,7 +67,7 @@ public class LoginController {
         if (token.isPresent()) {
             response.setStatus(Status.OK);
             emailService.sendSimpleMessage(
-                    userService.constructResetTokenEmail(utils.getAppUrl(request), locale, token.get(), token.get().getUser()));
+                    userService.constructResetTokenEmail(utils.getAppUrl(request), locale, token.get()));
         } else {
             response.setStatus(Status.FAIL);
             response.setResult("");
@@ -76,8 +76,8 @@ public class LoginController {
     }
 
     @GetMapping("/changePassword")
-    public String showChangePasswordPage(@RequestParam("id") final long id, @RequestParam("token") final String token) {
-        Optional<String> result = userService.validateResetPasswordToken(id, token);
+    public String showChangePasswordPage(@RequestParam("id") final long id, @RequestParam("token") final String token, @RequestParam("hash") final String hash) {
+        Optional<String> result = userService.validateResetPasswordToken(id, token, hash);
         if (result.isPresent()) {
             return "redirect:/login";
         }
@@ -96,7 +96,14 @@ public class LoginController {
         if (result.hasErrors()) {
             return updatePassword(model);
         }
-        userService.resetPassword(form);
+        userService.changePassword(form);
         return "redirect:/login?reset";
     }
+
+    @GetMapping(value = "/confirm")
+    public String confirmEmail(@RequestParam("id") final long id, @RequestParam("email") final String email) {
+        userService.confirmEmail(userRepository.findOne(id), email);
+        return "redirect:/";
+    }
+
 }

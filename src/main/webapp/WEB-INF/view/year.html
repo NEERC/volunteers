@@ -7,7 +7,7 @@
 <body>
 <div th:fragment="content" class="col-md-8">
     <form action="#" th:action="@{'/year/'+${year.id}+'/signup/'}" method="post" th:object="${applicationForm}"
-          th:if="${isUser} and ${year.openForRegistration}"
+          th:if="${isUser} and ${year.openForRegistration} and ${isConfirmed}"
           class="form-horizonatal col-sm-offset-2 col-sm-8" id="signUpForm">
         <link rel="stylesheet" type="text/css" media="screen"
               href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css"/>
@@ -155,8 +155,12 @@
             });
         </script>
     </form>
-    <h2 class="col-sm-offset-4" th:if="${isUser} and ${!year.openForRegistration}"
+    <h2 class="col-sm-offset-4" th:if="${isUser} and ${!year.openForRegistration} and ${isConfirmed}"
         th:text="#{volunteers.form.yearSignUp.finish}">Registration is finished</h2>
+    <h2 class="col-sm-offset-4" th:if="${isUser} and ${year.openForRegistration} and ${!isConfirmed}">
+        <span th:text="#{volunteers.email.confirm.reqest}"></span>
+        <a th:href="@{/user/confirm/}" class="" th:text="#{volunteers.email.confirm.link}"> send email again</a>
+    </h2>
 </div>
 </body>
 </html>

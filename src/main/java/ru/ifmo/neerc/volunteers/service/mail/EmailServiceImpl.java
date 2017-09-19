@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import ru.ifmo.neerc.volunteers.entity.User;
 
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -25,14 +27,17 @@ public class EmailServiceImpl implements EmailService {
     final Logger logger = LoggerFactory.getLogger(this.getClass());
     final MessageSource messageSource;
     final Locale locale = LocaleContextHolder.getLocale();
+    final ExecutorService toSend = Executors.newSingleThreadScheduledExecutor();
 
     @Override
     public void sendSimpleMessage(SimpleMailMessage message) {
-        try {
-            mailSender.send(message);
-        } catch (MailException e) {
-            logger.error("Error to send email", e);
-        }
+        toSend.execute(() -> {
+            try {
+                mailSender.send(message);
+            } catch (MailException e) {
+                logger.error("Error to send email", e);
+            }
+        });
     }
 
     @Override

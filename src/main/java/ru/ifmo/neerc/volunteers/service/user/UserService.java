@@ -23,13 +23,17 @@ public interface UserService {
 
     Optional<ResetPasswordToken> resetPassword(final ResetPasswordForm form);
 
-    void resetPassword(final ChangePasswordForm form);
+    void changePassword(final ChangePasswordForm form);
 
-    void registrateUser(final UserForm userForm);
+    User registrateUser(final UserForm userForm);
 
     void changeUserPassword(final User user, final String password);
 
-    Optional<String> validateResetPasswordToken(final long userId, final String token);
+    Optional<String> validateResetPasswordToken(final long userId, final String token, final String hash);
 
-    SimpleMailMessage constructResetTokenEmail(final String contextPath, final Locale locale, final ResetPasswordToken token, final User user);
+    SimpleMailMessage constructResetTokenEmail(final String contextPath, final Locale locale, final ResetPasswordToken token);
+
+    SimpleMailMessage constructConfirmEmail(final User user, String contextPath, Locale locale);
+
+    void confirmEmail(final User user, final String email);
 }

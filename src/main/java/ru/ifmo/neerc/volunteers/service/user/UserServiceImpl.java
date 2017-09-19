@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 import ru.ifmo.neerc.volunteers.config.SecurityConfig;
 import ru.ifmo.neerc.volunteers.entity.ResetPasswordToken;
 import ru.ifmo.neerc.volunteers.entity.Role;
@@ -27,6 +28,7 @@ import ru.ifmo.neerc.volunteers.service.Utils;
 import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.security.SecurityService;
 
+import javax.xml.bind.DatatypeConverter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,7 +76,6 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             return Optional.empty();
         }
-
         ResetPasswordToken token = new ResetPasswordToken(user);
         token.setExpiryDay(new Date());
         token.setToken(UUID.randomUUID().toString());
@@ -85,14 +86,19 @@ public class UserServiceImpl implements UserService {
         return Optional.of(token);
     }
 
-    public SimpleMailMessage constructResetTokenEmail(final String contextPath, final Locale locale, final ResetPasswordToken token, final User user) {
-        String url = contextPath + "/changePassword/?id=" + user.getId() + "&token=" + token.getToken();
+    public SimpleMailMessage constructResetTokenEmail(final String contextPath, final Locale locale, final ResetPasswordToken token) {
+        String url = contextPath + "/changePassword/?id=" + token.getUser().getId() + "&token=" + token.getToken() + "&hash=" + getHash(token);
         String message = messageSource.getMessage("volunteers.email.resetPassword.email", new Object[]{url}, locale);
-        return emailService.constructEmail(messageSource.getMessage("volunteers.email.resetPassword.subject", null, locale), message, user);
+        return emailService.constructEmail(messageSource.getMessage("volunteers.email.resetPassword.subject", null, locale), message, token.getUser());
+    }
+
+    private String getHash(ResetPasswordToken token) {
+        byte[] digest = DigestUtils.md5Digest((token.getToken() + " " + token.getUser().getPassword()).getBytes());
+        return DatatypeConverter.printHexBinary(digest).toUpperCase();
     }
 
     @Override
-    public void resetPassword(final ChangePasswordForm form) {
+    public void changePassword(final ChangePasswordForm form) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         changeUserPassword(user, form.getPassword());
     }
@@ -104,19 +110,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void registrateUser(final UserForm userForm) {
+    public User registrateUser(final UserForm userForm) {
         User user = new User(userForm);
         Role role = roleRepository.findByName("ROLE_USER");//ROLE_USER
         user.setRole(role);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         securityService.autologin(user.getEmail(), userForm.getPassword());
+        return user;
     }
 
     @Override
-    public Optional<String> validateResetPasswordToken(final long userId, final String token) {
+    public Optional<String> validateResetPasswordToken(final long userId, final String token, final String hash) {
         ResetPasswordToken passwordToken = resetPasswordTokenRepository.findByToken(token);
-        if (passwordToken == null || passwordToken.getUser().getId() != userId) {
+        if (passwordToken == null || passwordToken.getUser().getId() != userId || !getHash(passwordToken).equals(hash)) {
             return Optional.of("InvalidToken");
         }
         Date now = new Date();
@@ -138,5 +145,21 @@ public class UserServiceImpl implements UserService {
         Date now = new Date();
         tokens = tokens.stream().filter(token -> now.getTime() - token.getExpiryDay().getTime() > ResetPasswordToken.EXPIRATION).collect(Collectors.toSet());
         resetPasswordTokenRepository.delete(tokens);
+    }
+
+    @Override
+    public SimpleMailMessage constructConfirmEmail(User user, String contextPath, Locale locale) {
+        String url = contextPath + "/confirm/?id=" + user.getId() + "&email=" + user.getEmail();
+        String message = messageSource.getMessage("volunteers.email.confirm.email", new Object[]{url}, locale);
+        return emailService.constructEmail(messageSource.getMessage("volunteers.email.confirm.subject", null, locale), message, user);
+    }
+
+    @Override
+    public void confirmEmail(User user, String email) {
+        if (!user.getEmail().equals(email)) {
+            return;
+        }
+        user.setConfirmed(true);
+        userRepository.save(user);
     }
 }

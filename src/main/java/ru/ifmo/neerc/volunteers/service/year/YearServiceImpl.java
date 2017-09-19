@@ -40,6 +40,8 @@ public class YearServiceImpl implements YearService {
 
     @Override
     public void regUser(final User user, final UserYearForm form, final Year year) {
+        if (!user.isConfirmed())
+            return;
         if (user.changeUserInformation(form)) {
             userRepository.save(user);
         }

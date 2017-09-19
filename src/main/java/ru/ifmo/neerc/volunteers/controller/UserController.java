@@ -15,10 +15,13 @@ import ru.ifmo.neerc.volunteers.entity.Year;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
 import ru.ifmo.neerc.volunteers.repository.YearRepository;
 import ru.ifmo.neerc.volunteers.service.Utils;
+import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 import ru.ifmo.neerc.volunteers.service.year.YearService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -35,7 +38,10 @@ public class UserController {
 
     final UserService userService;
     final YearService yearService;
+    final EmailService emailService;
     final Utils utils;
+
+    final Locale locale = Locale.getDefault();
 
     @RequestMapping
     public String home(final Authentication authentication) {
@@ -70,6 +76,7 @@ public class UserController {
             model.addAttribute("applicationForm", new UserYearForm(form));
             model.addAttribute("isSaved", form.getId() != 0);
         }
+        model.addAttribute("isConfirmed", user.isConfirmed());
         return "year";
     }
 
@@ -98,5 +105,16 @@ public class UserController {
         utils.setModelForUser(model, userService.getUserByAuthentication(authentication).getYear());
         model.addAttribute("title", "Halls");
         return "hall";
+    }
+
+    @GetMapping("/user/confirm")
+    public String sendConfirmEmail(final Authentication authentication, final HttpServletRequest request) {
+        emailService.sendSimpleMessage(
+                userService.constructConfirmEmail(
+                        userService.getUserByAuthentication(authentication),
+                        utils.getAppUrl(request), locale
+                )
+        );
+        return "redirect:/";
     }
 }

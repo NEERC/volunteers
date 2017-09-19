@@ -47,6 +47,8 @@ public class User {
 
     private String phone;
 
+    private boolean confirmed;
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     //@Column(firstName = "role_id", nullable = false)
     private Role role;
@@ -70,6 +72,7 @@ public class User {
         badgeNameCyr = userForm.getBadgeNameCyr();
         email = userForm.getEmail();
         phone = userForm.getPhone();
+        confirmed = false;
     }
 
     public Collection<Role> getAuth() {
