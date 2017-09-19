@@ -33,17 +33,17 @@
 <div class="container">
 
     <th:block th:if="${year}!=null">
-        <div class="page-header" th:replace="fragments/headerAdmin :: header">Header goes here!</div>
+        <div class="page-header" th:replace="fragments/header :: header">Header goes here!</div>
 
 
         <div class="row">
-            <div class="col-md-2" th:replace="fragments/menuAdmin :: menu">Menu goes here!</div>
+            <div class="col-md-2" th:replace="fragments/menu :: menu">Menu goes here!</div>
                 <div th:replace="${view} :: content" class="col-md-8">Content goes here!</div>
-    </div>
+        </div>
 
     </th:block>
     <th:block th:unless="${year}!=null">
-        <div class="page-header" th:replace="fragments/header :: header">Header goes here, if no year in database</div>
+        <!--<div class="page-header" th:replace="fragments/header :: header">Header goes here, if no year in database</div>-->
         <!-- Model-->
         <div class="modal fade" id="yearForm" tabindex="-1" role="dialog" aria-labelledby="yearLabel">
             <div class="modal-dialog" role="document">

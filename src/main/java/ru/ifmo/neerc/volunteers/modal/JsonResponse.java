@@ -6,7 +6,7 @@ import lombok.Data;
  * Created by Lapenok Akesej on 08.07.2017.
  */
 @Data
-public class JsonResponse {
+public class JsonResponse<T> {
     Status status;
-    Object result;
+    T result;
 }

@@ -2217,6 +2217,10 @@ body { /* Margin bottom by footer height */ margin-bottom: 60px; }
 .admin-sidebar > li > a:not(.collapsed) .expanded { display: none; }
 .admin-sidebar > li > a.collapsed .collapsed { display: none; }
 
+.form-group .list-group { margin-bottom: 0; }
+
+.has-error .list-group-item { border-color: #a94442; }
+
 .show-grid {  margin-bottom: 15px; }
 
 .material-switch > input[type="checkbox"] {

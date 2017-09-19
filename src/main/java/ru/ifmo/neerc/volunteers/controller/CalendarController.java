@@ -5,7 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.ifmo.neerc.volunteers.repository.YearRepository;
 import ru.ifmo.neerc.volunteers.service.calendar.CalendarService;
 
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +18,6 @@ import java.io.IOException;
 @AllArgsConstructor
 public class CalendarController {
     private final CalendarService calendarService;
-    private final YearRepository yearRepository;
 
     @GetMapping("{id}")
     public void getCalendars(@PathVariable final long id, HttpServletResponse response) throws IOException {

@@ -49,6 +49,7 @@ dependencies {
 	compile('commons-beanutils:commons-beanutils')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-security')
+	compile('org.springframework.boot:spring-boot-starter-mail')
 
 	compile('org.mnode.ical4j:ical4j:1.0.5')
 	compile('net.sf.biweekly:biweekly:0.2.0')

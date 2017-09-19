@@ -1,9 +1,4 @@
 spring:
-  jpa:
-    database: HSQL
-  datasource:
-    initialize: false
-
   mail:
     host: smtp.mailgun.org
     port: 587

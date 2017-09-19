@@ -6,7 +6,8 @@
 </head>
 <body>
     <div th:fragment="content" >
-        <form action="#" th:action="@{/signup}" th:object="${user}" method="post" class="form-horizontal col-sm-offset-2 col-sm-8">
+        <form action="#" th:action="@{/signup}" method="post" th:object="${user}"
+              class="form-horizontal col-sm-offset-2 col-sm-8" id="signUpForm">
             <h2 class="col-sm-offset-4" th:text="#{volunteers.form.signUp.header}"> Sign up to volunteers </h2>
     
             <div class="form-group" th:class="${#fields.hasErrors('firstName')}? 'has-error form-group' : 'form-group'">
@@ -65,11 +66,24 @@
                           th:text="#{volunteers.form.signUp.email.error.exist}">This email already exist</span>
                 </div>
             </div>
+            <div class="form-group" th:class="(${#fields.hasErrors('phone')})? 'has-error form-group':'form-group'">
+                <label for="inputPhone" class="col-sm-4 control-label"
+                       th:text="#{volunteers.form.signUp.phone}">Phone</label>
+                <div class="col-sm-8">
+                    <input type="tel" th:field="*{phone}" class="form-control" id="inputPhone"
+                           placeholder="Phone" th:placeholder="#{volunteers.form.signUp.phone}"
+                           pattern="\+7[\(]\d{3}[\)]\d{3}[\-]?\d{2}[\-]?\d{2}"
+                    />
+                    <span class="help-block" th:if="${#fields.hasErrors('phone')}"
+                          th:text="#{volunteers.form.signUp.phone.error}">Incorrect phone number</span>
+                </div>
+            </div>
             <div class="form-group" th:class="${#fields.hasErrors('badgeName')}? 'has-error form-group' : 'form-group'">
                 <label for="inputBadgeName" class="col-sm-4 control-label"
                        th:text="#{volunteers.form.signUp.badgeName}">Badge name</label>
                 <div class="col-sm-8">
                     <input type="text" th:field="*{badgeName}" class="form-control" id="inputBadgeName"
+                           disabled="disabled"
                            placeholder="Badge name" th:placeholder="#{volunteers.form.signUp.badgeName}"/>
                     <span class="help-block" th:if="${#fields.hasErrors('badgeName')}"
                           th:text="#{volunteers.form.signUp.badgeName.error.empty}">Can't be empty</span>
@@ -80,6 +94,7 @@
                        th:text="#{volunteers.form.signUp.badgeNameCyr}">Имя на бейдже</label>
                 <div class="col-sm-8">
                     <input type="text" th:field="*{badgeNameCyr}" class="form-control" id="inputBadgeNameCyr"
+                           disabled="disabled"
                            placeholder="Имя на бейдже" th:placeholder="#{volunteers.form.signUp.badgeNameCyr}"/>
                     <span class="help-block" th:if="${#fields.hasErrors('badgeNameCyr')}"
                           th:text="#{volunteers.form.signUp.badgeNameCyr.error.empty}">Не может быть пустым</span>
@@ -113,6 +128,73 @@
             </div>
         </form>
         <script src="js/signup.js"></script>
+        <script th:inline="javascript">
+            $('#inputPhone').mask('+7(999)999-99-99');
+            $(function () {
+                $.validator.addMethod("regex", function (value, element, regexpr) {
+                    return regexpr.test(value);
+                }, "Please enter a valid pasword.");
+                $('#signUpForm').validate({
+                    rules: {
+                        firstName: {
+                            required: true
+                        },
+                        lastName: {
+                            required: true
+                        },
+                        firstNameCyr: {
+                            required: true
+                        },
+                        lastNameCyr: {
+                            required: true
+                        },
+                        email: {
+                            required: true,
+                            email: true
+                        },
+                        phone: {
+                            required: true,
+                            regex: /^\+7[\(]\d{3}[\)]\d{3}[\-]\d{2}[\-]\d{2}$/
+                        },
+                        password: {
+                            required: true,
+                            minlength: 8
+                        },
+                        confirmPassword: {
+                            required: true,
+                            equalTo: "#inputPassword"
+                        }
+                    },
+                    messages: {
+                        firstName: /*[[#{volunteers.form.signUp.firstName.error.empty}]]*/"",
+                        lastName: /*[[#{volunteers.form.signUp.lastName.error.empty}]]*/"",
+                        firstNameCyr: /*[[#{volunteers.form.signUp.firstNameCyr.error.empty}]]*/"",
+                        lastNameCyr: /*[[#{volunteers.form.signUp.lastNameCyr.error.empty}]]*/"",
+                        email: {
+                            required: /*[[#{volunteers.form.signUp.lastName.error.empty}]]*/"",
+                            email: /*[[#{volunteers.form.signUp.email.error.invalid}]]*/""
+                        },
+                        phone: {
+                            required: /*[[#{volunteers.form.signUp.phone.error.empty}]]*/"",
+                            matches: /*[[#{volunteers.form.signUp.phone.error.invalid}]]*/""
+                        },
+                        password: /*[[#{volunteers.form.signUp.password.error.empty}]]*/"",
+                        confirmPassword: {
+                            required: /*[[#{volunteers.form.signUp.confirmPassword.error.empty}]]*/"",
+                            equalTo: /*[[#{volunteers.form.signUp.confirmPassword.error.equals}]]*/""
+                        }
+                    },
+                    errorElement: 'span',
+                    errorClass: 'help-block',
+                    highlight: function (element) {
+                        $(element).closest('.form-group').addClass('has-error');
+                    },
+                    unhighlight: function (element) {
+                        $(element).closest('.form-group').removeClass('has-error');
+                    }
+                })
+            });
+        </script>
     </div>
 </body>
 </html>

@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.Pattern;
 
 /**
  * Created by Алексей on 21.02.2017.
@@ -32,11 +33,15 @@ public class UserForm {
     @NotEmpty
     private String confirmPassword;
 
-    @NotEmpty
+    //@NotEmpty
     private String badgeName;
 
-    @NotEmpty
+    //@NotEmpty
     private String badgeNameCyr;
+
+    @NotEmpty
+    @Pattern(regexp = "\\+7[\\(]\\d{3}[\\)]\\d{3}[\\-]\\d{2}[\\-]\\d{2}")
+    private String phone;
 
     @NotEmpty
     @Email

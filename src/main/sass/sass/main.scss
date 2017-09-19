@@ -56,3 +56,11 @@ body {
     }
   }
 }
+
+.form-group .list-group {
+    margin-bottom: 0;
+}
+
+.has-error .list-group-item {
+    border-color: #a94442;
+}

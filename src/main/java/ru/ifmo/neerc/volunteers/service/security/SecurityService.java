@@ -1,4 +1,4 @@
-package ru.ifmo.neerc.volunteers.service;
+package ru.ifmo.neerc.volunteers.service.security;
 
 /**
  * Created by Алексей on 23.02.2017.
