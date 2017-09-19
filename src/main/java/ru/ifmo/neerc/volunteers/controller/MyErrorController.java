@@ -13,9 +13,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.service.Utils;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
-import ru.ifmo.neerc.volunteers.service.year.YearService;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -35,7 +33,6 @@ public class MyErrorController implements ErrorController, AccessDeniedHandler {
     private final ErrorAttributes errorAttributes;
     private final Utils utils;
     private final UserService userService;
-    private final YearService yearService;
 
     @Override
     public String getErrorPath() {
@@ -48,22 +45,22 @@ public class MyErrorController implements ErrorController, AccessDeniedHandler {
         if (!errorMap.containsKey("trace"))
             errorMap.put("trace", "");
         model.addAttribute("errors", errorMap);
-        utils.setModelForUser(model, yearService.getYear(userService.getUserByAuthentication(authentication)));
+        utils.setModelForUser(model, userService.getUserByAuthentication(authentication));
         return "error";
     }
 
     @RequestMapping("/403")
-    String error403(final HttpServletRequest request, final Model model, final Authentication authentication) {
+    String error403(final Model model, final Authentication authentication) {
         HashMap<String, Object> errorMap = new HashMap<>();
         errorMap.put("status", "403");
         errorMap.put("message", "AccessDenied");
         model.addAttribute("errors", errorMap);
-        utils.setModelForUser(model, yearService.getYear(userService.getUserByAuthentication(authentication)));
+        utils.setModelForUser(model, userService.getUserByAuthentication(authentication));
         return "error";
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        response.sendRedirect("/403");
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
+        response.sendRedirect("/login");
     }
 }

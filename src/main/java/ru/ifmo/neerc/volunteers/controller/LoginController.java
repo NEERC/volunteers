@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.ResetPasswordToken;
 import ru.ifmo.neerc.volunteers.form.ChangePasswordForm;
-import ru.ifmo.neerc.volunteers.form.ResetPasswordForm;
+import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.UserRepository;
@@ -37,13 +37,12 @@ public class LoginController {
 
     @RequestMapping("/login")
     public String login(@RequestParam(value = "error", required = false) final String error,
-                        @RequestParam(value = "logout", required = false) final String logout,
                         @RequestParam(value = "reset", required = false) final String reset,
                         final Model model) {
 
         if (error != null) {
             model.addAttribute("error", "");
-            model.addAttribute("resetPasswordForm", new ResetPasswordForm());
+            model.addAttribute("resetPasswordForm", new EmailForm());
         }
         /*if (logout != null) {
             model.addAttribute("message", "");
@@ -56,7 +55,7 @@ public class LoginController {
 
     @PostMapping("/reset-password/")
     public @ResponseBody
-    JsonResponse<String> resetPassword(@Valid @ModelAttribute("resetPasswordForm") final ResetPasswordForm form, final BindingResult result, final HttpServletRequest request, final Locale locale) {
+    JsonResponse<String> resetPassword(@Valid @ModelAttribute("resetPasswordForm") final EmailForm form, final BindingResult result, final HttpServletRequest request, final Locale locale) {
         JsonResponse<String> response = new JsonResponse<>();
         if (result.hasErrors()) {
             response.setStatus(Status.FAIL);

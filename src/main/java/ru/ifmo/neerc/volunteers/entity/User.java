@@ -3,6 +3,8 @@ package ru.ifmo.neerc.volunteers.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import ru.ifmo.neerc.volunteers.form.UserForm;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
 
@@ -20,7 +22,7 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {"password", "role", "id", "applicationForms"})
 @ToString(exclude = {"password", "role", "id", "applicationForms", "year"})
 @Table(indexes = {@Index(columnList = "email", unique = true)})
-public class User {
+public class User implements UserDetails {
 
     /*@Autowired
     PasswordEncoder passwordEncoder;*/
@@ -75,12 +77,6 @@ public class User {
         confirmed = false;
     }
 
-    public Collection<Role> getAuth() {
-        final List<Role> roles = new ArrayList<>(1);
-        roles.add(getRole());
-        return roles;
-    }
-
     public boolean changeUserInformation(UserYearForm form) {
         boolean result = false;
         if (!firstName.equals(form.getFirstName())) {
@@ -116,4 +112,35 @@ public class User {
         return result;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        final List<Role> roles = new ArrayList<>(1);
+        roles.add(getRole());
+        return roles;
+    }
+
+    @Override
+    public String getUsername() {
+        return getEmail();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

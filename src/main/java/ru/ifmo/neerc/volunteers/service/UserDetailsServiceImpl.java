@@ -1,30 +1,29 @@
 package ru.ifmo.neerc.volunteers.service;
 
-import ru.ifmo.neerc.volunteers.entity.User;
-import ru.ifmo.neerc.volunteers.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import ru.ifmo.neerc.volunteers.repository.UserRepository;
 
 /**
  * Created by Алексей on 22.02.2017.
  */
 @Service
+@AllArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
         UserDetails userDetails;
         try {
-            final User user = userRepository.findByEmailIgnoreCase(username);
-            userDetails = new org.springframework.security.core.userdetails.User(
+            userDetails = userRepository.findByEmailIgnoreCase(username);
+            /*new org.springframework.security.core.userdetails.User(
                     username, user.getPassword(), user.getAuth()
-            );
+            );*/
         } catch (final Exception e) {
             throw new UsernameNotFoundException(e.getMessage(), e);
         }

@@ -19,7 +19,7 @@ import ru.ifmo.neerc.volunteers.entity.Role;
 import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
 import ru.ifmo.neerc.volunteers.form.ChangePasswordForm;
-import ru.ifmo.neerc.volunteers.form.ResetPasswordForm;
+import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.form.UserForm;
 import ru.ifmo.neerc.volunteers.repository.ResetPasswordTokenRepository;
 import ru.ifmo.neerc.volunteers.repository.RoleRepository;
@@ -55,11 +55,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByAuthentication(final Authentication authentication) {
-        String name = "";
         if (authentication != null) {
-            name = authentication.getName();
+            String name = authentication.getName();
+            return userRepository.findByEmailIgnoreCase(name);
         }
-        return userRepository.findByEmailIgnoreCase(name);
+        return null;
     }
 
     @Override
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<ResetPasswordToken> resetPassword(final ResetPasswordForm form) {
+    public Optional<ResetPasswordToken> resetPassword(final EmailForm form) {
         User user = userRepository.findByEmailIgnoreCase(form.getEmail());
         if (user == null) {
             return Optional.empty();
@@ -161,5 +161,17 @@ public class UserServiceImpl implements UserService {
         }
         user.setConfirmed(true);
         userRepository.save(user);
+    }
+
+    @Override
+    public void changeEmail(User user, EmailForm emailForm, Authentication authentication) {
+        if (userRepository.findByEmailIgnoreCase(emailForm.getEmail()) != null) {
+            return;
+        }
+        user.setEmail(emailForm.getEmail());
+        user.setConfirmed(false);
+        userRepository.save(user);
+        User userDetails = (User) authentication.getPrincipal();
+        userDetails.setEmail(emailForm.getEmail());
     }
 }

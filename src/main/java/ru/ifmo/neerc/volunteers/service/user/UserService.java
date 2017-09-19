@@ -6,7 +6,7 @@ import ru.ifmo.neerc.volunteers.entity.ResetPasswordToken;
 import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
 import ru.ifmo.neerc.volunteers.form.ChangePasswordForm;
-import ru.ifmo.neerc.volunteers.form.ResetPasswordForm;
+import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.form.UserForm;
 
 import java.util.Locale;
@@ -21,7 +21,7 @@ public interface UserService {
 
     void setUserYear(final User user, final Year year);
 
-    Optional<ResetPasswordToken> resetPassword(final ResetPasswordForm form);
+    Optional<ResetPasswordToken> resetPassword(final EmailForm form);
 
     void changePassword(final ChangePasswordForm form);
 
@@ -36,4 +36,6 @@ public interface UserService {
     SimpleMailMessage constructConfirmEmail(final User user, String contextPath, Locale locale);
 
     void confirmEmail(final User user, final String email);
+
+    void changeEmail(final User user, final EmailForm emailForm, Authentication authentication);
 }

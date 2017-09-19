@@ -5,11 +5,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import ru.ifmo.neerc.volunteers.entity.Day;
 import ru.ifmo.neerc.volunteers.entity.Role;
+import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
+import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.form.HallForm;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
 import ru.ifmo.neerc.volunteers.repository.RoleRepository;
 import ru.ifmo.neerc.volunteers.repository.YearRepository;
+import ru.ifmo.neerc.volunteers.service.year.YearService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -23,14 +26,16 @@ public class Utils {
 
     final YearRepository yearRepository;
     final RoleRepository roleRepository;
+    final YearService yearService;
 
-    public void setModelForUser(Model model, Year year) {
-        setModel(model, year);
+    public void setModelForUser(Model model, User user) {
+        setModel(model, user);
         model.addAttribute("isUser", true);
     }
 
 
-    private void setModel(Model model, Year year) {
+    private void setModel(Model model, User user) {
+        Year year = yearService.getYear(user);
         model.addAttribute("year", year);
         model.addAttribute("years", yearRepository.findAll());
 
@@ -43,16 +48,19 @@ public class Utils {
             model.addAttribute("positions", Collections.EMPTY_LIST);
             model.addAttribute("halls", Collections.EMPTY_LIST);
         }
+        if (!model.containsAttribute("emailForm") && user != null) {
+            model.addAttribute("emailForm", new EmailForm(user.getEmail()));
+        }
     }
 
-    public void setModelForAdmin(Model model, Year year) {
-        setModel(model, year);
+    public void setModelForAdmin(Model model, User user) {
+        setModel(model, user);
         if (!model.containsAttribute("newYear")) {
             model.addAttribute("newYear", new Year());
         }
         if (!model.containsAttribute("newDay")) {
             final Day newDay = new Day();
-            newDay.setYear(year);
+            newDay.setYear(yearService.getYear(user));
             model.addAttribute("newDay", newDay);
         }
         if (!model.containsAttribute("newPosition")) {

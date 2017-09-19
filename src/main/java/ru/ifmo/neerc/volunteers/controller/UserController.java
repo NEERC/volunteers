@@ -12,7 +12,9 @@ import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
 import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
+import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
+import ru.ifmo.neerc.volunteers.repository.UserRepository;
 import ru.ifmo.neerc.volunteers.repository.YearRepository;
 import ru.ifmo.neerc.volunteers.service.Utils;
 import ru.ifmo.neerc.volunteers.service.mail.EmailService;
@@ -35,13 +37,14 @@ import java.util.Set;
 public class UserController {
 
     final YearRepository yearRepository;
+    final UserRepository userRepository;
 
     final UserService userService;
     final YearService yearService;
     final EmailService emailService;
     final Utils utils;
 
-    final Locale locale = Locale.getDefault();
+    private final Locale locale = Locale.getDefault();
 
     @RequestMapping
     public String home(final Authentication authentication) {
@@ -70,7 +73,7 @@ public class UserController {
         User user = userService.getUserByAuthentication(authentication);
         Year year = yearRepository.findOne(id);
         userService.setUserYear(user, year);
-        utils.setModelForUser(model, year);
+        utils.setModelForUser(model, user);
         if (!model.containsAttribute("applicationForm")) {
             ApplicationForm form = yearService.getApplicationForm(user, year);
             model.addAttribute("applicationForm", new UserYearForm(form));
@@ -81,7 +84,7 @@ public class UserController {
     }
 
     @PostMapping("/year/{id}/signup")
-    public String signupForYear(@PathVariable final long id, @Valid @ModelAttribute("applicationForm") final UserYearForm applicationForm, final BindingResult result, final Model model, final Authentication authentication, final RedirectAttributes attributes) {
+    public String signupForYear(@PathVariable final long id, @Valid @ModelAttribute("applicationForm") final UserYearForm applicationForm, final BindingResult result, final Authentication authentication, final RedirectAttributes attributes) {
         User user = userService.getUserByAuthentication(authentication);
         applicationForm.setEmail(user.getEmail());
         if (result.hasErrors()) {
@@ -95,14 +98,14 @@ public class UserController {
 
     @GetMapping("/position")
     public String positions(final Model model, final Authentication authentication) {
-        utils.setModelForUser(model, userService.getUserByAuthentication(authentication).getYear());
+        utils.setModelForUser(model, userService.getUserByAuthentication(authentication));
         model.addAttribute("title", "Positions");
         return "position";
     }
 
     @GetMapping("/hall")
     public String hall(final Model model, final Authentication authentication) {
-        utils.setModelForUser(model, userService.getUserByAuthentication(authentication).getYear());
+        utils.setModelForUser(model, userService.getUserByAuthentication(authentication));
         model.addAttribute("title", "Halls");
         return "hall";
     }
@@ -115,6 +118,23 @@ public class UserController {
                         utils.getAppUrl(request), locale
                 )
         );
+        return "redirect:/";
+    }
+
+    @PostMapping("/user/email")
+    public String changeEmail(@Valid @ModelAttribute("emailForm") final EmailForm emailForm, final BindingResult result, final Authentication authentication, final RedirectAttributes attributes, final HttpServletRequest request) {
+        User user = userService.getUserByAuthentication(authentication);
+        if (userRepository.findByEmailIgnoreCase(emailForm.getEmail()) != null &&
+                !user.getEmail().equals(emailForm.getEmail())) {
+            result.rejectValue("emailExist", "exist.emailForm.email", "");
+        }
+        if (result.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.emailForm", result);
+            attributes.addFlashAttribute("emailForm", emailForm);
+        } else {
+            userService.changeEmail(user, emailForm, authentication);
+            emailService.sendSimpleMessage(userService.constructConfirmEmail(user, utils.getAppUrl(request), locale));
+        }
         return "redirect:/";
     }
 }
