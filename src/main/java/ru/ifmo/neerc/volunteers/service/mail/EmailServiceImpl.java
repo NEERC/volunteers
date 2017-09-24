@@ -33,7 +33,9 @@ public class EmailServiceImpl implements EmailService {
     public void sendSimpleMessage(SimpleMailMessage message) {
         toSend.execute(() -> {
             try {
+                logger.info("I will send email", message);
                 mailSender.send(message);
+                logger.info("I sent email", message);
             } catch (MailException e) {
                 logger.error("Error to send email", e);
             }
