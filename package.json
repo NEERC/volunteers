@@ -7,6 +7,7 @@
     "bootstrap-sass": "latest",
     "jquery": "latest",
     "jquery-validation": "latest",
-    "jquery-mask-plugin": "latest"
+    "jquery-mask-plugin": "latest",
+    "bootstrap-select":"latest"
   }
 }
