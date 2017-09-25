@@ -9,6 +9,7 @@ import ru.ifmo.neerc.volunteers.service.calendar.CalendarService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * Created by Lapenok Akesej on 03.08.2017.
@@ -19,12 +20,13 @@ import java.io.IOException;
 public class CalendarController {
     private final CalendarService calendarService;
 
-    @GetMapping("{id}")
+    @GetMapping(value = "{id}")
     public void getCalendars(@PathVariable final long id, HttpServletResponse response) throws IOException {
-        response.getOutputStream().print(calendarService.getCalendars(id));
-        response.setContentType("data:text/ics;charset=utf-8");
+        response.setContentType("text/html; charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter writer = response.getWriter();
+        writer.println(calendarService.getCalendars(id));
         response.setHeader("Content-Disposition", "attachment; filename=\"calendar.ics\"");
-
         response.flushBuffer();
     }
 
@@ -34,6 +36,5 @@ public class CalendarController {
         response.setContentType("data:text/ics;charset=utf-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"calendar.ics\"");
         response.flushBuffer();
-        ;
     }
 }
