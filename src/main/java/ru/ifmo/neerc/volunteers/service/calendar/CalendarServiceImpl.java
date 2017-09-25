@@ -78,6 +78,8 @@ public class CalendarServiceImpl implements CalendarService {
 
                     vEvent.setDescription(event.getDescription());
 
+                    vEvent.setLocation(event.getLocation());
+
                     vEvent.setSummary(eventSummery);
 
                     iCalendar.addEvent(vEvent);
