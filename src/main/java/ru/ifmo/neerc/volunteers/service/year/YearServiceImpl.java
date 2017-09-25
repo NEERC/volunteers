@@ -1,16 +1,14 @@
 package ru.ifmo.neerc.volunteers.service.year;
 
 import lombok.AllArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
-import ru.ifmo.neerc.volunteers.entity.User;
-import ru.ifmo.neerc.volunteers.entity.Year;
+import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
-import ru.ifmo.neerc.volunteers.repository.ApplicationFormRepository;
-import ru.ifmo.neerc.volunteers.repository.UserRepository;
-import ru.ifmo.neerc.volunteers.repository.YearRepository;
+import ru.ifmo.neerc.volunteers.repository.*;
 
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -23,6 +21,10 @@ public class YearServiceImpl implements YearService {
     final YearRepository yearRepository;
     final ApplicationFormRepository applicationFormRepository;
     final UserRepository userRepository;
+    final PositionValueRepository positionValueRepository;
+    final HallRepository hallRepository;
+
+    final MessageSource messageSource;
 
     @Override
     public Optional<Year> getLastYear() {
@@ -56,5 +58,34 @@ public class YearServiceImpl implements YearService {
         if (user == null)
             return null;
         return user.getYear();
+    }
+
+    @Override
+    public Hall findOrCreateDefaultHall(Year year, Locale locale) {
+        Hall hall = null;
+        for (final Hall hall1 : year.getHalls()) {
+            if (hall1.isDef())
+                hall = hall1;
+        }
+        if (hall == null) {
+            hall = new Hall(messageSource.getMessage("volunteers.reserve.hall", null, "Reserve", locale), true, "", year);
+            hallRepository.save(hall);
+        }
+        return hall;
+    }
+
+    @Override
+    public PositionValue findOrCreateDefaultPosition(Year year, Locale locale) {
+        PositionValue positionValue = null;
+        for (final PositionValue positionValue1 : year.getPositionValues()) {
+            if (positionValue1.isDef()) {
+                positionValue = positionValue1;
+            }
+        }
+        if (positionValue == null) {
+            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "Reserve", locale), true, 0, year);
+            positionValueRepository.save(positionValue);
+        }
+        return positionValue;
     }
 }

@@ -10,13 +10,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
+import ru.ifmo.neerc.volunteers.entity.Day;
 import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
 import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
+import ru.ifmo.neerc.volunteers.repository.DayRepository;
 import ru.ifmo.neerc.volunteers.repository.UserRepository;
 import ru.ifmo.neerc.volunteers.repository.YearRepository;
 import ru.ifmo.neerc.volunteers.service.Utils;
+import ru.ifmo.neerc.volunteers.service.day.DayService;
 import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 import ru.ifmo.neerc.volunteers.service.year.YearService;
@@ -38,10 +41,12 @@ public class UserController {
 
     final YearRepository yearRepository;
     final UserRepository userRepository;
+    final DayRepository dayRepository;
 
     final UserService userService;
     final YearService yearService;
     final EmailService emailService;
+    final DayService dayService;
     final Utils utils;
 
     private final Locale locale = Locale.getDefault();
@@ -136,5 +141,18 @@ public class UserController {
             emailService.sendSimpleMessage(userService.constructConfirmEmail(user, utils.getAppUrl(request), locale));
         }
         return "redirect:/";
+    }
+
+    @GetMapping("/day/{id}")
+    public String getDay(@PathVariable("id") final long id, final Model model, final Authentication authentication) {
+        User user = userService.getUserByAuthentication(authentication);
+        final Day day = dayRepository.findOne(id);
+
+        utils.setModelForUser(model, userService.getUserByAuthentication(authentication));
+        model.addAttribute("hallUser", dayService.getHallUser(day, locale));
+        model.addAttribute("day", day);
+        model.addAttribute("halls", user.getYear().getHalls());
+        model.addAttribute("title", day.getName());
+        return "showEvent";
     }
 }

@@ -1,10 +1,9 @@
 package ru.ifmo.neerc.volunteers.service.year;
 
-import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
-import ru.ifmo.neerc.volunteers.entity.User;
-import ru.ifmo.neerc.volunteers.entity.Year;
+import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
 
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -18,4 +17,8 @@ public interface YearService {
     ApplicationForm getApplicationForm(User user, Year year);
 
     Year getYear(User user);
+
+    Hall findOrCreateDefaultHall(final Year year, Locale locale);
+
+    PositionValue findOrCreateDefaultPosition(final Year year, Locale locale);
 }

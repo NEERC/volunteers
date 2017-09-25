@@ -22,6 +22,7 @@ import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.*;
 import ru.ifmo.neerc.volunteers.service.Utils;
+import ru.ifmo.neerc.volunteers.service.day.DayService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 import ru.ifmo.neerc.volunteers.service.year.YearService;
 
@@ -59,6 +60,7 @@ public class AdminController {
 
     private final UserService userService;
     private final YearService yearService;
+    private final DayService dayService;
     private final Utils utils;
 
     @GetMapping
@@ -337,8 +339,8 @@ public class AdminController {
         Year year = day.getYear();
         final Set<ApplicationForm> users = year.getUsers();
         day.setUsers(new HashSet<>());
-        final PositionValue positionValue = findOrCreateDefaultPosition(year);
-        final Hall hall = findOrCreateDefaultHall(year);
+        final PositionValue positionValue = yearService.findOrCreateDefaultPosition(year, locale);
+        final Hall hall = yearService.findOrCreateDefaultHall(year, locale);
         final List<UserDay> userDays = new ArrayList<>();
         users.forEach(applicationForm -> {
             final UserDay userDay = new UserDay();
@@ -352,32 +354,6 @@ public class AdminController {
         return "redirect:/admin/day/" + day.getId() + "/";
     }
 
-    private PositionValue findOrCreateDefaultPosition(final Year year) {
-        PositionValue positionValue = null;
-        for (final PositionValue positionValue1 : year.getPositionValues()) {
-            if (positionValue1.isDef()) {
-                positionValue = positionValue1;
-            }
-        }
-        if (positionValue == null) {
-            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "Reserve", locale), true, 0, year);
-            positionValueRepository.save(positionValue);
-        }
-        return positionValue;
-    }
-
-    private Hall findOrCreateDefaultHall(final Year year) {
-        Hall hall = null;
-        for (final Hall hall1 : year.getHalls()) {
-            if (hall1.isDef())
-                hall = hall1;
-        }
-        if (hall == null) {
-            hall = new Hall(messageSource.getMessage("volunteers.reserve.hall", null, "Reserve", locale), true, "", year);
-            hallRepository.save(hall);
-        }
-        return hall;
-    }
 
     @GetMapping("day/{id}")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -386,11 +362,11 @@ public class AdminController {
         final Year year = user.getYear();
         final Day currentDay = dayRepository.findOne(id);
         utils.setModelForAdmin(model, user);
-        final Set<ApplicationForm> yearUsers = new HashSet<>(year.getUsers());
+        /*final Set<ApplicationForm> yearUsers = new HashSet<>(year.getUsers());
         yearUsers.removeAll(currentDay.getUsers().stream().map(UserDay::getUserYear).collect(Collectors.toSet()));
-        final Hall reserve = findOrCreateDefaultHall(year);
+        final Hall reserve = yearService.findOrCreateDefaultHall(year, locale);
 
-        final PositionValue defaultPosition = findOrCreateDefaultPosition(year);
+        final PositionValue defaultPosition = yearService.findOrCreateDefaultPosition(year,locale);
 
         userEventRepository.save(yearUsers.stream().map(af -> {
             final UserDay ue = new UserDay();
@@ -405,17 +381,19 @@ public class AdminController {
 
         final HashMap<Hall, List<UserDay>> hallUser = new HashMap<>(
                 day.getUsers().stream().collect(Collectors.groupingBy(UserDay::getHall)));
-        hallUser.forEach((u, v) -> v.sort(Comparator.comparing(lst -> lst.getPosition().getName())));
+        hallUser.forEach((u, v) -> v.sort(Comparator.comparing(lst -> lst.getPosition().getName())));*/
+
+        final HashMap<Hall, List<UserDay>> hallUser = dayService.getHallUser(currentDay, locale);
 
         final Set<Hall> halls = year.getHalls();
-        hallUser.putAll(halls.stream()
+        /*hallUser.putAll(halls.stream()
                 .filter(h -> !hallUser.containsKey(h))
-                .collect(Collectors.toMap(Function.identity(), hall -> new ArrayList<>())));
+                .collect(Collectors.toMap(Function.identity(), hall -> new ArrayList<>())));*/
 
         model.addAttribute("hallUser", hallUser);
-        model.addAttribute("day", day);
+        model.addAttribute("day", currentDay);
         model.addAttribute("halls", halls);
-        model.addAttribute("title", day.getName());
+        model.addAttribute("title", currentDay.getName());
 
         Map<Attendance, String> attendanceMap = getAttendaceMap();
         model.addAttribute("attendanceMap", attendanceMap);
