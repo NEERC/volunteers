@@ -33,6 +33,7 @@ public class CalendarServiceImpl implements CalendarService {
         try {
             Map<String, Map<String, Map<String, String>>> calendars = readYaml(id);
             for (String calendarName : calendars.keySet()) {
+                logger.info("Generate calendar " + calendarName);
                 Map<String, Map<String, String>> calendar = calendars.get(calendarName);
                 iCalendars.add(generateCalendar(calendar, calendarName));
             }
@@ -46,8 +47,8 @@ public class CalendarServiceImpl implements CalendarService {
     public String getCalendar(final long id, String calendarName) {
         ICalendar iCalendar = null;
         try {
+            logger.info("Generate calendar " + calendarName);
             Map<String, Map<String, Map<String, String>>> calendars = readYaml(id);
-
             iCalendar = generateCalendar(calendars.get(calendarName), calendarName);
         } catch (Exception e) {
             logger.error("Error, while try find and parse file: calendar" + id, e);
@@ -66,6 +67,7 @@ public class CalendarServiceImpl implements CalendarService {
         iCalendar.getTimezoneInfo().setDefaultTimezone(TimezoneAssignment.download(TimeZone.getDefault(), true));
         if (calendar != null) {
             for (String eventSummery : calendar.keySet()) {
+                logger.info("Generate event " + eventSummery);
                 try {
                     Event event = new Event(calendar.get(eventSummery));
                     VEvent vEvent = new VEvent();
@@ -91,6 +93,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     private Map<String, Map<String, Map<String, String>>> readYaml(final long id) throws YamlException {
+        logger.info("Parse yaml file for year" + id);
         YamlReader reader = new YamlReader(yearRepository.findOne(id).getCalendar());
         Object result = reader.read();
         if (result instanceof Map) {
