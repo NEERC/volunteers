@@ -14,18 +14,29 @@ import java.util.Map;
 @Data
 public class Event {
 
-    private static final SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    private static final SimpleDateFormat parserWithTime = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    private static final SimpleDateFormat parserWithoutTime = new SimpleDateFormat("yyyy-MM-dd");
 
     String location;
     String description;
     Date start;
+    boolean withTime;
     Date end;
 
     public Event(Map<String, String> data) throws ParseException {
         location = data.get("location");
         description = data.get("description");
-        start = parser.parse(data.get("start"));
-        end = parser.parse(data.get("end"));
+        try {
+            start = parserWithTime.parse(data.get("start"));
+            withTime = true;
+        } catch (ParseException e) {
+            start = parserWithoutTime.parse(data.get("start"));
+            withTime = false;
+        }
+        if (withTime) {
+            end = parserWithTime.parse(data.get("end"));
+
+        }
     }
 
     public Event(String str) {

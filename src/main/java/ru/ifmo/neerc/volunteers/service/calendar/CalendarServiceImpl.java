@@ -3,6 +3,7 @@ package ru.ifmo.neerc.volunteers.service.calendar;
 import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
+import biweekly.io.TimezoneAssignment;
 import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.ifmo.neerc.volunteers.repository.YearRepository;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +39,7 @@ public class CalendarServiceImpl implements CalendarService {
         } catch (Exception e) {
             logger.error("Error, while try find and parse file: calendar" + id, e);
         }
-        Biweekly.WriterChainTextMulti text = Biweekly.write(iCalendars);
-        return text.go();
+        return Biweekly.write(iCalendars).go();
     }
 
     @Override
@@ -57,24 +56,24 @@ public class CalendarServiceImpl implements CalendarService {
             iCalendar = new ICalendar();
             iCalendar.setProductId(calendarName);
         }
-        Biweekly.WriterChainTextSingle text = Biweekly.write(iCalendar);
-        return text.go();
+        return Biweekly.write(iCalendar).go();
     }
 
     private ICalendar generateCalendar(Map<String, Map<String, String>> calendar, String name) {
         ICalendar iCalendar = new ICalendar();
         iCalendar.setProductId(name);
+        iCalendar.setName(name);
+        iCalendar.getTimezoneInfo().setDefaultTimezone(TimezoneAssignment.download(TimeZone.getDefault(), true));
         if (calendar != null) {
             for (String eventSummery : calendar.keySet()) {
                 try {
                     Event event = new Event(calendar.get(eventSummery));
                     VEvent vEvent = new VEvent();
 
-                    vEvent.setDateStart(event.getStart());
-                    vEvent.getDateStart().setTimezoneId(TimeZone.getDefault().getID());
+                    vEvent.setDateStart(event.getStart(), event.isWithTime());
 
-                    vEvent.setDateEnd(event.getEnd());
-                    vEvent.getDateEnd().setTimezoneId(TimeZone.getDefault().getID());
+                    if (event.isWithTime())
+                        vEvent.setDateEnd(event.getEnd());
 
                     vEvent.setDescription(event.getDescription());
 
@@ -91,7 +90,7 @@ public class CalendarServiceImpl implements CalendarService {
         return iCalendar;
     }
 
-    private Map<String, Map<String, Map<String, String>>> readYaml(final long id) throws FileNotFoundException, YamlException {
+    private Map<String, Map<String, Map<String, String>>> readYaml(final long id) throws YamlException {
         YamlReader reader = new YamlReader(yearRepository.findOne(id).getCalendar());
         Object result = reader.read();
         if (result instanceof Map) {
