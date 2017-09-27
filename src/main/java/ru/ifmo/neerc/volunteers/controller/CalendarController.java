@@ -22,21 +22,21 @@ public class CalendarController {
 
     @GetMapping(value = "{id}")
     public void getCalendars(@PathVariable final long id, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html; charset=UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        PrintWriter writer = response.getWriter();
-        writer.println(calendarService.getCalendars(id));
-        response.setHeader("Content-Disposition", "attachment; filename=\"calendar.ics\"");
-        response.flushBuffer();
+        sendCalendar(response, calendarService.getCalendars(id));
     }
 
     @GetMapping("{id}/{calendarName}")
     public void getCalendar(@PathVariable final long id, @PathVariable final String calendarName, HttpServletResponse response) throws IOException {
+        sendCalendar(response, calendarService.getCalendar(id, calendarName));
+    }
+
+    private void sendCalendar(HttpServletResponse response, String calendar) throws IOException {
         response.setContentType("data:text/ics;charset=utf-8");
         response.setCharacterEncoding("UTF-8");
-        PrintWriter writer = response.getWriter();
-        writer.print(calendarService.getCalendar(id, calendarName));
         response.setHeader("Content-Disposition", "attachment; filename=\"calendar.ics\"");
-        response.flushBuffer();
+        PrintWriter writer = response.getWriter();
+        writer.print(calendar);
+        writer.flush();
+        writer.close();
     }
 }
