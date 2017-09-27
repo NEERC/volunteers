@@ -32,8 +32,10 @@ public class CalendarController {
 
     @GetMapping("{id}/{calendarName}")
     public void getCalendar(@PathVariable final long id, @PathVariable final String calendarName, HttpServletResponse response) throws IOException {
-        response.getOutputStream().print(calendarService.getCalendar(id, calendarName));
         response.setContentType("data:text/ics;charset=utf-8");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter writer = response.getWriter();
+        writer.print(calendarService.getCalendar(id, calendarName));
         response.setHeader("Content-Disposition", "attachment; filename=\"calendar.ics\"");
         response.flushBuffer();
     }

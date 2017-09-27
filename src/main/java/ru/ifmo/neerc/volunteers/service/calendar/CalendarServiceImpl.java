@@ -3,7 +3,6 @@ package ru.ifmo.neerc.volunteers.service.calendar;
 import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
-import biweekly.io.TimezoneAssignment;
 import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import lombok.AllArgsConstructor;
@@ -15,7 +14,6 @@ import ru.ifmo.neerc.volunteers.repository.YearRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Created by Lapenok Akesej on 29.07.2017.
@@ -64,7 +62,7 @@ public class CalendarServiceImpl implements CalendarService {
         ICalendar iCalendar = new ICalendar();
         iCalendar.setProductId(name);
         iCalendar.setName(name);
-        iCalendar.getTimezoneInfo().setDefaultTimezone(TimezoneAssignment.download(TimeZone.getDefault(), true));
+        //iCalendar.getTimezoneInfo().setDefaultTimezone(TimezoneAssignment.download(TimeZone.getDefault(), true));
         if (calendar != null) {
             for (String eventSummery : calendar.keySet()) {
                 logger.info("Generate event " + eventSummery);
