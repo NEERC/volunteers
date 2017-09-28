@@ -40,6 +40,12 @@
             <th th:text="#{volunteers.day.volunteer}">
                 User
             </th>
+            <th th:text="#{volunteers.day.positions.wish}">
+                Positions desired
+            </th>
+            <th th:text="#{volunteers.day.comments}">
+                Comments
+            </th>
             <th th:text="#{volunteers.day.position}">
                 Position
             </th>
@@ -54,6 +60,13 @@
 
                     <tr>
                         <td th:text="${user.userYear.user.badgeName}"></td>
+                        <td>
+                            <div class="list-group">
+                                <label class="list-group-item" th:each="position:${user.userYear.positions}"
+                                       th:text="${position.name}"></label>
+                            </div>
+                        </td>
+                        <td th:text="${user.userYear.suggestions}"></td>
                         <td>
                             <select class="form-control" th:name="p+${user.id}"
                                     th:onchange="'savePosition('+${user.id}+', this.value);'"
