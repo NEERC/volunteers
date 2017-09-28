@@ -47,6 +47,8 @@ public class User implements UserDetails {
 
     private String email;
 
+    private String oldEmail;
+
     private String phone;
 
     private boolean confirmed;
