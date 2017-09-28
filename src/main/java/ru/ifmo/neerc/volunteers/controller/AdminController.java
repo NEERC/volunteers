@@ -287,14 +287,14 @@ public class AdminController {
         userService.setUserYear(user, year);
         utils.setModelForAdmin(model, user);
         final Set<ApplicationForm> users = year.getUsers();
-        model.addAttribute("users", users);
+        model.addAttribute("users", users.stream().map(ApplicationForm::getUser).collect(Collectors.toList()));
         /*if (!model.containsAttribute("day")) {
             Day day = new Day();
             day.setYear(year);
             model.addAttribute("day", day);
         }*/
         model.addAttribute("title", year.getName());
-        return "year";
+        return "adminHome";
     }
 
     @PostMapping("/day/edit")

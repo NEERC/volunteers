@@ -29,7 +29,7 @@ public class ApplicationForm {
     @JoinColumn(name = "year")
     private Year year;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<PositionValue> positions;
 
     private String suggestions;

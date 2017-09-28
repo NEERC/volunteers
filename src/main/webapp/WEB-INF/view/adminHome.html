@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="content" class="col-md-8">
+    <table class="table table-hover">
+        <thead>
+        <th th:text="#{volunteers.contacts.badgeName}">Badge name</th>
+        <th th:text="#{volunteers.contacts.email}">Email</th>
+        <th th:text="#{volunteers.contacts.phone}">Phone</th>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.badgeName}"></td>
+            <td th:text="${user.confirmed}?${user.email}:${user.oldEmail}"></td>
+            <td th:text="${user.phone}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
