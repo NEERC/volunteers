@@ -33,7 +33,7 @@ public class Year {
     /*private boolean current;*/
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year")
-    @OrderBy("id ASC")
+    @OrderBy("name ASC")
     private Set<Day> days;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year")

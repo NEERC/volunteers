@@ -178,7 +178,10 @@
                             required: /*[[#{volunteers.form.signUp.phone.error.empty}]]*/"",
                             matches: /*[[#{volunteers.form.signUp.phone.error.invalid}]]*/""
                         },
-                        password: /*[[#{volunteers.form.signUp.password.error.empty}]]*/"",
+                        password: {
+                            required: /*[[#{volunteers.form.signUp.password.error.empty}]]*/"",
+                            minlength: /*[[#{volunteers.form.signUp.password.error.short}]]*/""
+                        },
                         confirmPassword: {
                             required: /*[[#{volunteers.form.signUp.confirmPassword.error.empty}]]*/"",
                             equalTo: /*[[#{volunteers.form.signUp.confirmPassword.error.equals}]]*/""
