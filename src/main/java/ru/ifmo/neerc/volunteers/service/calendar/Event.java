@@ -17,6 +17,7 @@ public class Event {
     private static final SimpleDateFormat parserWithTime = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private static final SimpleDateFormat parserWithoutTime = new SimpleDateFormat("yyyy-MM-dd");
 
+    String name;
     String location;
     String description;
     Date start;
@@ -24,6 +25,7 @@ public class Event {
     Date end;
 
     public Event(Map<String, String> data) throws ParseException {
+        name = data.get("name");
         location = data.get("location");
         description = data.get("description");
         try {
@@ -35,11 +37,6 @@ public class Event {
         }
         if (withTime) {
             end = parserWithTime.parse(data.get("end"));
-
         }
-    }
-
-    public Event(String str) {
-
     }
 }
