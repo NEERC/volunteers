@@ -31,7 +31,7 @@ public class CalendarController {
     }
 
     private void sendCalendar(HttpServletResponse response, String calendar) throws IOException {
-        response.setContentType("data:text/calendar");
+        response.setContentType("text/calendar");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"calendar.ics\"");
         PrintWriter writer = response.getWriter();
