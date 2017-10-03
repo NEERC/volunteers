@@ -4,6 +4,7 @@ import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
 import biweekly.io.TimezoneAssignment;
+import biweekly.property.RawProperty;
 import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import lombok.AllArgsConstructor;
@@ -64,6 +65,7 @@ public class CalendarServiceImpl implements CalendarService {
         ICalendar iCalendar = new ICalendar();
         iCalendar.setProductId(name);
         iCalendar.setName(name);
+        iCalendar.setProperty(new RawProperty("X-WR-CALNAME", name));
         iCalendar.getTimezoneInfo().setDefaultTimezone(new TimezoneAssignment(TimeZone.getDefault(), TimeZone.getDefault().getID()));
         if (calendar != null) {
             for (Map<String, String> eventMap : calendar) {
