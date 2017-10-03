@@ -99,19 +99,20 @@ public class CalendarServiceImpl implements CalendarService {
             }
         }
 
-        logger.info("download timezoneAssignment");
         VTimezone timezone = new VTimezone("Europe/Moscow");
         timezone.setTimezoneUrl("http://tzurl.org/zoneinfo-outlook/Europe/Moscow");
         timezone.addExperimentalProperty("X-LIC-LOCATION", "Europe/Moscow");
+
         StandardTime standardTime = new StandardTime();
         standardTime.setTimezoneOffsetFrom(new UtcOffset(true, 3, 0));
         standardTime.setTimezoneOffsetTo(new UtcOffset(true, 3, 0));
         standardTime.addExperimentalProperty("TZNAME", "MSK");
         standardTime.addExperimentalProperty("DTSTART", "19700101T000000");
+
         timezone.addStandardTime(standardTime);
         TimezoneAssignment current = new TimezoneAssignment(TimeZone.getDefault(), timezone);
         iCalendar.getTimezoneInfo().setDefaultTimezone(current);
-        logger.info("downloaded");
+
         return iCalendar;
     }
 
