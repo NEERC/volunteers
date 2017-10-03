@@ -4,6 +4,7 @@ import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
 import biweekly.io.TimezoneAssignment;
+import biweekly.property.Method;
 import biweekly.property.RawProperty;
 import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
@@ -63,10 +64,13 @@ public class CalendarServiceImpl implements CalendarService {
 
     private ICalendar generateCalendar(List<Map<String, String>> calendar, String name) {
         ICalendar iCalendar = new ICalendar();
-        iCalendar.setProductId(name);
+        iCalendar.setProductId("neerc.ifmo.ru/volunteers/");
         iCalendar.setName(name);
-        iCalendar.setProperty(new RawProperty("X-WR-CALNAME", name));
-        iCalendar.getTimezoneInfo().setDefaultTimezone(new TimezoneAssignment(TimeZone.getDefault(), TimeZone.getDefault().getID()));
+        iCalendar.setMethod(Method.PUBLISH);
+        iCalendar.addProperty(new RawProperty("X-WR-CALNAME", name));
+        iCalendar.addProperty(new RawProperty("X-WR-TIMEZONE", "Europe/Moscow"));
+        //iCalendar.getTimezoneInfo().setDefaultTimezone(new TimezoneAssignment(TimeZone.getDefault(), "Europe/Moscow"));
+        iCalendar.addCategories();
         if (calendar != null) {
             for (Map<String, String> eventMap : calendar) {
                 //logger.info("Generate event " + eventSummery);
@@ -91,6 +95,11 @@ public class CalendarServiceImpl implements CalendarService {
                 }
             }
         }
+
+        logger.info("download timezoneAssignment");
+        TimezoneAssignment current = TimezoneAssignment.download(TimeZone.getDefault(), true);
+        iCalendar.getTimezoneInfo().setDefaultTimezone(current);
+        logger.info("downloaded");
         return iCalendar;
     }
 
