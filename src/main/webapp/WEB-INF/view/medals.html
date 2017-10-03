@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="content" class="col-md-10">
+    <table class="table table-hover" id="medals">
+        <thead>
+        <th th:text="#{volunteers.medals.name}">Medal name</th>
+        <th th:text="#{volunteers.medals.value}">Medal value</th>
+        <th></th>
+        </thead>
+        <tbody>
+        <th:block th:each="medal:${medals}">
+            <tr th:id="${medal.id}">
+                <td>
+                    <label th:text="${medal.name}"></label>
+                </td>
+                <td>
+                    <label th:text="${medal.value}"></label>
+                </td>
+                <td>
+                    <a class="btn btn-default" role="button"
+                       th:text="#{volunteers.form.button.delete}"
+                       th:onclick="'deleteMedal('+${medal.id}+');'">Delete</a>
+                </td>
+            </tr>
+        </th:block>
+        <tr>
+            <td colspan="3" class="text-center">
+                <a align="center" href="#" data-toggle="modal" data-target="#medalForm" class="btn btn-default"
+                   role="button" th:text="#{volunteers.hall.button.add}">Add</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="medalForm" tabindex="-1" role="dialog" aria-labelledby="medalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form method="post" th:object="${newMedal}" id="newMedal">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="medalLabel" th:text="#{volunteers.form.medal.header}">Add
+                            medal</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group"
+                             th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
+                            <label for="medalName" th:text="#{volunteers.form.medal.medalName}">Medal name</label>
+                            <input type="text" class="form-control" id="medalName" th:field="*{name}"/>
+                            <span class="help-block" th:if="${#fields.hasErrors('name')}"
+                                  th:text="#{volunteers.form.medal.medalName.error.empty}"></span>
+                        </div>
+                        <div class="form-group"
+                             th:class="${#fields.hasErrors('value')}? 'has-error form-group' : 'form-group'">
+                            <label for="medalValue"
+                                   th:text="#{volunteers.form.medal.medalValue}">Medal value</label>
+                            <input type="number" class="form-control" id="medalValue" th:field="*{value}"/>
+                            <span class="help-block" th:if="${#fields.hasErrors('value')}"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                                th:text="#{volunteers.form.button.close}">Close
+                        </button>
+                        <button type="submit" class="btn btn-primary" th:text="#{volunteers.hall.button.add}">Add
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        $(function () {
+            $('#newMedal').validate({
+                rules: {
+                    name: {
+                        minlength: 1,
+                        required: true
+                    }
+                },
+                messages: {
+                    name: /*[[#{volunteers.form.medal.medalName.error.empty}]]*/""
+                },
+                errorElement: 'span',
+                errorClass: 'help-block',
+                highlight: function (element) {
+                    $(element).closest('.form-group').addClass('has-error');
+                },
+                unhighlight: function (elements) {
+                    $(elements).closest('.form-group').removeClass('has-error');
+                },
+                submitHandler: function (form) {
+                    var str = $(form).serialize();
+                    $.ajax({
+                        type: "post",
+                        data: str,
+                        url: /*[[@{/admin/medals/add/}]]*/"/admin/medals/add/",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.status === "OK") {
+                                var label = /*[[#{volunteers.form.button.delete}]]*/'Delete';
+                                var str = '<tr id="' + data.result.id + '">' +
+                                    '<td><label>' + data.result.name + '</label></td>' +
+                                    '<td><label>' + data.result.value + '</label></td>' +
+                                    '<td><a href="#" class="btn btn-default" role="button" onclick="deleteMedal(' + data.result.id + ');">' + label + '</a></td>' +
+                                    '</tr>';
+                                $("#medals tbody").find("tr:last").before(str);
+                                $("#medalForm").modal("hide");
+                                form.reset();
+                            }
+                            else {
+                                console.log(data.result);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        function deleteMedal(id) {
+            var data = {
+                'id': id
+            };
+            data[_csrf_param_name] = _csrf_token;
+            $.ajax({
+                type: "post",
+                data: data,
+                url: /*[[@{/admin/medals/delete/}]]*/"/admin/medals/delete/",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status === "OK") {
+                        $("#" + id).remove();
+                        console.log("success");
+                    } else {
+                        alert(data.result);
+                    }
+                }
+            })
+        }
+    </script>
+</div>
+</body>
+</html>

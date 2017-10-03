@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+    <div th:fragment="menu" class="col-md-2">
+        <ul id="sidebar" class="nav nav-pills nav-stacked admin-sidebar well well-sm">
+
+            <li>
+                <span style="color: #337ab7">
+                    Registration
+                </span>
+                <div class="material-switch pull-right collapsed">
+                    <input type="checkbox" id="registration" name="registration"
+                           th:checked="${year.openForRegistration}" th:disabled="${isUser}"/>
+                    <label for="registration" class="label-success"></label>
+                </div>
+            </li>
+            <li><a href="#eventsList" data-toggle="collapse" aria-expanded="true" aria-controls="eventsList">
+                <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                <span th:text="#{volunteers.admin.menu.days}">Events</span>
+            </a>
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm"
+                        th:unless="${isUser}">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </button>
+                <ul class="collapse in" id="eventsList">
+                    <th:block th:each="day : ${days}">
+                        <li>
+                            <a th:href="@{(${isUser}? '/':'/admin/')+'day/'+${day.id}+'/'}" th:text="${day.name}"
+                               th:id="'day'+${day.id}+'name'"></a>
+                            <span class="glyphicon glyphicon-pencil" th:onclick="'editDay('+${day.id}+');'"
+                                  th:unless="${isUser}"></span>
+                            <input type="hidden" th:value="${day.information}" th:id="'day'+${day.id}+'information'"
+                                   th:unless="${isUser}"/>
+                            <input type="hidden" th:value="${day.attendanceValue}" th:id="'day'+${day.id}+'value'"
+                                   th:unless="${isUser}"/>
+                        </li>
+                    </th:block>
+                </ul>
+            </li>
+            <li th:unless="${isUser}">
+                <a th:href="@{/admin/events/}" class="collapsed" th:text="#{volunteers.calendar.events.edit}">Edit
+                    events</a>
+            </li>
+            <li>
+                <a th:href="@{${isUser}? '/position/':'/admin/position/'}" class="collapsed"
+                   th:text="#{volunteers.admin.menu.positions}">
+                    Positions</a>
+            </li>
+            <li>
+                <a th:href="@{${isUser}?'/hall/':'/admin/hall/'}" class="collapsed"
+                   th:text="#{volunteers.admin.menu.halls}">
+                    Halls</a>
+            </li>
+            <li th:unless="${isUser}">
+                <a th:href="@{/admin/medals/}" class="collapsed" th:text="#{volunteers.admin.menu.medals}">Medals</a>
+            </li>
+
+            <li th:unless="${isUser}">
+                <a th:href="@{/admin/results/}" class="collapsed" th:text="#{volunteers.admin.menu.results}">Show
+                    results</a>
+            </li>
+            <li th:unless="${isUser}">
+                <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">
+                    <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                    <span th:text="#{volunteers.admin.menu.admins}">Admins</span>
+                </a>
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#adminForm">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </button>
+                <ul class="collapse" id="adminList">
+                    <th:block th:each="admin:${roleAdmin}">
+                        <li>
+                            <span th:text="${admin.badgeName}" style="color: #337ab7"></span>
+                        </li>
+                    </th:block>
+                </ul>
+            </li>
+        </ul>
+        <!-- Modal -->
+
+        <div class="modal fade" id="eventForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel"
+             th:unless="${isUser}">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" th:action="@{/admin/day/add}" th:object="${newDay}">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="eventLabel" th:text="#{volunteers.form.day.header}">Add
+                                day</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
+                                <label for="eventName" th:text="#{volunteers.form.day.name}">Event name</label>
+                                <input type="text" class="form-control" id="eventName" th:field="*{name}" />
+                                <span class="help-block" th:if="${#fields.hasErrors('name')}"
+                                      th:text="#{volunteers.form.day.name.error.empty}"></span>
+                            </div>
+                            <div class="form-group"
+                                 th:class="${#fields.hasErrors('attendanceValue')}?'has-error form-group':'form-group'">
+                                <label for="evenScore" th:text="#{volunteers.form.day.score}">Score</label>
+                                <input type="number" step="any" class="form-control" id="evenScore"
+                                       th:field="*{attendanceValue}"/>
+                            </div>
+                            <div class="form-group" th:class="${#fields.hasErrors('information')}? 'has-error form-group' : 'form-group'">
+                                <label for="information"
+                                       th:text="#{volunteers.form.day.information}">Information</label>
+                                <input type="text" class="form-control" id="information" th:field="*{information}" />
+                                <span class="help-block" th:if="${#fields.hasErrors('information')}"
+                                      th:text="#{volunteers.form.day.information.error.empty}"></span>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                                    th:text="#{volunteers.form.button.close}">Close
+                            </button>
+                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.add}">Add
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="adminForm" tabindex="-1" role="dialog" aria-labelledby="adminLabel"
+             th:unless="${isUser}">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" id="formAdmin">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="adminLabel" th:text="#{volunteers.form.admin.header}">Add new
+                                admin</h4>
+                        </div>
+                        <div class="modal-body">
+                            <select class="form-control" name="userId" id="userId">
+                                <th:block th:each="user : ${roleUsers}">
+                                    <option th:value="${user.id}" th:text="${user.badgeName}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                                    th:text="#{volunteers.form.button.close}">Close
+                            </button>
+                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.add}">Add
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="editDayForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel"
+             th:unless="${isUser}">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" th:object="${newDay}" id="formEditDay">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="dayLabel" th:text="#{volunteers.form.day.edit.header}">Edit
+                                day</h4>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" th:field="*{id}" id="idDay"/>
+                            <div class="form-group"
+                                 th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
+                                <label for="dayName" th:text="#{volunteers.form.day.name}">Event name</label>
+                                <input type="text" class="form-control" id="dayName" th:field="*{name}"/>
+                                <span class="help-block" th:if="${#fields.hasErrors('name')}"
+                                      th:text="#{volunteers.form.day.name.error.empty}"></span>
+                            </div>
+                            <div class="form-group"
+                                 th:class="${#fields.hasErrors('attendanceValue')}?'has-error form-group':'form-group'">
+                                <label for="dayScore" th:text="#{volunteers.form.day.score}">Score</label>
+                                <input type="number" step="any" class="form-control" id="dayScore"
+                                       th:field="*{attendanceValue}"/>
+                            </div>
+                            <div class="form-group"
+                                 th:class="${#fields.hasErrors('information')}? 'has-error form-group' : 'form-group'">
+                                <label for="dayInformation"
+                                       th:text="#{volunteers.form.day.information}">Information</label>
+                                <input type="text" class="form-control" id="dayInformation" th:field="*{information}"/>
+                                <span class="help-block" th:if="${#fields.hasErrors('information')}"
+                                      th:text="#{volunteers.form.day.information.error.empty}"></span>
+                            </div>
+                        </div>
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.getToken()}"/>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                                    th:text="#{volunteers.form.button.close}">Close
+                            </button>
+                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.day.button.edit}">Edit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript" th:unless="${isUser}">
+            function editDay(id) {
+                $("#idDay").val(id);
+                $("#dayName").val($("#day" + id + "name").text());
+                $("#dayScore").val($("#day" + id + "value").val());
+                $("#dayInformation").val($("#day" + id + "information").val());
+                $("#editDayForm").modal("show");
+            }
+            $('#registration').change(function () {
+                /*<![CDATA[*/
+                var _csrf_token = /*[[${_csrf.token}]]*/ '';
+                var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
+                /*]]>*/
+
+                var requestData = {
+                    'id': /*[[${year.id}]]*/1,
+                };
+                requestData['isOpen'] = !!this.checked;
+                requestData[_csrf_param_name] = _csrf_token;
+                $(this).prop("checked", !this.checked);
+
+                $.ajax({
+                    type: "POST",
+                    url: /*[[@{/admin/year/close}]]*/ '/admin/year/close',
+                    data: requestData,
+                    success: function (data) {
+                        if (data.status === "OK") {
+                            $('#registration').prop("checked", !$('#registration:checked').val());
+                        }
+                        console.log("success");
+                    },
+                    error: function (e) {
+                        console.log("error", e);
+                    }
+                })
+            });
+            $('#formAdmin').validate({
+                submitHandler: function (form) {
+                    var data = $(form).serialize();
+                    var id = $("#formAdmin").find('select[name="userId"]').val();
+                    var name = $('#userId option[value="' + id + '"]').html();
+                    $.ajax({
+                        type: "post",
+                        data: data,
+                        url: /*[[@{/admin/add/}]]*/"/admin/add/",
+                        dataType: "json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                $('#userId option[value="' + id + '"]').remove();
+                                $('#adminList').append('<li><span style="color: #337ab7">' + name + '</span></li>');
+                                $("#adminForm").modal("hide");
+                            } else {
+                                console.log(result.result);
+                            }
+                        }
+                    })
+                }
+            });
+            $('#formEditDay').validate({
+                rules: {
+                    name: {
+                        minlength: 1,
+                        required: true
+                    }
+                },
+                messages: {
+                    name: /*[[#{volunteers.form.day.name.error.empty}]]*/""
+                },
+                errorElement: 'span',
+                errorClass: 'help-block',
+                highlight: function (element) {
+                    $(element).closest('.form-group').addClass('has-error');
+                },
+                unhighlight: function (elements) {
+                    $(elements).closest('.form-group').removeClass('has-error');
+                },
+                submitHandler: function (form) {
+                    var data = $(form).serialize();
+                    var id = $("#formEditDay").find('input[name="id"]').val();
+                    $.ajax({
+                        type: "post",
+                        data: data,
+                        url: /*[[@{/admin/day/edit/}]]*/"/admin/day/edit",
+                        dataType: "json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                $("#editDayForm").modal("hide");
+                                $("#day" + id + "name").text(result.result.name);
+                                $("#day" + id + "value").val(result.result.attendanceValue);
+                                $("#day" + id + "information").val(result.result.information);
+                            }
+                            else {
+                                console.log(result.result);
+                            }
+                        }
+                    })
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

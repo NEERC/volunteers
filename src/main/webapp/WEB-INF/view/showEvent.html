@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="content" class="col-md-10">
+    <form
+            method="post">
+        <div class="table-responsive">
+            <input type="hidden" th:value="${day.id}" name="day"/>
+
+            <table class="table table-hover table-bordered table-fixed">
+                <thead>
+                <th th:text="#{volunteers.day.hall}">
+                    Hall
+                </th>
+                <th th:text="#{volunteers.day.volunteer}">
+                    Volunteer
+                </th>
+                <th th:text="#{volunteers.day.position}">
+                    Position
+                </th>
+                <th:block th:unless="${isUser}">
+                    <th th:unless="${assessment}" th:text="#{volunteers.day.attendance}">
+                        Attendance
+                    </th>
+
+                    <th th:if="${assessment}" th:text="#{volunteers.day.assessments}">
+                        Assessments
+                    </th>
+                </th:block>
+
+                </thead>
+                <tbody>
+                <tr th:if="${attendance}">
+                    <td colspan="3"></td>
+                    <td>
+                        <select class="form-control" onchange="selectAll(this)" th:id="hall">
+                            <option disabled="disabled" selected="selected" value=""></option>
+                            <th:block th:each="att:${attendances}">
+                                <option th:text="${attendanceMap.get(att)}" th:value="${att.name()}"></option>
+                            </th:block>
+                        </select>
+                    </td>
+                </tr>
+                <th:block th:each="hall:${halls}">
+                    <tr>
+                        <td th:text="${hall.name}" th:rowspan="${hallUser.get(hall).size()+1}"></td>
+                        <td colspan="2" th:if="${attendance}"></td>
+                        <td th:if="${attendance}">
+                            <select class="form-control" onchange="selectAll(this)" th:id="hall+${hall.id}+'_'">
+                                <option disabled="disabled" selected="selected" value=""></option>
+                                <th:block th:each="att:${attendances}">
+                                    <option th:text="${attendanceMap.get(att)}" th:value="${att.name()}"></option>
+                                </th:block>
+                            </select>
+                        </td>
+                        <th:block th:each="user:${hallUser.get(hall)}">
+                    <tr>
+                        <td th:text="${user.userYear.user.badgeName}"></td>
+                        <td th:text="${user.position.name}">name position</td>
+                        <td th:if="${attendance}">
+                            <select class="form-control" th:name="${user.id}"
+                                    th:id="'hall'+${hall.id}+'_'+${user.id}"
+                                    th:onchange="'save('+${user.id}+', this.value)'">
+                                <th:block th:if="${user.attendance}==null">
+                                    <option selected="selected" th:value="" disabled="disabled"></option>
+                                </th:block>
+                                <th:block th:each="att:${attendances}">
+                                    <option th:selected="${user.attendance}==${att}" th:text="${attendanceMap.get(att)}"
+                                            th:value="${att.name()}"></option>
+                                </th:block>
+                            </select>
+                        </td>
+                    <th:block th:unless="${isUser}">
+                        <td th:unless="${attendance} or ${assessment}"
+                            th:text="${attendanceMap.get(user.attendance)}"></td>
+                        <td th:if="${assessments}" th:id="'user'+${user.id}">
+                            <ul class="list-group-horizontal">
+                                <th:block th:each="a: ${user.assessments}">
+                                    <li class="list-group-item">
+                                        <button type="button" class="btn btn-default btn-xs" data-toggle="tooltip"
+                                                th:title="${a.value}"
+                                                th:text="${a.comment}" th:id="${a.id}"
+                                                th:onclick="'showForm('+${user.id}+', '+${a.id}+', '+${a.value}+', \''+${a.comment}+'\');'"></button>
+                                    </li>
+                                </th:block>
+                                <li class="list-group-item">
+                                    <button type="button" class="btn btn-primary btn-xs" data-toggle="tooltip"
+                                            th:title="#{volunteers.day.button.addAssessment}"
+                                            th:onclick="'openForm('+${user.id}+');'">
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </td>
+                    </th:block>
+                    </tr>
+                </th:block>
+                </tr>
+                </th:block>
+                </tbody>
+            </table>
+
+        </div>
+        <div class="text-center" th:unless="${isUser}">
+            <!--<th:block th:if="${assessments}">
+                <input class="btn btn-primary" role="button" type="submit" value="Save assessments"/>
+                <button type="button" class="btn btn-default" data-toggle="modal"
+                        data-target="#assessmentForm" th:text="#{volunteers.day.button.addAssessment}">
+                    Add assessments
+                </button>
+            </th:block>-->
+            <th:block th:unless="${assessments} or ${attendance}">
+                <a th:href="@{'/admin/day/'+${day.id}+'/edit/'}" class="btn btn-default"
+                   role="button" th:text="#{volunteers.day.button.edit}">Edit</a>
+                <a th:href="@{'/admin/day/'+${day.id}+'/attendance/'}" class="btn btn-default"
+                   role="button" th:text="#{volunteers.day.button.editAttendance}">Set attendance</a>
+                <a th:href="@{'/admin/day/'+${day.id}+'/assessments'}" class="btn btn-default"
+                   role="button" th:text="#{volunteers.day.button.editAssessments}">Set assessments</a>
+            </th:block>
+        </div>
+    </form>
+
+    <th:block th:unless="${isUser}">
+        <th:block th:if="${assessment}">
+            <div class="modal fade" id="assessmentForm" tabindex="-1" role="dialog" aria-labelledby="assessmentLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form method="post" th:object="${newAssessment}" id="newAssessment">
+                            <input th:value="${day.id}" type="hidden" name="day"/>
+
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                        aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="assessmentLabel">Add new assessment</h4>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" th:field="*{id}" id="assessmentId"/>
+                                <input type="hidden" name="userId" id="userIdAssessment"/>
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <div class="form-group"
+                                     th:class="${#fields.hasErrors('comment')}? 'has-error form-group' : 'form-group'">
+                                    <label for="assessmentComment"
+                                           th:text="#{volunteers.form.assessment.comment}">Comment</label>
+                                    <input type="text" class="form-control" id="assessmentComment"
+                                           th:field="*{comment}"/>
+                                    <span class="help-block" th:if="${#fields.hasErrors('comment')}"
+                                          th:text="#{volunteers.form.assessment.comment.error.empty}"></span>
+                                </div>
+                                <div class="form-group"
+                                     th:class="${#fields.hasErrors('value')}? 'has-error form-group' : 'form-group'">
+                                    <label for="assessmentValue"
+                                           th:text="#{volunteers.form.assessment.value}">Value</label>
+                                    <input type="number" class="form-control" id="assessmentValue" th:field="*{value}"/>
+                                    <span class="help-block" th:if="${#fields.hasErrors('value')}"
+                                          th:text="#{volunteers.form.assessment.value.error}"></span>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal"
+                                        th:text="#{volunteers.form.button.close}">Close
+                                </button>
+                                <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.add}"
+                                        id="buttonSubmit">Add
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+        <th:block th:if="${assessments}">
+            <script th:src="@{/js/showEvent.js}"/>
+        </th:block>
+        <script th:if="${attendance}" th:inline="javascript">
+            function save(id, value) {
+                if (id === "")
+                    return;
+                console.log(id + " " + value);
+                var data = {
+                    'id': id,
+                    'value': value
+                };
+                data[_csrf_param_name] = _csrf_token;
+                $.ajax({
+                    type: "post",
+                    data: data,
+                    url: /*[[@{/admin/day/attendance/}]]*/"/admin/day/attendance/",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.status === "OK") {
+                            console.log("success");
+                        } else {
+                            alert(data.result);
+                        }
+                    }
+                })
+            }
+
+            function selectAll(source) {
+                var name = source.id;
+                var type = source.localName;
+                var selectors = $(type + "[id^='" + name + "']");
+                //<![CDATA[
+                for (var i = 0; i < selectors.length; i++) {
+                    if ($(selectors[i]).val() !== $(source).val()) {
+                        $(selectors[i]).val($(source).val());
+                        save(selectors[i].name, source.value);
+                    }
+                }
+                //]]>
+            }
+        </script>
+
+        <script th:if="${assessment}" th:inline="javascript">
+            /*<![CDATA[*/
+            var _csrf_token = /*[[${_csrf.token}]]*/ '';
+            var _csrf_param_name = /*[[${_csrf.parameterName}]]*/ '';
+            /*]]>*/
+            $(function () {
+                $("[data-toggle='tooltip']").tooltip();
+                $('#newAssessment').validate({
+                    rules: {
+                        comment: {
+                            minlength: 1,
+                            required: true
+                        },
+                        value: {
+                            number: true
+                        }
+                    },
+                    messages: {
+                        comment: /*[[#{volunteers.form.assessment.comment.error.empty}]]*/"",
+                        value: /*[[#{volunteers.form.assessment.value.error}]]*/""
+                    },
+                    errorElement: 'span',
+                    errorClass: 'help-block',
+                    highlight: function (element) {
+                        $(element).closest('.form-group').addClass('has-error');
+                    },
+                    unhighlight: function (elements) {
+                        $(elements).closest('.form-group').removeClass('has-error');
+                    },
+                    submitHandler: function (form) {
+                        var userId = $(form.userId).val();
+                        var isNew = $(form.id).val() === "0";
+                        var str = $(form).serialize();
+                        $.ajax({
+                            type: "post",
+                            data: str,
+                            url: /*[[@{/admin/day/assessments/}]]*/"/admin/day/assessments/",
+                            dataType: "json",
+                            success: function (data) {
+                                if (data.status === "OK") {
+                                    //update or add assessment
+                                    var btn = '<button type="button" class="btn btn-default btn-xs" data-toggle="tooltip" title="' + data.result.value + '" id="' + data.result.id + '" onclick="showForm(' + userId + ', ' + data.result.id + ',' + data.result.value + ', \'' + data.result.comment + '\');">' + data.result.comment + '</button>';
+                                    if (isNew) {
+                                        var str = '<li class="list-group-item">' + btn + '</li>';
+                                        $("#user" + userId + " ul").find("li:last").before(str);
+                                    }
+                                    else {
+                                        $("#" + data.result.id).parent().html(btn);
+                                    }
+                                    $("[data-toggle='tooltip']").tooltip();
+                                    console.log("OK", data.result);
+                                }
+                                else {
+                                    console.log("ERROR", data.result);
+                                }
+                                $("#assessmentForm").modal("hide");
+                            }
+                        });
+                    }
+                });
+            });
+
+            function showForm(userId, assessmentId, value, comment) {
+                $("#assessmentForm").modal("show");
+                $("#assessmentId").val(assessmentId);
+                $("#userIdAssessment").val(userId);
+                $("#assessmentComment").val(comment);
+                $("#assessmentValue").val(value);
+                var lblBtn = "";
+                if (assessmentId === 0)
+                    lblBtn = /*[[#{volunteers.form.button.add}]]*/"Add";
+                else
+                    lblBtn = /*[[#{volunteers.form.button.update}]]*/"Update";
+                $("#buttonSubmit").html(lblBtn);
+            }
+
+            function openForm(userId) {
+                showForm(userId, 0, 0, "");
+            }
+        </script>
+    </th:block>
+</div>
+</body>
+</html>

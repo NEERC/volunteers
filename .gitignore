@@ -25,3 +25,14 @@ dist/
 nbdist/
 .nb-gradle/
 /bin/
+
+node_modules
+.sass-cache
+**/webapp/components
+**/webapp/fonts/bootstrap
+database.puml
+src/main/java/ru/ifmo/neerc/volunteers/bean/
+src/main/java/ru/ifmo/neerc/volunteers/lib/
+src/main/webapp/fonts/
+
+data.sql

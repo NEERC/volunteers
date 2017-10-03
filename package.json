@@ -1,0 +1,13 @@
+{
+  "name": "volunteers",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "NEERC volunteers",
+  "dependencies": {
+    "bootstrap-sass": "latest",
+    "jquery": "latest",
+    "jquery-validation": "latest",
+    "jquery-mask-plugin": "latest",
+    "bootstrap-select":"latest"
+  }
+}

@@ -1,17 +1,19 @@
 spring:
-  jpa:
-    hibernate:
-      ddl-auto: update
-      naming:
-        strategy: org.hibernate.cfg.ImprovedNamingStrategy
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL5Dialect
-  datasource:
-    url: jdbc:mysql://localhost:3306/volunteers
-    username: volunteers
-    password: volunteers
-    driver-class-name: com.mysql.jdbc.Driver
-    initialize: false
-    
- 
+  profiles:
+    active:
+      - mysql
+      - mail
+
+  thymeleaf:
+    prefix:  /WEB-INF/view/
+    suffix: .html
+    cache: false
+
+  messages:
+    encoding: UTF-8
+    basename: messages/messages
+
+      
+server:
+  context-path: /
+  

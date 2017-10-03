@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+</head>
+<body>
+    <div th:fragment="content" class="col-md-10">
+        <div class="table-responsive">
+            <div class="has-error form-group" th:if="${message!=null}">
+                <label th:text="${message}" class="help-block"></label>
+            </div>
+            <table class="table table-hover" id="halls">
+                <thead>
+                <th th:text="#{volunteers.hall.hallName}">Hall name</th>
+                <th th:text="#{volunteers.hall.hallDescription}">Hall description</th>
+                <th th:if="${isUser}"></th>
+                </thead>
+                <tbody>
+                    <th:block th:each="hall : ${halls}">
+                        <tr th:id="${hall.id}">
+                            <td>
+                                <input type="text" th:value="${hall.name}" class="form-control"
+                                       th:onblur="'changeName('+${hall.id}+', this.value);'"
+                                       th:id="'hallName'+${hall.id}" th:disabled="${isUser}"/>
+                                <input type="hidden" th:value="${hall.name}" th:id="'originHallName'+${hall.id}"
+                                       th:unless="${isUser}"/>
+                            </td>
+                            <td>
+                                <input type="text" th:value="${hall.description}" class="form-control"
+                                       th:onblur="'changeDescription('+${hall.id}+', this.value);'"
+                                       th:id="'hallDescription'+${hall.id}" th:disabled="${isUser}"/>
+                                <input type="hidden" th:value="${hall.description}"
+                                       th:id="'originHallDescription'+${hall.id}" th:unless="${isUser}"/>
+                            </td>
+                            <td th:unless="${isUser}">
+                                <a th:if="${hall.def}" class="btn btn-default" role="button"
+                                   th:text="#{volunteers.form.button.delete}" disabled="true">Delete</a>
+                                <a th:unless="${hall.def}" class="btn btn-default"
+                                   th:onclick="'deleteHall('+${hall.id}+'); return false;'"
+                                   role="button" th:text="#{volunteers.form.button.delete}">Delete</a>
+                            </td>
+                        </tr>
+                    </th:block>
+                    <tr th:unless="${isUser}">
+                        <td colspan="3" class="text-center">
+                            <a href="#" data-toggle="modal" data-target="#hallForm" class="btn btn-default"
+                               role="button" th:text="#{volunteers.hall.button.add}">Add</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="hallForm" tabindex="-1" role="dialog" aria-labelledby="hallLabel"
+             th:unless="${isUser}">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" th:object="${newHall}" id="hall">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="hallLabel" th:text="#{volunteers.form.hall.header}">Add
+                                hall</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <div class="form-group" th:class="${#fields.hasErrors('name')}? 'has-error form-group' : 'form-group'">
+                                <label for="hallName" th:text="#{volunteers.form.hall.hallName}">Hall name</label>
+                                <input type="text" class="form-control" id="hallName" th:field="*{name}" />
+                                <span class="help-block" th:if="${#fields.hasErrors('name')}"
+                                      th:text="#{volunteers.form.hall.hallName.error.empty}"></span>
+                            </div>
+                            <div class="form-group"
+                                 th:class="${#fields.hasErrors('description')}? 'has-error form-group' : 'form-group'">
+                                <label for="description"
+                                       th:text="#{volunteers.form.hall.hallDescription}">Description</label>
+                                <input type="text" class="form-control" id="description" th:field="*{description}"/>
+                                <span class="help-block" th:if="${#fields.hasErrors('description')}"
+                                      th:text="#{volunteers.form.hall.hallDescription.error.empty}"></span>
+                            </div>
+                        </div>
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                                    th:text="#{volunteers.form.button.close}">Close
+                            </button>
+                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.hall.button.add}">Add
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript" th:unless="${isUser}">
+            $(function () {
+                $("#hall").validate({
+                    rules: {
+                        name: {
+                            minlength: 1,
+                            required: true
+                        },
+                        description: {
+                            minlength: 1,
+                            required: true
+                        }
+                    },
+                    messages: {
+                        name: /*[[#{volunteers.form.hall.hallName.error.empty}]]*/"",
+                        description: /*[[#{volunteers.form.hall.hallDescription.error.empty}]]*/""
+                    },
+                    errorElement: 'span',
+                    errorClass: 'help-block',
+                    highlight: function (element) {
+                        $(element).closest('.form-group').addClass('has-error');
+                    },
+                    unhighlight: function (elements) {
+                        $(elements).closest('.form-group').removeClass('has-error');
+                    },
+                    submitHandler: function (form) {
+                        var str = $(form).serialize();
+                        $.ajax({
+                            type: "post",
+                            data: str,
+                            url: /*[[@{/admin/hall/add/}]]*/"/admin/hall/add",
+                            dataType: "json",
+                            success: function (data) {
+                                if (data.status === "OK") {
+                                    var note = /*[[#{volunteers.form.button.delete}]]*/"Delete";
+                                    var url = /*[[@{/admin/hall/}]]*/"/admin/hall/";
+                                    url = url + data.result.id + "/delete";
+                                    var str = '<tr id="' + data.result.id + '">' +
+                                        '<td>' +
+                                        '<input type="text" class="form-control" id="hallName' + data.result.id + '" value="' + data.result.name + '" onblur="changeName(' + data.result.id + ', this.value);" />' +
+                                        '<input type="hidden" value="' + data.result.name + '" id="originHallName' + data.result.id + '"/>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<input type="text" class="form-control" id="hallDescription' + data.result.id + '" value="' + data.result.description + '" onblur="changeDescription(' + data.result.id + ', this.value);" />' +
+                                        '<input type="hidden" value="' + data.result.name + '" id="originHallDescription' + data.result.id + '"/>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<a href="' + url + '" class="btn btn-default" role="button" onclick="deleteHall(' + data.result.id + '); return false;">' + note + '</a>' +
+                                        '</td>' +
+                                        '</tr>';
+                                    $("#halls tbody").find("tr:last").before(str);
+                                    $("#hallForm").modal('hide');
+                                    form.reset();
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+
+            function changeName(id, value) {
+                var originName = $("#originHallName" + id).val();
+                if (value === "") {
+                    $("#hallName" + id).val(originName);
+                    return;
+                }
+                if (value === originName) {
+                    return;
+                }
+                var data = {
+                    "id": id,
+                    "name": value,
+                    "description": ""
+                };
+                data[_csrf_param_name] = _csrf_token;
+                $.ajax({
+                    type: "post",
+                    data: data,
+                    url: /*[[@{/admin/hall/edit/}]]*/"/admin/hall/edit/",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.status === "OK") {
+                            $("#originHallName" + id).val(value);
+                        }
+                        else {
+                            $("#hallName" + id).val(originName);
+                        }
+                    },
+                    error: function () {
+                        $("#hallName" + id).val(originName);
+                    }
+                });
+            }
+
+            function changeDescription(id, value) {
+                var originDescription = $("#originHallDescription" + id).val();
+                if (value === "") {
+                    $("#hallDescription" + id).val(originDescription);
+                    return;
+                }
+                if (value === originDescription) {
+                    return;
+                }
+                var data = {
+                    "id": id,
+                    "name": "",
+                    "description": value
+                };
+                data[_csrf_param_name] = _csrf_token;
+                $.ajax({
+                    type: "post",
+                    data: data,
+                    url: /*[[@{/admin/hall/edit/}]]*/"/admin/hall/edit/",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.status === "OK") {
+                            $("#originHallDescription" + id).val(value);
+                        }
+                        else {
+                            $("#hallDescription" + id).val(originDescription);
+                        }
+                    },
+                    error: function () {
+                        $("#hallDescription" + id).val(originDescription);
+                    }
+
+                });
+            }
+
+            function deleteHall(id) {
+                var data = {
+                    "id": id
+                };
+                data[_csrf_param_name] = _csrf_token;
+                $.ajax({
+                    type: "post",
+                    data: data,
+                    url: /*[[@{/admin/hall/delete/}]]*/"/admin/hall/delete/",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.status === "OK") {
+                            $("#" + id).remove();
+                            console.log("success");
+                        }
+                        else {
+                            alert(data.result);
+                        }
+                    }
+                })
+            }
+        </script>
+
+    </div>
+</body>
+</html>

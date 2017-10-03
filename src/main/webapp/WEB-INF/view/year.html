@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${year.name}">Title</title>
+</head>
+<body>
+<div th:fragment="content" class="col-md-8">
+    <form action="#" th:action="@{'/year/'+${year.id}+'/signup/'}" method="post" th:object="${applicationForm}"
+          th:if="${isUser} and ${year.openForRegistration} and ${isConfirmed}"
+          class="form-horizonatal col-sm-offset-2 col-sm-8" id="signUpForm">
+        <link rel="stylesheet" type="text/css" media="screen"
+              href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css"/>
+        <script src="../../components/bootstrap-select.min.js" th:src="@{/components/bootstrap-select.min.js}"></script>
+        <h2 class="col-sm-offset-4" th:text="#{volunteers.form.yearSignUp.header(${year.name})}" th:unless="${isSaved}">
+            Sign up</h2>
+        <h2 class="col-sm-offset-4" th:text="#{volunteers.form.yearSignUp.header.update(${year.name})}"
+            th:if="${isSaved}">Update form</h2>
+
+        <div class="form-group" th:class="${#fields.hasErrors('firstName')}? 'has-error form-group' : 'form-group'">
+            <label for="inputFirstName" class="col-sm-4 control-label"
+                   th:text="#{volunteers.form.signUp.firstName}">First name</label>
+            <div class="col-sm-8">
+                <input type="text" th:field="*{firstName}" class="form-control" id="inputFirstName"
+                       placeholder="First name" oninput="badgeNameOnInput()"
+                       th:placeholder="#{volunteers.form.signUp.firstName}"/>
+                <span class="help-block" th:if="${#fields.hasErrors('firstName')}"
+                      th:text="#{volunteers.form.signUp.firstName.error.empty}">Can't be empty</span>
+            </div>
+        </div>
+        <div class="form-group" th:class="${#fields.hasErrors('lastName')}? 'has-error form-group' : 'form-group'">
+            <label for="inputLastName" class="col-sm-4 control-label" th:text="#{volunteers.form.signUp.lastName}">Last
+                name</label>
+            <div class="col-sm-8">
+                <input type="text" th:field="*{lastName}" class="form-control" id="inputLastName"
+                       placeholder="Last name" oninput="badgeNameOnInput()"
+                       th:placeholder="#{volunteers.form.signUp.lastName}"/>
+                <span class="help-block" th:if="${#fields.hasErrors('lastName')}"
+                      th:text="#{volunteers.form.signUp.lastName.error.empty}">Can't be empty</span>
+            </div>
+        </div>
+        <div class="form-group" th:class="${#fields.hasErrors('firstNameCyr')}? 'has-error form-group' : 'form-group'">
+            <label for="inputFirstNameCyr" class="col-sm-4 control-label"
+                   th:text="#{volunteers.form.signUp.firstNameCyr}">Имя</label>
+            <div class="col-sm-8">
+                <input type="text" th:field="*{firstNameCyr}" class="form-control" id="inputFirstNameCyr"
+                       placeholder="Имя" oninput="badgeNameCyrOnInput()"
+                       th:placeholder="#{volunteers.form.signUp.firstNameCyr}"/>
+                <span class="help-block" th:if="${#fields.hasErrors('firstNameCyr')}"
+                      th:text="#{volunteers.form.signUp.firstNameCyr.error.empty}">Не может быть пустым</span>
+            </div>
+        </div>
+        <div class="form-group" th:class="${#fields.hasErrors('lastNameCyr')}? 'has-error form-group' : 'form-group'">
+            <label for="inputLastNameCyr" class="col-sm-4 control-label"
+                   th:text="#{volunteers.form.signUp.lastNameCyr}">Фамилия</label>
+            <div class="col-sm-8">
+                <input type="text" th:field="*{lastNameCyr}" class="form-control" id="inputLastNameCyr"
+                       placeholder="Фамилия" oninput="badgeNameCyrOnInput()"
+                       th:placeholder="#{volunteers.form.signUp.lastNameCyr}"/>
+                <span class="help-block" th:if="${#fields.hasErrors('lastNameCyr')}"
+                      th:text="#{volunteers.form.signUp.lastNameCyr.error.empty}">Не может быть пустым</span>
+            </div>
+        </div>
+        <div class="form-group"
+             th:class="(${#fields.hasErrors('email')} or ${#fields.hasErrors('emailCorrect')}) ? 'has-error form-group' : 'form-group'">
+            <label for="inputEmail" class="col-sm-4 control-label"
+                   th:text="#{volunteers.form.signUp.email}">Email</label>
+            <div class="col-sm-8">
+                <input type="email" th:field="*{email}" class="form-control" id="inputEmail"
+                       placeholder="Email" th:placeholder="#{volunteers.form.signUp.email}" disabled="disabled"/>
+                <span class="help-block" th:if="${#fields.hasErrors('email')}"
+                      th:text="#{volunteers.form.signUp.email.error.empty}">Can't be empty</span>
+                <input type="checkbox" th:field="*{emailCorrect}" id="emailCorrect" value="true"/>
+                <label for="emailCorrect" th:text="#{volunteers.form.yearSignUp.emailCorrect}" class="control-label">Correct
+                    email</label>
+                <span class="help-block" th:if="${#fields.hasErrors('emailCorrect')}"
+                      th:text="#{volunteers.form.yearSignUp.emailCorrect.error}"></span>
+            </div>
+        </div>
+
+        <div class="form-group" th:class="(${#fields.hasErrors('phone')})? 'has-error form-group':'form-group'">
+            <label for="inputPhone" class="col-sm-4 control-label"
+                   th:text="#{volunteers.form.signUp.phone}">Phone</label>
+            <div class="col-sm-8">
+                <input type="tel" th:field="*{phone}" class="form-control" id="inputPhone"
+                       placeholder="Phone" th:placeholder="#{volunteers.form.signUp.phone}"
+                       pattern="\+7[\(]\d{3}[\)]\d{3}[\-]?\d{2}[\-]?\d{2}"
+                />
+                <span class="help-block" th:if="${#fields.hasErrors('phone')}"
+                      th:text="#{volunteers.form.signUp.phone.error}">Incorrect phone number</span>
+            </div>
+        </div>
+
+        <div class="form-group" th:classappend="${#fields.hasErrors('group')} ? 'has-error'">
+            <label class="control-label col-sm-4" th:text="#{volunteers.form.yearSignUp.group}">Group</label>
+
+            <div class="col-sm-8">
+                <input type="text" th:field="*{group}" class="form-control"/>
+
+                <span class="help-block" th:if="${#fields.hasErrors('group')}"
+                      th:text="#{volunteers.form.yearSignUp.group.error.empty}">Group can't be empty</span>
+            </div>
+        </div>
+
+        <div class="form-group" th:classappend="${#fields.hasErrors('positions')} ? 'has-error'">
+            <label class="control-label col-sm-4" th:text="#{volunteers.form.yearSignUp.positions}">Positions
+                Desired</label>
+
+            <div class="col-sm-8">
+                <!--<div class="list-group">
+                    <div class="list-group-item" th:each="position : ${positions}">
+                        <label class="list-group-item-text">
+                            <input type="checkbox" th:field="*{positions}" th:value="${position.id}"/>
+                            <span th:text="${position.name}" th:remove="tag"></span>
+                        </label>
+                    </div>
+                </div>-->
+                <select class="selectpicker" th:field="*{positions}" multiple="multiple">
+                    <th:block th:each="position: ${positions}">
+                        <option th:value="${position.id}" th:text="${position.name}"></option>
+                    </th:block>
+                </select>
+            </div>
+
+            <span class="help-block" th:if="${#fields.hasErrors('positions')}"
+                  th:text="#{volunteers.form.yearSignUp.positions.error.empty}">Choose at least one position</span>
+        </div>
+
+        <div class="form-group">
+            <label for="suggestionsTextArea" th:text="#{volunteers.form.yearSignUp.comments}">Comments</label>
+
+            <textarea th:field="*{suggestions}" class="form-control" rows="3" id="suggestionsTextArea"></textarea>
+        </div>
+
+        <div class="form-group" th:classappend="${#fields.hasErrors('agree')} ? 'has-error'">
+            <label class="control-label" th:text="#{volunteers.form.yearSignUp.agree}" for="agree">I agree</label>
+            <input type="checkbox" th:value="true" th:field="*{agree}" id="agree"/>
+            <span class="help-block" th:if="${#fields.hasErrors('agree')}"
+                  th:text="#{volunteers.form.yearSignUp.agree.error}">You should be agree</span>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-4 col-sm-8">
+                <button type="submit" class="btn btn-default" th:text="#{volunteers.form.yearSignUp.signUp}"
+                        th:unless="${isSaved}">Sign up
+                </button>
+                <button type="submit" class="btn btn-default" th:text="#{volunteers.form.yearSignUp.update}"
+                        th:if="${isSaved}">Update
+                </button>
+            </div>
+        </div>
+        <script th:inline="javascript">
+            $(document).ready(function () {
+                $('.selectpicker').selectpicker();
+            });
+        </script>
+    </form>
+    <h2 class="col-sm-offset-4" th:if="${isUser} and ${!year.openForRegistration} and ${isConfirmed}"
+        th:text="#{volunteers.form.yearSignUp.finish}">Registration is finished</h2>
+    <h2 class="col-sm-offset-4" th:if="${isUser} and ${year.openForRegistration} and ${!isConfirmed}">
+        <span th:text="#{volunteers.email.confirm.reqest}"></span>
+        <a th:href="@{/user/confirm/}" class="" th:text="#{volunteers.email.confirm.link}"> send email again</a>
+    </h2>
+</div>
+</body>
+</html>

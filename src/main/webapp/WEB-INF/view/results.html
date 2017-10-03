@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="content" class="col-md-10">
+    <div class="input-group">
+        <span class="input-group-addon glyphicon glyphicon-search"></span>
+        <input class="form-control" type="text" th:placeholder="#{volunteers.result.searchHalls}"
+               onkeyup="search(this.value.toUpperCase())" id="seachInput"/>
+        <span class="input-group-addon glyphicon glyphicon-remove" id="clear" style="cursor: pointer"></span>
+    </div>
+    <table class="table table-hover table-fixed" id="results">
+        <thead>
+        <th th:text="#{volunteers.results.hall}"></th>
+        <th th:text="#{volunteers.results.users}">
+            User
+        </th>
+        <th th:text="#{volunteers.results.medal}+' ('+#{volunteers.results.experience}+')'">
+            Medal (Experience)
+        </th>
+        <th th:text="#{volunteers.results.assessment}">
+            Assessment
+        </th>
+        </thead>
+        <tbody>
+        <th:block th:each="applicationForm:${applicationForms}">
+            <tr>
+                <td>
+                    <div class="list-group">
+                        <th:block th:each="hall: ${halls.get(applicationForm)}">
+                            <a class="list-group-item" href="#" onclick="searchHall(this)"><label
+                                    th:text="${hall.name}"></label> </a>
+                        </th:block>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <a th:href="@{'/admin/results/user/'+${applicationForm.id}}"
+                       th:text="${applicationForm.user.badgeName}"></a>
+                </td>
+                <td>
+                    <label th:text="${medals.get(applicationForm.id).name}"></label>
+                    <span th:text="'('+${experience.get(applicationForm.id)}+')'"></span>
+                </td>
+                <td>
+                    <label th:text="${assessments.get(applicationForm.id)}">
+                    </label>
+                    <th:block th:each="day: ${assessmentsGroupByDays.get(applicationForm.id)}">
+                        <span th:text="${day}"></span>
+                    </th:block>
+                </td>
+            </tr>
+        </th:block>
+        </tbody>
+    </table>
+
+    <script th:inline="javascript">
+        function search(value) {
+            $("#results > tbody > tr").each(function () {
+                var flage = false;
+                $(this).find("td:first-child > div > a > label").each(function () {
+                    flage |= $(this).text().toUpperCase().indexOf(value) > -1;
+                    console.log($(this).text());
+                });
+                if (flage)
+                    $(this).show();
+                else
+                    $(this).hide();
+            });
+        }
+
+        function searchHall(hall) {
+            var value = $(hall).find("label").text();
+            $("#seachInput").val(value);
+            search(value.toUpperCase());
+        }
+
+        $("#clear").click(function () {
+            $("#seachInput").val("");
+            search("");
+        })
+    </script>
+</div>
+</body>
+</html>

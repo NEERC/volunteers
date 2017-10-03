@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+</head>
+<body>
+    <div th:fragment="content" >
+        <form action="#" th:action="@{/signup}" method="post" th:object="${user}"
+              class="form-horizontal col-sm-offset-2 col-sm-8" id="signUpForm">
+            <h2 class="col-sm-offset-4" th:text="#{volunteers.form.signUp.header}"> Sign up to volunteers </h2>
+    
+            <div class="form-group" th:class="${#fields.hasErrors('firstName')}? 'has-error form-group' : 'form-group'">
+                <label for="inputFirstName" class="col-sm-4 control-label"
+                       th:text="#{volunteers.form.signUp.firstName}">First name</label>
+                <div class="col-sm-8">
+                    <input type="text" th:field="*{firstName}" class="form-control" id="inputFirstName"
+                           placeholder="First name" oninput="badgeNameOnInput()"
+                           th:placeholder="#{volunteers.form.signUp.firstName}"/>
+                    <span class="help-block" th:if="${#fields.hasErrors('firstName')}"
+                          th:text="#{volunteers.form.signUp.firstName.error.empty}">Can't be empty</span>
+                </div>
+            </div>
+            <div class="form-group" th:class="${#fields.hasErrors('lastName')}? 'has-error form-group' : 'form-group'">
+                <label for="inputLastName" class="col-sm-4 control-label" th:text="#{volunteers.form.signUp.lastName}">Last
+                    name</label>
+                <div class="col-sm-8">
+                    <input type="text" th:field="*{lastName}" class="form-control" id="inputLastName"
+                           placeholder="Last name" oninput="badgeNameOnInput()"
+                           th:placeholder="#{volunteers.form.signUp.lastName}"/>
+                    <span class="help-block" th:if="${#fields.hasErrors('lastName')}"
+                          th:text="#{volunteers.form.signUp.lastName.error.empty}">Can't be empty</span>
+                </div>
+            </div>
+            <div class="form-group" th:class="${#fields.hasErrors('firstNameCyr')}? 'has-error form-group' : 'form-group'">
+                <label for="inputFirstNameCyr" class="col-sm-4 control-label"
+                       th:text="#{volunteers.form.signUp.firstNameCyr}">Имя</label>
+                <div class="col-sm-8">
+                    <input type="text" th:field="*{firstNameCyr}" class="form-control" id="inputFirstNameCyr"
+                           placeholder="Имя" oninput="badgeNameCyrOnInput()"
+                           th:placeholder="#{volunteers.form.signUp.firstNameCyr}"/>
+                    <span class="help-block" th:if="${#fields.hasErrors('firstNameCyr')}"
+                          th:text="#{volunteers.form.signUp.firstNameCyr.error.empty}">Не может быть пустым</span>
+                </div>
+            </div>
+            <div class="form-group" th:class="${#fields.hasErrors('lastNameCyr')}? 'has-error form-group' : 'form-group'">
+                <label for="inputLastNameCyr" class="col-sm-4 control-label"
+                       th:text="#{volunteers.form.signUp.lastNameCyr}">Фамилия</label>
+                <div class="col-sm-8">
+                    <input type="text" th:field="*{lastNameCyr}" class="form-control" id="inputLastNameCyr"
+                           placeholder="Фамилия" oninput="badgeNameCyrOnInput()"
+                           th:placeholder="#{volunteers.form.signUp.lastNameCyr}"/>
+                    <span class="help-block" th:if="${#fields.hasErrors('lastNameCyr')}"
+                          th:text="#{volunteers.form.signUp.lastNameCyr.error.empty}">Не может быть пустым</span>
+                </div>
+            </div>
+            <div class="form-group" th:class="(${#fields.hasErrors('email')} or ${#fields.hasErrors('emailExist')}) ? 'has-error form-group' : 'form-group'">
+                <label for="inputEmail" class="col-sm-4 control-label"
+                       th:text="#{volunteers.form.signUp.email}">Email</label>
+                <div class="col-sm-8">
+                    <input type="email" th:field="*{email}" class="form-control" id="inputEmail"
+                           placeholder="Email" th:placeholder="#{volunteers.form.signUp.email}"/>
+                    <span class="help-block" th:if="${#fields.hasErrors('email')}"
+                          th:text="#{volunteers.form.signUp.email.error.empty}">Can't be empty</span>
+                    <span class="help-block" th:if="${#fields.hasErrors('emailExist')}"
+                          th:text="#{volunteers.form.signUp.email.error.exist}">This email already exist</span>
+                </div>
+            </div>
+            <div class="form-group" th:class="(${#fields.hasErrors('phone')})? 'has-error form-group':'form-group'">
+                <label for="inputPhone" class="col-sm-4 control-label"
+                       th:text="#{volunteers.form.signUp.phone}">Phone</label>
+                <div class="col-sm-8">
+                    <input type="tel" th:field="*{phone}" class="form-control" id="inputPhone"
+                           placeholder="Phone" th:placeholder="#{volunteers.form.signUp.phone}"
+                           pattern="\+7[\(]\d{3}[\)]\d{3}[\-]?\d{2}[\-]?\d{2}"
+                    />
+                    <span class="help-block" th:if="${#fields.hasErrors('phone')}"
+                          th:text="#{volunteers.form.signUp.phone.error}">Incorrect phone number</span>
+                </div>
+            </div>
+            <div class="form-group" th:class="${#fields.hasErrors('badgeName')}? 'has-error form-group' : 'form-group'">
+                <label for="inputBadgeName" class="col-sm-4 control-label"
+                       th:text="#{volunteers.form.signUp.badgeName}">Badge name</label>
+                <div class="col-sm-8">
+                    <input type="text" th:field="*{badgeName}" class="form-control" id="inputBadgeName"
+                           disabled="disabled"
+                           placeholder="Badge name" th:placeholder="#{volunteers.form.signUp.badgeName}"/>
+                    <span class="help-block" th:if="${#fields.hasErrors('badgeName')}"
+                          th:text="#{volunteers.form.signUp.badgeName.error.empty}">Can't be empty</span>
+                </div>
+            </div>
+            <div class="form-group" th:class="${#fields.hasErrors('badgeNameCyr')}? 'has-error form-group' : 'form-group'">
+                <label for="inputBadgeNameCyr" class="col-sm-4 control-label"
+                       th:text="#{volunteers.form.signUp.badgeNameCyr}">Имя на бейдже</label>
+                <div class="col-sm-8">
+                    <input type="text" th:field="*{badgeNameCyr}" class="form-control" id="inputBadgeNameCyr"
+                           disabled="disabled"
+                           placeholder="Имя на бейдже" th:placeholder="#{volunteers.form.signUp.badgeNameCyr}"/>
+                    <span class="help-block" th:if="${#fields.hasErrors('badgeNameCyr')}"
+                          th:text="#{volunteers.form.signUp.badgeNameCyr.error.empty}">Не может быть пустым</span>
+                </div>
+            </div>
+            <div class="form-group" th:class="${#fields.hasErrors('password')}? 'has-error form-group' : 'form-group'">
+                <label for="inputPassword" class="col-sm-4 control-label" th:text="#{volunteers.form.signUp.password}">Password</label>
+                <div class="col-sm-8">
+                    <input type="password" th:field="*{password}" class="form-control" id="inputPassword"
+                           placeholder="Password" th:placeholder="#{volunteers.form.signUp.password}"/>
+                    <span class="help-block" th:if="${#fields.hasErrors('password')}"
+                          th:text="#{volunteers.form.signUp.password.error.empty}">Can't be empty</span>
+                </div>
+            </div>
+            <div class="form-group" th:class="${#fields.hasErrors('confirmPassword') || #fields.hasErrors('passwordEquals')}? 'has-error form-group' : 'form-group'">
+                <label for="inputConfirmPassword" class="col-sm-4 control-label"
+                       th:text="#{volunteers.form.signUp.confirmPassword}">Confirm password</label>
+                <div class="col-sm-8">
+                    <input type="password" th:field="*{confirmPassword}" class="form-control" id="inputConfirmPassword"
+                           placeholder="Confirm password" th:placeholder="#{volunteers.form.signUp.confirmPassword}"/>
+                    <span class="help-block" th:if="${#fields.hasErrors('passwordEquals')}"
+                          th:text="#{volunteers.form.signUp.confirmPassword.error.equals}">Passwords are not equals</span>
+                    <span class="help-block" th:if="${#fields.hasErrors('confirmPassword')}"
+                          th:text="#{volunteers.form.signUp.confirmPassword.error.empty}">Can't be empty</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-4 col-sm-8">
+                    <button type="submit" class="btn btn-default">Sign up</button>
+                </div>
+            </div>
+        </form>
+        <script src="js/signup.js"></script>
+        <script th:inline="javascript">
+            $('#inputPhone').mask('+7(999)999-99-99');
+            $(function () {
+                $.validator.addMethod("regex", function (value, element, regexpr) {
+                    return regexpr.test(value);
+                }, "Please enter a valid pasword.");
+                $('#signUpForm').validate({
+                    rules: {
+                        firstName: {
+                            required: true
+                        },
+                        lastName: {
+                            required: true
+                        },
+                        firstNameCyr: {
+                            required: true
+                        },
+                        lastNameCyr: {
+                            required: true
+                        },
+                        email: {
+                            required: true,
+                            email: true
+                        },
+                        phone: {
+                            required: true,
+                            regex: /^\+7[\(]\d{3}[\)]\d{3}[\-]\d{2}[\-]\d{2}$/
+                        },
+                        password: {
+                            required: true,
+                            minlength: 8
+                        },
+                        confirmPassword: {
+                            required: true,
+                            equalTo: "#inputPassword"
+                        }
+                    },
+                    messages: {
+                        firstName: /*[[#{volunteers.form.signUp.firstName.error.empty}]]*/"",
+                        lastName: /*[[#{volunteers.form.signUp.lastName.error.empty}]]*/"",
+                        firstNameCyr: /*[[#{volunteers.form.signUp.firstNameCyr.error.empty}]]*/"",
+                        lastNameCyr: /*[[#{volunteers.form.signUp.lastNameCyr.error.empty}]]*/"",
+                        email: {
+                            required: /*[[#{volunteers.form.signUp.lastName.error.empty}]]*/"",
+                            email: /*[[#{volunteers.form.signUp.email.error.invalid}]]*/""
+                        },
+                        phone: {
+                            required: /*[[#{volunteers.form.signUp.phone.error.empty}]]*/"",
+                            matches: /*[[#{volunteers.form.signUp.phone.error.invalid}]]*/""
+                        },
+                        password: {
+                            required: /*[[#{volunteers.form.signUp.password.error.empty}]]*/"",
+                            minlength: /*[[#{volunteers.form.signUp.password.error.short}]]*/""
+                        },
+                        confirmPassword: {
+                            required: /*[[#{volunteers.form.signUp.confirmPassword.error.empty}]]*/"",
+                            equalTo: /*[[#{volunteers.form.signUp.confirmPassword.error.equals}]]*/""
+                        }
+                    },
+                    errorElement: 'span',
+                    errorClass: 'help-block',
+                    highlight: function (element) {
+                        $(element).closest('.form-group').addClass('has-error');
+                    },
+                    unhighlight: function (element) {
+                        $(element).closest('.form-group').removeClass('has-error');
+                    }
+                })
+            });
+        </script>
+    </div>
+</body>
+</html>

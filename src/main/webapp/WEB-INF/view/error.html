@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Error</title>
+</head>
+<body>
+<div th:fragment="content" class="col-md-8">
+    <div class="logo">
+            <h1 th:text="${errors.status}"></h1>
+    </div>
+    <p class="lead text-muted" th:text="${errors.message}">Unauthorized</p>
+    <a th:href="@{'/'}" class="btn btn primary" th:text="#{volunteers.error.home}">Go home</a>
+    </div>
+</body>
+</html>
