@@ -1,6 +1,7 @@
 package ru.ifmo.neerc.volunteers.service.user;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 @EnableScheduling
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     final UserRepository userRepository;
@@ -156,9 +158,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void confirmEmail(User user, String email) {
-        if (!user.getEmail().equals(email)) {
+        if (user.getEmail() == null) {
+            log.error("User or email is null");
+        }
+        if (!user.getEmail().equalsIgnoreCase(email)) {
             return;
         }
+        log.info("Marking user {} as confirmed" + user.getEmail());
         user.setConfirmed(true);
         userRepository.save(user);
     }

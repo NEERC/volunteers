@@ -1,12 +1,14 @@
 package ru.ifmo.neerc.volunteers.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.ResetPasswordToken;
+import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.form.ChangePasswordForm;
 import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.modal.JsonResponse;
@@ -17,7 +19,9 @@ import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -27,6 +31,7 @@ import java.util.Optional;
 @Controller
 @AllArgsConstructor
 @Layout("empty")
+@Slf4j
 public class LoginController {
 
     final UserService userService;
@@ -100,8 +105,15 @@ public class LoginController {
     }
 
     @GetMapping(value = "/confirm")
-    public String confirmEmail(@RequestParam("id") final long id, @RequestParam("email") final String email) {
-        userService.confirmEmail(userRepository.findOne(id), email);
+    public String confirmEmail(@RequestParam("id") final long id, @RequestParam("email") final String email, HttpServletResponse resp) throws IOException {
+        User user = userRepository.findOne(id);
+        if (user ==null) {
+            log.warn("User with id={} is not found", id);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return null;
+        }
+        log.info("Confirming user id={}, email={}", id, email);
+        userService.confirmEmail(user, email);
         return "redirect:/";
     }
 
