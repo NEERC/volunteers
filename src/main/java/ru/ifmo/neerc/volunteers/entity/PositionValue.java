@@ -2,9 +2,7 @@ package ru.ifmo.neerc.volunteers.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
 
 import javax.persistence.Entity;
@@ -20,6 +18,9 @@ import javax.validation.constraints.NotNull;
 @Data
 @RequiredArgsConstructor
 @JsonIgnoreProperties(value = {"year"})
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PositionValue {
 
     @Id
@@ -43,9 +44,6 @@ public class PositionValue {
 
     public PositionValue(PositionForm positionForm, Year year) {
         this(positionForm.getName(), false, positionForm.getValue(), year);
-    }
-
-    public PositionValue() {
     }
 
 }

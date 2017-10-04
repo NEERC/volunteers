@@ -1,6 +1,7 @@
 package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.Entity;
@@ -12,19 +13,17 @@ import javax.persistence.Id;
  */
 @Data
 @Entity
+@NoArgsConstructor
 public class Medal {
 
     @Id
     @GeneratedValue
-    long id;
+    private long id;
 
     @NotEmpty
-    String name;
+    private String name;
 
-    int value;
-
-    public Medal() {
-    }
+    private int value;
 
     public Medal(String name, int value) {
         this.name = name;

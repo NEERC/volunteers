@@ -14,8 +14,8 @@ public class PositionForm {
 
     @NotNull
     @NotEmpty(message = "надо указать имя")
-    String name;
+    private String name;
 
     @Min(0)
-    double value;
+    private double value;
 }

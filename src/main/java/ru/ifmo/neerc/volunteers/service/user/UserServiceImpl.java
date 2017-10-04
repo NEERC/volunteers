@@ -164,7 +164,7 @@ public class UserServiceImpl implements UserService {
         if (!user.getEmail().equalsIgnoreCase(email)) {
             return;
         }
-        log.info("Marking user {} as confirmed" + user.getEmail());
+        log.info("Marking user {} as confirmed", user.getEmail());
         user.setConfirmed(true);
         userRepository.save(user);
     }

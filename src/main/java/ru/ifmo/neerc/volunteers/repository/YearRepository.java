@@ -18,4 +18,6 @@ public interface YearRepository extends CrudRepository<Year, Long> {
 
     List<Year> findAll();
     List<Year> findAllByOrderByIdDesc();
+
+    Year findByName(String name);
 }

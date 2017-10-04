@@ -3,6 +3,7 @@ package ru.ifmo.neerc.volunteers.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -18,6 +19,8 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {"users","positionValues"})
 @ToString(exclude = {"users","positionValues"})
 @JsonIgnoreType
+@Table(indexes = {@Index(columnList = "name", unique = true)})
+@NoArgsConstructor
 public class Year {
 
     @Id
@@ -28,7 +31,7 @@ public class Year {
     @Size(max = 255)
     private String name;
 
-   private boolean openForRegistration;
+    private boolean openForRegistration;
 
     /*private boolean current;*/
 
@@ -44,7 +47,7 @@ public class Year {
     @OrderBy(value = "name ASC")
     private Set<Hall> halls;
 
-    @OneToMany(mappedBy = "year")
+    @OneToMany(mappedBy = "year", cascade = CascadeType.ALL)
     private Set<PositionValue> positionValues;
 
     @Lob
@@ -54,5 +57,4 @@ public class Year {
         this.name = name;
     }
 
-    public Year() {}
 }

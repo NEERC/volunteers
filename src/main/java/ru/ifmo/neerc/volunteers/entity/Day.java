@@ -39,7 +39,7 @@ public class Day {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "day")
     @OrderBy("id ASC")
-    Set<UserDay> users;
+    private Set<UserDay> users;
 
     public void addUser(final UserDay ue) {
         if (ue != null) {

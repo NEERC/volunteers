@@ -20,8 +20,8 @@ import java.util.Set;
 @Entity
 @Data
 @EqualsAndHashCode(exclude = {"password", "role", "id", "applicationForms"})
+@Table(indexes = {@Index(columnList = "email", unique = true), @Index(columnList = "year_id")})
 @ToString(exclude = {"password", "role", "id", "applicationForms", "year"})
-@Table(indexes = {@Index(columnList = "email", unique = true)})
 public class User implements UserDetails {
 
     /*@Autowired

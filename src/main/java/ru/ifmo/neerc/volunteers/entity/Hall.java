@@ -13,6 +13,9 @@ import javax.persistence.*;
 @ToString(exclude = {"id","year"})
 @EqualsAndHashCode(exclude = {"year"})
 @RequiredArgsConstructor
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Hall {
 
     @Id
@@ -36,7 +39,5 @@ public class Hall {
         this(form.getName(), false, form.getDescription(), year);
     }
 
-    public Hall() {
 
-    }
 }
