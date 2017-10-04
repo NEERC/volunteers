@@ -22,21 +22,21 @@ public class UserDay {
     long id;
 
     @JoinColumn(name = "userYear")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     ApplicationForm userYear;
 
     @JoinColumn(name = "day")
     @ManyToOne
     Day day;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "position")
     PositionValue position;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     Set<Assessment> assessments;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     Hall hall;
 
     @Enumerated(EnumType.STRING)

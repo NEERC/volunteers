@@ -73,6 +73,10 @@
                         </div>
                     </div>
                 </li>
+                <li th:unless="${isUser}">
+                    <a th:href="@{'/year/'+${year.id}+'/'}" th:text="#{volunteers.header.touser}">Go to user
+                        interface</a>
+                </li>
                 <th:block th:if="${day!=null}">
                     <li>
                         <p th:text="${day.name}" class="navbar-text"></p>
