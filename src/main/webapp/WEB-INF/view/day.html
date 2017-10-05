@@ -37,19 +37,22 @@
     <div class="table-responsive">
         <table class="table">
             <thead>
-            <th th:text="#{volunteers.day.volunteer}">
+            <th th:text="#{volunteers.day.volunteer}" class="col-md-2">
                 User
             </th>
-            <th th:text="#{volunteers.day.positions.wish}">
+            <th th:text="#{volunteers.day.positions.wish}" class="col-md-1">
                 Positions desired
             </th>
-            <th th:text="#{volunteers.day.comments}">
+            <th th:text="#{volunteers.day.comments}" class="col-md-2">
                 Comments
             </th>
-            <th th:text="#{volunteers.day.position}">
+            <th th:text="#{volunteers.day.experience}" class="col-md-3">
+                Experience
+            </th>
+            <th th:text="#{volunteers.day.position}" class="col-md-2">
                 Position
             </th>
-            <th th:text="#{volunteers.day.hall}">
+            <th th:text="#{volunteers.day.hall}" class="col-md-2">
                 Hall
             </th>
             </thead>
@@ -67,6 +70,7 @@
                             </div>
                         </td>
                         <td th:text="${user.userYear.suggestions}"></td>
+                        <td></td>
                         <td>
                             <select class="form-control" th:name="p+${user.id}"
                                     th:onchange="'savePosition('+${user.id}+', this.value);'"

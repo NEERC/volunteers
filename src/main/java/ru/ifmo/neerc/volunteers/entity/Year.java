@@ -35,19 +35,19 @@ public class Year {
 
     /*private boolean current;*/
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "year")
     @OrderBy("name ASC")
     private Set<Day> days;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "year")
     @OrderBy(value = "id ASC ")
     private Set<ApplicationForm> users;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "year")
     @OrderBy(value = "name ASC")
     private Set<Hall> halls;
 
-    @OneToMany(mappedBy = "year", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "year", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<PositionValue> positionValues;
 
     @Lob
