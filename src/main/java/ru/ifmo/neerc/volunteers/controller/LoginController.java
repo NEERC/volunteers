@@ -45,10 +45,9 @@ public class LoginController {
                         @RequestParam(value = "reset", required = false) final String reset,
                         final Model model) {
 
-        if (error != null) {
-            model.addAttribute("error", "");
-            model.addAttribute("resetPasswordForm", new EmailForm());
-        }
+        model.addAttribute("error", error);
+        model.addAttribute("resetPasswordForm", new EmailForm());
+
         /*if (logout != null) {
             model.addAttribute("message", "");
         }*/
@@ -107,7 +106,7 @@ public class LoginController {
     @GetMapping(value = "/confirm")
     public String confirmEmail(@RequestParam("id") final long id, @RequestParam("email") final String email, HttpServletResponse resp) throws IOException {
         User user = userRepository.findOne(id);
-        if (user ==null) {
+        if (user == null) {
             log.warn("User with id={} is not found", id);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return null;
