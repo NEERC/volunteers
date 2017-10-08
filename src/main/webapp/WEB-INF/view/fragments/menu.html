@@ -65,6 +65,9 @@
                     results</a>
             </li>
             <li th:unless="${isUser}">
+                <a th:href="@{/admin/email}" class="collapsed" th:text="#{volunteers.admin.menu.email}">Send email</a>
+            </li>
+            <li th:unless="${isUser}">
                 <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">
                     <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
                     <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>

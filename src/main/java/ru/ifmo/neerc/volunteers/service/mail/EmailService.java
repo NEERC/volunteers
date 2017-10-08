@@ -13,5 +13,7 @@ public interface EmailService {
 
     void sendSimpleMessage(MimeMessage message);
 
-    MimeMessage constructEmail(String subject, String body, IContext context, User... users) throws MessagingException;
+    MimeMessage constructEmail(String subject, String templateName, IContext context, User... users) throws MessagingException;
+
+    MimeMessage constructEmail(String subject, String body, User... users) throws MessagingException;
 }

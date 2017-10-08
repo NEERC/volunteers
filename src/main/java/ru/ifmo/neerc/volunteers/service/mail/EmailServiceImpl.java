@@ -49,7 +49,12 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public MimeMessage constructEmail(String subject, String body, IContext context, User... users) throws MessagingException {
+    public MimeMessage constructEmail(String subject, String templateName, IContext context, User... users) throws MessagingException {
+        return constructEmail(subject, templateEngine.process(templateName, context), users);
+    }
+
+    @Override
+    public MimeMessage constructEmail(String subject, String body, User... users) throws MessagingException {
         if (users.length == 0) {
             throw new IllegalArgumentException("users.length == 0");
         }
@@ -57,7 +62,7 @@ public class EmailServiceImpl implements EmailService {
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
         messageHelper.setTo(Arrays.stream(users).map(User::getEmail).toArray(String[]::new));
         messageHelper.setSubject(subject);
-        messageHelper.setText(templateEngine.process(body, context), true);
+        messageHelper.setText(body, true);
         String email = messageSource.getMessage("volunteers.email.from", null, "neerc@mail.ifmo.ru", locale);
         messageHelper.setFrom(email);
         return message;
