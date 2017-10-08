@@ -6,11 +6,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.IContext;
 import ru.ifmo.neerc.volunteers.entity.User;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,10 +32,11 @@ public class EmailServiceImpl implements EmailService {
     final Logger logger = LoggerFactory.getLogger(this.getClass());
     final MessageSource messageSource;
     final Locale locale = LocaleContextHolder.getLocale();
+    final TemplateEngine templateEngine;
     final ExecutorService toSend = Executors.newSingleThreadScheduledExecutor();
 
     @Override
-    public void sendSimpleMessage(SimpleMailMessage message) {
+    public void sendSimpleMessage(MimeMessage message) {
         toSend.execute(() -> {
             try {
                 logger.info("I will send email", message);
@@ -43,13 +49,17 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public SimpleMailMessage constructEmail(String subject, String body, User user) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setSubject(subject);
-        message.setText(body);
-        message.setTo(user.getEmail());
+    public MimeMessage constructEmail(String subject, String body, IContext context, User... users) throws MessagingException {
+        if (users.length == 0) {
+            throw new IllegalArgumentException("users.length == 0");
+        }
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
+        messageHelper.setTo(Arrays.stream(users).map(User::getEmail).toArray(String[]::new));
+        messageHelper.setSubject(subject);
+        messageHelper.setText(templateEngine.process(body, context), true);
         String email = messageSource.getMessage("volunteers.email.from", null, "neerc@mail.ifmo.ru", locale);
-        message.setFrom(email);
+        messageHelper.setFrom(email);
         return message;
     }
 }

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.thymeleaf.context.Context;
 import ru.ifmo.neerc.volunteers.config.SecurityConfig;
 import ru.ifmo.neerc.volunteers.entity.ResetPasswordToken;
 import ru.ifmo.neerc.volunteers.entity.Role;
@@ -29,6 +29,8 @@ import ru.ifmo.neerc.volunteers.service.Utils;
 import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.security.SecurityService;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.xml.bind.DatatypeConverter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -88,10 +90,13 @@ public class UserServiceImpl implements UserService {
         return Optional.of(token);
     }
 
-    public SimpleMailMessage constructResetTokenEmail(final String contextPath, final Locale locale, final ResetPasswordToken token) {
+    @Override
+    public MimeMessage constructResetTokenEmail(final String contextPath, final Locale locale, final ResetPasswordToken token) throws MessagingException {
         String url = contextPath + "/changePassword/?id=" + token.getUser().getId() + "&token=" + token.getToken() + "&hash=" + getHash(token);
         String message = messageSource.getMessage("volunteers.email.resetPassword.email", new Object[]{url}, locale);
-        return emailService.constructEmail(messageSource.getMessage("volunteers.email.resetPassword.subject", null, locale), message, token.getUser());
+        Context context = new Context();
+        context.setVariable("url", url);
+        return emailService.constructEmail(messageSource.getMessage("volunteers.email.resetPassword.subject", null, locale), "mails/ResetPassword", context, token.getUser());
     }
 
     private String getHash(ResetPasswordToken token) {
@@ -150,10 +155,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SimpleMailMessage constructConfirmEmail(User user, String contextPath, Locale locale) {
+    public MimeMessage constructConfirmEmail(User user, String contextPath, Locale locale) throws MessagingException {
         String url = contextPath + "/confirm/?id=" + user.getId() + "&email=" + user.getEmail();
         String message = messageSource.getMessage("volunteers.email.confirm.email", new Object[]{url}, locale);
-        return emailService.constructEmail(messageSource.getMessage("volunteers.email.confirm.subject", null, locale), message, user);
+        Context context = new Context();
+        context.setVariable("url", url);
+        return emailService.constructEmail(messageSource.getMessage("volunteers.email.confirm.subject", null, locale), "mails/confirmMail", context, user);
     }
 
     @Override
