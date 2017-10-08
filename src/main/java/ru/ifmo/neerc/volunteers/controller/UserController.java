@@ -24,6 +24,7 @@ import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 import ru.ifmo.neerc.volunteers.service.year.YearService;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Locale;
@@ -116,7 +117,7 @@ public class UserController {
     }
 
     @GetMapping("/user/confirm")
-    public String sendConfirmEmail(final Authentication authentication, final HttpServletRequest request) {
+    public String sendConfirmEmail(final Authentication authentication, final HttpServletRequest request) throws MessagingException {
         emailService.sendSimpleMessage(
                 userService.constructConfirmEmail(
                         userService.getUserByAuthentication(authentication),
@@ -127,7 +128,7 @@ public class UserController {
     }
 
     @PostMapping("/user/email")
-    public String changeEmail(@Valid @ModelAttribute("emailForm") final EmailForm emailForm, final BindingResult result, final Authentication authentication, final RedirectAttributes attributes, final HttpServletRequest request) {
+    public String changeEmail(@Valid @ModelAttribute("emailForm") final EmailForm emailForm, final BindingResult result, final Authentication authentication, final RedirectAttributes attributes, final HttpServletRequest request) throws MessagingException {
         User user = userService.getUserByAuthentication(authentication);
         if (userRepository.findByEmailIgnoreCase(emailForm.getEmail()) != null &&
                 !user.getEmail().equals(emailForm.getEmail())) {

@@ -19,6 +19,7 @@ import ru.ifmo.neerc.volunteers.service.Utils;
 import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Locale;
@@ -51,7 +52,7 @@ public class SignupController {
 
     @PostMapping("/signup")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String processSignup(@Valid @ModelAttribute("user") UserForm userForm, BindingResult result, HttpServletRequest request) {
+    public String processSignup(@Valid @ModelAttribute("user") UserForm userForm, BindingResult result, HttpServletRequest request) throws MessagingException {
         if (userRepository.findByEmailIgnoreCase(userForm.getEmail()) != null) {
             result.rejectValue("emailExist", "exist.user.email", "");
         }

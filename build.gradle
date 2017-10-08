@@ -78,8 +78,18 @@ task copyjs(type:Sync) {
 	}
 
 	includeEmptyDirs false
-	dependsOn 'copyfonts'
+	dependsOn 'copyckeditor'
 
+}
+
+task copyckeditor(type:Sync) {
+	group 'help'
+	description 'update ckeditor'
+
+	from 'node_modules/ckeditor'
+	into 'src/main/webapp/ckeditor'
+
+	dependsOn 'copyfonts'
 }
 
 
