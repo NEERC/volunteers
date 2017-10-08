@@ -26,14 +26,13 @@
         <div class="form-group">
             <button type="submit" class="btn btn-default" th:text="#{volunteers.login.login}">Log in</button>
             <button type="button" class="btn btn-link" role="button" th:text="#{volunteers.login.passwordReset}"
-                    th:if="${error!=null}" data-toggle="modal" data-target="#resetPasswordModal">Reset password
+                    data-toggle="modal" data-target="#resetPasswordModal">Reset password
             </button>
             <a th:href="@{/signup}" class="btn btn-link" role="button" th:text="#{volunteers.login.signUp}">Sign up</a>
         </div>
     </form>
 
-    <div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="label"
-         th:if="${error}">
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="label">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form th:object="${resetPasswordForm}" id="resetPasswordForm">
