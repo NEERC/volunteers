@@ -24,11 +24,11 @@ public class UserForm {
     private String lastName;
 
     @NotEmpty
-    @Pattern(regexp = "[а-яА-ЯёЁ -]+")
+    @Pattern(regexp = "[а-яА-ЯёЁ ,.'-]+")
     private String firstNameCyr;
 
     @NotEmpty
-    @Pattern(regexp = "[а-яА-ЯёЁ -]+")
+    @Pattern(regexp = "[а-яА-ЯёЁ ,.'-]+")
     private String lastNameCyr;
 
     @NotEmpty

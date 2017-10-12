@@ -25,7 +25,7 @@
                        placeholder="First name" oninput="badgeNameOnInput()"
                        th:placeholder="#{volunteers.form.signUp.firstName}"/>
                 <span class="help-block" th:if="${#fields.hasErrors('firstName')}"
-                      th:text="#{volunteers.form.signUp.firstName.error.empty}">Can't be empty</span>
+                      th:text="#{volunteers.form.signUp.firstName.error.invalid}">Can't be empty</span>
             </div>
         </div>
         <div class="form-group" th:class="${#fields.hasErrors('lastName')}? 'has-error form-group' : 'form-group'">
@@ -36,7 +36,7 @@
                        placeholder="Last name" oninput="badgeNameOnInput()"
                        th:placeholder="#{volunteers.form.signUp.lastName}"/>
                 <span class="help-block" th:if="${#fields.hasErrors('lastName')}"
-                      th:text="#{volunteers.form.signUp.lastName.error.empty}">Can't be empty</span>
+                      th:text="#{volunteers.form.signUp.lastName.error.invalid}">Can't be empty</span>
             </div>
         </div>
         <div class="form-group" th:class="${#fields.hasErrors('firstNameCyr')}? 'has-error form-group' : 'form-group'">
@@ -47,7 +47,7 @@
                        placeholder="Имя" oninput="badgeNameCyrOnInput()"
                        th:placeholder="#{volunteers.form.signUp.firstNameCyr}"/>
                 <span class="help-block" th:if="${#fields.hasErrors('firstNameCyr')}"
-                      th:text="#{volunteers.form.signUp.firstNameCyr.error.empty}">Не может быть пустым</span>
+                      th:text="#{volunteers.form.signUp.firstNameCyr.error.invalid}">Не может быть пустым</span>
             </div>
         </div>
         <div class="form-group" th:class="${#fields.hasErrors('lastNameCyr')}? 'has-error form-group' : 'form-group'">
@@ -58,7 +58,7 @@
                        placeholder="Фамилия" oninput="badgeNameCyrOnInput()"
                        th:placeholder="#{volunteers.form.signUp.lastNameCyr}"/>
                 <span class="help-block" th:if="${#fields.hasErrors('lastNameCyr')}"
-                      th:text="#{volunteers.form.signUp.lastNameCyr.error.empty}">Не может быть пустым</span>
+                      th:text="#{volunteers.form.signUp.lastNameCyr.error.invalid}">Не может быть пустым</span>
             </div>
         </div>
         <div class="form-group"
@@ -87,7 +87,7 @@
                        pattern="\+7[\(]\d{3}[\)]\d{3}[\-]?\d{2}[\-]?\d{2}"
                 />
                 <span class="help-block" th:if="${#fields.hasErrors('phone')}"
-                      th:text="#{volunteers.form.signUp.phone.error}">Incorrect phone number</span>
+                      th:text="#{volunteers.form.signUp.phone.error.invalid}">Incorrect phone number</span>
             </div>
         </div>
 
