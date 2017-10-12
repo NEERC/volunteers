@@ -70,7 +70,21 @@
                             </div>
                         </td>
                         <td th:text="${user.userYear.suggestions}"></td>
-                        <td></td>
+                        <td>
+                            <div class="dropdown" th:each="year:${exp.get(user).keySet()}">
+                                <button class="btn btn-link dropdown-toggle" type="button" data-toggle="dropdown">
+                                    <th:block th:text="${year.name}"></th:block>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li th:each="pair:${exp.get(user).get(year)}">
+                                        <label th:text="${pair.getKey().name}+': '+${pair.getValue().name}"></label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <label th:if="${exp.get(user).keySet().isEmpty()}"
+                                   th:text="#{volunteers.day.exp.noExp}"></label>
+                        </td>
                         <td>
                             <select class="form-control" th:name="p+${user.id}"
                                     th:onchange="'savePosition('+${user.id}+', this.value);'"
