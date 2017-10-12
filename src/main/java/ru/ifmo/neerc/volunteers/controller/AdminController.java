@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
 import org.thymeleaf.util.StringUtils;
+import ru.ifmo.neerc.dev.Pair;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.HallForm;
 import ru.ifmo.neerc.volunteers.form.MailForm;
@@ -370,6 +371,12 @@ public class AdminController {
         utils.setModelForAdmin(model, user);
         model.addAttribute("day", day);
         model.addAttribute("users", day.getUsers());
+        final Map<UserDay, Map<Year, Set<Pair<Hall, PositionValue>>>> exp = day.getUsers().stream().collect(Collectors.toMap(Function.identity(),
+                u -> u.getUserYear().getUser().getApplicationForms().stream().
+                        filter(uy -> !uy.getYear().equals(user.getYear())).
+                        collect(Collectors.toMap(ApplicationForm::getYear,
+                                uy -> uy.getUserDays().stream().map(ud -> new Pair<>(ud.getHall(), ud.getPosition())).collect(Collectors.toSet())))));
+        model.addAttribute("exp", exp);
         return "day";
     }
 
