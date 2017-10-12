@@ -269,7 +269,7 @@ public class AdminController {
         userService.setUserYear(user, year);
         utils.setModelForAdmin(model, user);
         final Set<ApplicationForm> users = year.getUsers();
-        model.addAttribute("users", users.stream().map(ApplicationForm::getUser).collect(Collectors.toList()));
+        model.addAttribute("users", users);
         /*if (!model.containsAttribute("day")) {
             Day day = new Day();
             day.setYear(year);

@@ -11,12 +11,14 @@
         <th th:text="#{volunteers.contacts.badgeName}">Badge name</th>
         <th th:text="#{volunteers.contacts.email}">Email</th>
         <th th:text="#{volunteers.contacts.phone}">Phone</th>
+        <th th:text="#{volunteers.contacts.group}">Group</th>
         </thead>
         <tbody>
         <tr th:each="user : ${users}">
-            <td th:text="${user.badgeName}"></td>
-            <td th:text="${user.confirmed}?${user.email}:${user.oldEmail}"></td>
-            <td th:text="${user.phone}"></td>
+            <td th:text="${user.user.badgeName}"></td>
+            <td th:text="${user.user.confirmed}?${user.user.email}:${user.user.oldEmail}"></td>
+            <td th:text="${user.user.phone}"></td>
+            <th th:text="${user.group}"></th>
         </tr>
         </tbody>
     </table>
