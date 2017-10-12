@@ -133,20 +133,24 @@
             $(function () {
                 $.validator.addMethod("regex", function (value, element, regexpr) {
                     return regexpr.test(value);
-                }, "Please enter a valid pasword.");
+                });
                 $('#signUpForm').validate({
                     rules: {
                         firstName: {
-                            required: true
+                            required: true,
+                            regex: /[a-zA-Z ,.'-]+/
                         },
                         lastName: {
-                            required: true
+                            required: true,
+                            regex: /[a-zA-Z ,.'-]+/
                         },
                         firstNameCyr: {
-                            required: true
+                            required: true,
+                            regex: /[а-яА-ЯёЁ -]+/
                         },
                         lastNameCyr: {
-                            required: true
+                            required: true,
+                            regex: /[а-яА-ЯёЁ -]+/
                         },
                         email: {
                             required: true,
@@ -166,17 +170,29 @@
                         }
                     },
                     messages: {
-                        firstName: /*[[#{volunteers.form.signUp.firstName.error.empty}]]*/"",
-                        lastName: /*[[#{volunteers.form.signUp.lastName.error.empty}]]*/"",
-                        firstNameCyr: /*[[#{volunteers.form.signUp.firstNameCyr.error.empty}]]*/"",
-                        lastNameCyr: /*[[#{volunteers.form.signUp.lastNameCyr.error.empty}]]*/"",
+                        firstName: {
+                            required: /*[[#{volunteers.form.signUp.firstName.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.firstName.error.invalid}]]*/""
+                        },
+                        lastName: {
+                            required: /*[[#{volunteers.form.signUp.lastName.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.lastName.error.invalid}]]*/""
+                        },
+                        firstNameCyr: {
+                            required: /*[[#{volunteers.form.signUp.firstNameCyr.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.firstNameCyr.error.invalid}]]*/""
+                        },
+                        lastNameCyr: {
+                            required: /*[[#{volunteers.form.signUp.lastNameCyr.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.lastNameCyr.error.invalid}]]*/""
+                        },
                         email: {
                             required: /*[[#{volunteers.form.signUp.lastName.error.empty}]]*/"",
                             email: /*[[#{volunteers.form.signUp.email.error.invalid}]]*/""
                         },
                         phone: {
                             required: /*[[#{volunteers.form.signUp.phone.error.empty}]]*/"",
-                            matches: /*[[#{volunteers.form.signUp.phone.error.invalid}]]*/""
+                            regex: /*[[#{volunteers.form.signUp.phone.error.invalid}]]*/""
                         },
                         password: {
                             required: /*[[#{volunteers.form.signUp.password.error.empty}]]*/"",

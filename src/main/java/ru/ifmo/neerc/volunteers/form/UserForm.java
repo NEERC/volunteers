@@ -16,15 +16,19 @@ import javax.validation.constraints.Pattern;
 public class UserForm {
 
     @NotEmpty
+    @Pattern(regexp = "[a-zA-Z ,.'-]+")
     private String firstName;
 
     @NotEmpty
+    @Pattern(regexp = "[a-zA-Z ,.'-]+")
     private String lastName;
 
     @NotEmpty
+    @Pattern(regexp = "[а-яА-ЯёЁ -]+")
     private String firstNameCyr;
 
     @NotEmpty
+    @Pattern(regexp = "[а-яА-ЯёЁ -]+")
     private String lastNameCyr;
 
     @NotEmpty
