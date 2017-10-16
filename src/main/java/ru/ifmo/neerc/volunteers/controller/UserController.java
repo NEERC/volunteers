@@ -141,8 +141,9 @@ public class UserController {
         } else {
             userService.changeEmail(user, emailForm, authentication);
             emailService.sendSimpleMessage(userService.constructConfirmEmail(user, utils.getAppUrl(request), locale));
+            attributes.addFlashAttribute("isEmailChanged", true);
         }
-        return "redirect:/";
+        return "redirect:/user/profile";
     }
 
     @GetMapping("/day/{id}")
@@ -163,6 +164,10 @@ public class UserController {
         if (!model.containsAttribute("profile")) {
             User user = userRepository.findByEmailIgnoreCase(authentication.getName());
             model.addAttribute("profile", new UserProfileForm(user));
+        }
+        if (!model.containsAttribute("emailForm")) {
+            User user = userRepository.findByEmailIgnoreCase(authentication.getName());
+            model.addAttribute("emailForm", new EmailForm(user.getEmail()));
         }
         return "profile";
     }

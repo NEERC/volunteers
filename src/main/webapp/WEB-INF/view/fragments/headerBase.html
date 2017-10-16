@@ -16,9 +16,6 @@
         <div class="navbar-collapse collapse">
 
             <ul class="nav navbar-nav navbar-right" th:if="${currentUser != null}">
-                <li th:if="${emailForm!=null}">
-                    <a class="navbar-link" href="#" data-toggle="modal" data-target="#emailModal">Change email</a>
-                </li>
                 <li><a class="navbar-link" th:href="@{/user/profile}" th:text="${currentUser.badgeName}">User Name</a></li>
                 <li>
                     <form th:action="@{/logout}" method="post">

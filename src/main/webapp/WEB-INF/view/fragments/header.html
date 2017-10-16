@@ -84,9 +84,6 @@
                 </th:block>
             </ul>
             <ul class="nav navbar-nav navbar-right" th:if="${currentUser != null}">
-                <li th:if="${emailForm!=null}">
-                    <a class="navbar-link" href="#" data-toggle="modal" data-target="#emailModal">Change email</a>
-                </li>
                 <li><a class="navbar-link" th:href="@{/user/profile}" th:text="${currentUser.badgeName}">User Name</a></li>
                 <li>
                     <form th:action="@{/logout}" method="post">
@@ -97,67 +94,6 @@
                 </li>
             </ul>
         </div>
-
-        <div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailLabel"
-             th:if="${emailForm!=null}">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <form method="post" th:action="@{/user/email}" th:object="${emailForm}" id="emailForm">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="emailLabel" th:text="#{volunteers.form.email.header}">Change
-                                email</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group"
-                                 th:class="${#fields.hasErrors('email')} or ${#fields.hasErrors('emailExist')}? 'has-error form-group' : 'form-group'">
-                                <label for="eventName" th:text="#{volunteers.form.email.email}">Email</label>
-                                <input type="email" class="form-control" id="eventName" th:field="*{email}"/>
-                                <span class="help-block" th:if="${#fields.hasErrors('email')}"
-                                      th:text="#{volunteers.form.email.email.error}"></span>
-                                <span class="help-block" th:if="${#fields.hasErrors('emailExist')}"
-                                      th:text="#{volunteers.form.signUp.email.error.exist}"></span>
-                            </div>
-
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal"
-                                    th:text="#{volunteers.form.button.close}">Close
-                            </button>
-                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.change}">
-                                Change
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <script th:inline="javascript">
-            $(function () {
-                $('#emailForm').validate({
-                    rules: {
-                        email: {
-                            required: true,
-                            email: true
-                        }
-                    },
-                    messages: {
-                        email: /*[[#{volunteers.form.email.email.error}]]*/""
-                    },
-                    errorElement: 'span',
-                    errorClass: 'help-block',
-                    highlight: function (element) {
-                        $(element).closest('.form-group').addClass('has-error');
-                    },
-                    unhightlight: function (element) {
-                        $(element).closest('.form-group').removeClass('has-error');
-                    }
-                });
-            });
-        </script>
-
     </div>
 </nav>
 </body>
