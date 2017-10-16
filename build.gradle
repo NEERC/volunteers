@@ -73,6 +73,7 @@ task copyjs(type:Sync) {
 	from 'node_modules/'
 	into "src/main/webapp/components"
 	include '**/*.min.js'
+	include '**/jquery.dataTables.js'
 	eachFile {
 		details -> details.setRelativePath new RelativePath(true, details.name)
 	}
@@ -128,5 +129,5 @@ task generateDataSql(type:JavaExec) {
 	main = "ru.ifmo.neerc.dev.DataGenerator"
 	classpath = sourceSets.main.runtimeClasspath
 
-	args "data.sql"
+	args 'data.sql'
 }

@@ -8,7 +8,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5Dialect
   datasource:
-    url: jdbc:mysql://localhost:3306/volunteers?useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://localhost:3306/volunteers?useUnicoder=true&characterEncoding=utf8
     username: root
     password: root
     driver-class-name: com.mysql.jdbc.Driver
