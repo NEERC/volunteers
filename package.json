@@ -8,6 +8,7 @@
     "jquery": "latest",
     "jquery-validation": "latest",
     "jquery-mask-plugin": "latest",
+    "datatables.net-dt": "latest",
     "bootstrap-select": "latest",
     "ckeditor": "latest"
   }
