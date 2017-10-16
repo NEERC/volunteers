@@ -46,7 +46,7 @@
                 <input type="text" class="form-control"
                        th:placeholder="#{volunteers.day.search}+' '+#{volunteers.day.volunteer}"/>
             </th>
-            <th class="col-md-2">
+            <th class="col-md-1">
                 <label th:text="#{volunteers.day.positions.wish}">Positions desired</label>
                 <input type="text" class="form-control"
                        th:placeholder="#{volunteers.day.search}+' '+#{volunteers.day.positions.wish}"/>
@@ -57,7 +57,7 @@
                        th:placeholder="#{volunteers.day.search}+' '+#{volunteers.day.comments}"/>
 
             </th>
-            <th th:text="#{volunteers.day.experience}" class="col-md-2">
+            <th th:text="#{volunteers.day.experience}" class="col-md-3">
                 Experience
             </th>
             <th th:text="#{volunteers.day.position}" class="col-md-2">
@@ -81,17 +81,16 @@
                     </td>
                     <td th:text="${user.userYear.suggestions}"></td>
                     <td>
-                        <div class="dropdown" th:each="year:${exp.get(user).keySet()}">
-                            <button class="btn btn-link dropdown-toggle" type="button" data-toggle="dropdown">
-                                <th:block th:text="${year.name}"></th:block>
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li th:each="pair:${exp.get(user).get(year)}">
-                                    <label th:text="${pair.getKey().name}+': '+${pair.getValue().name}"></label>
-                                </li>
-                            </ul>
-                        </div>
+                        <ul class="list-group">
+                            <li th:each="year:${exp.get(user).keySet()}" class="list-group-item">
+                                <label th:text="${year.name}"></label>
+                                <ul class="list-group">
+                                    <li th:each="pair:${exp.get(user).get(year)}" class="list-group-item">
+                                        <label th:text="${pair.getKey().name}+': '+${pair.getValue().name}"></label>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
                         <label th:if="${exp.get(user).keySet().isEmpty()}"
                                th:text="#{volunteers.day.exp.noExp}"></label>
                     </td>
