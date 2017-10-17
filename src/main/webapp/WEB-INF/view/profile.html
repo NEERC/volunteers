@@ -124,6 +124,8 @@
                   class="form-horizontal col-sm-offset-3 col-sm-6" id="emailForm">
                 <div th:if="${isEmailChanged}" th:text="#{volunteers.form.email.changed}"
                      class="alert alert-success" role="alert">Email changed</div>
+                <div th:if="${isConfirmationSent}" th:text="#{volunteers.email.confirm.emailSent}"
+                     class="alert alert-success" role="alert">Confirmation email sent</div>
 
                 <h2 class="col-sm-offset-4" th:text="#{volunteers.form.email.header}">Email</h2>
 

@@ -165,6 +165,10 @@
     </form>
     <h2 class="col-sm-offset-4" th:if="${isUser} and ${!year.openForRegistration} and ${isConfirmed}"
         th:text="#{volunteers.form.yearSignUp.finish}">Registration is finished</h2>
+
+    <div th:if="${isUser} and ${year.openForRegistration} and ${!isConfirmed} and ${isConfirmationSent}"
+         th:text="#{volunteers.email.confirm.emailSent}"
+         class="alert alert-success" role="alert">Confirmation email sent</div>
     <h2 class="col-sm-offset-4" th:if="${isUser} and ${year.openForRegistration} and ${!isConfirmed}">
         <span th:text="#{volunteers.email.confirm.reqest}"></span>
         <a th:href="@{/user/confirm/}" class="" th:text="#{volunteers.email.confirm.link}"> send email again</a>
