@@ -63,7 +63,7 @@
                     <span class="help-block" th:if="${#fields.hasErrors('email')}"
                           th:text="#{volunteers.form.signUp.email.error.empty}">Can't be empty</span>
                     <span class="help-block" th:if="${#fields.hasErrors('emailExist')}"
-                          th:text="#{volunteers.form.signUp.email.error.exist}">This email already exist</span>
+                          th:text="#{volunteers.form.signUp.email.error.exist}">This email is already in use</span>
                 </div>
             </div>
             <div class="form-group" th:class="(${#fields.hasErrors('phone')})? 'has-error form-group':'form-group'">

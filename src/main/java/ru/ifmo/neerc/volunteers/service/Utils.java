@@ -7,7 +7,6 @@ import ru.ifmo.neerc.volunteers.entity.Day;
 import ru.ifmo.neerc.volunteers.entity.Role;
 import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
-import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.form.HallForm;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
 import ru.ifmo.neerc.volunteers.repository.RoleRepository;
@@ -47,9 +46,6 @@ public class Utils {
             model.addAttribute("days", Collections.EMPTY_LIST);
             model.addAttribute("positions", Collections.EMPTY_LIST);
             model.addAttribute("halls", Collections.EMPTY_LIST);
-        }
-        if (!model.containsAttribute("emailForm") && user != null) {
-            model.addAttribute("emailForm", new EmailForm(user.getEmail()));
         }
     }
 
