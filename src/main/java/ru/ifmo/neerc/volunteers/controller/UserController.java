@@ -118,14 +118,15 @@ public class UserController {
     }
 
     @GetMapping("/user/confirm")
-    public String sendConfirmEmail(final Authentication authentication, final HttpServletRequest request) throws MessagingException {
+    public String sendConfirmEmail(final Authentication authentication, final RedirectAttributes attributes, final HttpServletRequest request) throws MessagingException {
         emailService.sendSimpleMessage(
                 userService.constructConfirmEmail(
                         userService.getUserByAuthentication(authentication),
                         utils.getAppUrl(request), locale
                 )
         );
-        return "redirect:/";
+        attributes.addFlashAttribute("isConfirmationSent", true);
+        return "redirect:" + Optional.ofNullable(request.getHeader("Referer")).orElse("/");
     }
 
     @PostMapping("/user/email")
