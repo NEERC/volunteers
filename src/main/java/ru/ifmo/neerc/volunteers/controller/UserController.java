@@ -161,12 +161,16 @@ public class UserController {
 
     @GetMapping("/user/profile")
     public String profile(Model model, Authentication authentication) {
+        User user = userService.getUserByAuthentication(authentication);
+        if (AuthorityUtils.authorityListToSet(user.getAuthorities()).contains("ROLE_ADMIN")) {
+            utils.setModelForAdmin(model, user);
+        } else {
+            utils.setModelForUser(model, user);
+        }
         if (!model.containsAttribute("profile")) {
-            User user = userRepository.findByEmailIgnoreCase(authentication.getName());
             model.addAttribute("profile", new UserProfileForm(user));
         }
         if (!model.containsAttribute("emailForm")) {
-            User user = userRepository.findByEmailIgnoreCase(authentication.getName());
             model.addAttribute("emailForm", new EmailForm(user.getEmail()));
         }
         return "profile";
