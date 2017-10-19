@@ -73,7 +73,7 @@
             <th:block th:each="user:${users}">
 
                 <tr>
-                    <td th:text="${user.userYear.user.badgeName}"></td>
+                    <td th:text="${user.userYear.user.badgeName}+' ('+${user.userYear.group}+')'"></td>
                     <td class="list-group">
                         <span th:each="position:${user.userYear.positions}" class="list-group-item"
                               th:text="${position.name}"></span>
