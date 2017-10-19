@@ -8,7 +8,7 @@
 <div th:fragment="content" class="col-md-8">
     <form action="#" th:action="@{'/year/'+${year.id}+'/signup/'}" method="post" th:object="${applicationForm}"
           th:if="${isUser} and ${year.openForRegistration} and ${isConfirmed}"
-          class="form-horizonatal col-sm-offset-2 col-sm-8" id="signUpForm">
+          class="form-horizontal col-sm-offset-2 col-sm-8" id="signUpForm">
         <link rel="stylesheet" type="text/css" media="screen"
               href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css"/>
         <script src="../../components/bootstrap-select.min.js" th:src="@{/components/bootstrap-select.min.js}"></script>
@@ -61,8 +61,9 @@
                       th:text="#{volunteers.form.signUp.lastNameCyr.error.invalid}">Не может быть пустым</span>
             </div>
         </div>
+
         <div class="form-group"
-             th:class="(${#fields.hasErrors('email')} or ${#fields.hasErrors('emailCorrect')}) ? 'has-error form-group' : 'form-group'">
+             th:classappend="${#fields.hasErrors('email') || #fields.hasErrors('emailCorrect')} ? 'has-error'">
             <label for="inputEmail" class="col-sm-4 control-label"
                    th:text="#{volunteers.form.signUp.email}">Email</label>
             <div class="col-sm-8">
@@ -70,9 +71,12 @@
                        placeholder="Email" th:placeholder="#{volunteers.form.signUp.email}" disabled="disabled"/>
                 <span class="help-block" th:if="${#fields.hasErrors('email')}"
                       th:text="#{volunteers.form.signUp.email.error.empty}">Can't be empty</span>
-                <input type="checkbox" th:field="*{emailCorrect}" id="emailCorrect" value="true"/>
-                <label for="emailCorrect" th:text="#{volunteers.form.yearSignUp.emailCorrect}" class="control-label">Correct
-                    email</label>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" th:field="*{emailCorrect}" id="emailCorrect" value="true" />
+                        <span th:text="#{volunteers.form.yearSignUp.emailCorrect}" th:remove="tag">Email is correct</span>
+                    </label>
+                </div>
                 <span class="help-block" th:if="${#fields.hasErrors('emailCorrect')}"
                       th:text="#{volunteers.form.yearSignUp.emailCorrect.error}"></span>
             </div>
@@ -103,8 +107,8 @@
         </div>
 
         <div class="form-group" th:classappend="${#fields.hasErrors('positions')} ? 'has-error'">
-            <label class="control-label col-sm-4" th:text="#{volunteers.form.yearSignUp.positions}">Positions
-                Desired</label>
+            <label class="control-label col-sm-4" th:utext="#{volunteers.form.yearSignUp.positions}">Positions
+                desired</label>
 
             <div class="col-sm-8">
                 <!--<div class="list-group">
@@ -127,16 +131,20 @@
         </div>
 
         <div class="form-group">
-            <label for="suggestionsTextArea" th:text="#{volunteers.form.yearSignUp.comments}">Comments</label>
+            <label for="suggestionsTextArea" th:utext="#{volunteers.form.yearSignUp.comments}">Comments, additional wishes</label>
 
             <textarea th:field="*{suggestions}" class="form-control" rows="3" id="suggestionsTextArea"></textarea>
         </div>
 
         <div class="form-group" th:classappend="${#fields.hasErrors('agree')} ? 'has-error'">
-            <label class="control-label" th:text="#{volunteers.form.yearSignUp.agree}" for="agree">I agree</label>
-            <input type="checkbox" th:value="true" th:field="*{agree}" id="agree"/>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" th:value="true" th:field="*{agree}" id="agree"/>
+                    <span th:utext="#{volunteers.form.yearSignUp.agree}" th:remove="tag"></span>
+                </label>
+            </div>
             <span class="help-block" th:if="${#fields.hasErrors('agree')}"
-                  th:text="#{volunteers.form.yearSignUp.agree.error}">You should be agree</span>
+                  th:text="#{volunteers.form.yearSignUp.agree.error}">You should agree</span>
         </div>
 
         <div class="form-group">
@@ -157,6 +165,10 @@
     </form>
     <h2 class="col-sm-offset-4" th:if="${isUser} and ${!year.openForRegistration} and ${isConfirmed}"
         th:text="#{volunteers.form.yearSignUp.finish}">Registration is finished</h2>
+
+    <div th:if="${isUser} and ${year.openForRegistration} and ${!isConfirmed} and ${isConfirmationSent}"
+         th:text="#{volunteers.email.confirm.emailSent}"
+         class="alert alert-success" role="alert">Confirmation email sent</div>
     <h2 class="col-sm-offset-4" th:if="${isUser} and ${year.openForRegistration} and ${!isConfirmed}">
         <span th:text="#{volunteers.email.confirm.reqest}"></span>
         <a th:href="@{/user/confirm/}" class="" th:text="#{volunteers.email.confirm.link}"> send email again</a>

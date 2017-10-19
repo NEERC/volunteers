@@ -181,7 +181,8 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByEmailIgnoreCase(emailForm.getEmail()) != null) {
             return;
         }
-        user.setOldEmail(user.getEmail());
+        if (user.isConfirmed())
+            user.setOldEmail(user.getEmail());
         user.setEmail(emailForm.getEmail());
         user.setConfirmed(false);
         userRepository.save(user);
