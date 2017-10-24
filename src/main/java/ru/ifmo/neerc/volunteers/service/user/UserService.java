@@ -1,6 +1,5 @@
 package ru.ifmo.neerc.volunteers.service.user;
 
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.core.Authentication;
 import ru.ifmo.neerc.volunteers.entity.ResetPasswordToken;
 import ru.ifmo.neerc.volunteers.entity.User;
@@ -9,6 +8,8 @@ import ru.ifmo.neerc.volunteers.form.ChangePasswordForm;
 import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.form.UserForm;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -31,9 +32,9 @@ public interface UserService {
 
     Optional<String> validateResetPasswordToken(final long userId, final String token, final String hash);
 
-    SimpleMailMessage constructResetTokenEmail(final String contextPath, final Locale locale, final ResetPasswordToken token);
+    MimeMessage constructResetTokenEmail(final String contextPath, final Locale locale, final ResetPasswordToken token) throws MessagingException;
 
-    SimpleMailMessage constructConfirmEmail(final User user, String contextPath, Locale locale);
+    MimeMessage constructConfirmEmail(final User user, String contextPath, Locale locale) throws MessagingException;
 
     void confirmEmail(final User user, final String email);
 

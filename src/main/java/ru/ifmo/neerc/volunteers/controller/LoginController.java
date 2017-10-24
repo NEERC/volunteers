@@ -18,6 +18,7 @@ import ru.ifmo.neerc.volunteers.service.Utils;
 import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -45,10 +46,9 @@ public class LoginController {
                         @RequestParam(value = "reset", required = false) final String reset,
                         final Model model) {
 
-        if (error != null) {
-            model.addAttribute("error", "");
-            model.addAttribute("resetPasswordForm", new EmailForm());
-        }
+        model.addAttribute("error", error);
+        model.addAttribute("resetPasswordForm", new EmailForm());
+
         /*if (logout != null) {
             model.addAttribute("message", "");
         }*/
@@ -60,7 +60,7 @@ public class LoginController {
 
     @PostMapping("/reset-password/")
     public @ResponseBody
-    JsonResponse<String> resetPassword(@Valid @ModelAttribute("resetPasswordForm") final EmailForm form, final BindingResult result, final HttpServletRequest request, final Locale locale) {
+    JsonResponse<String> resetPassword(@Valid @ModelAttribute("resetPasswordForm") final EmailForm form, final BindingResult result, final HttpServletRequest request, final Locale locale) throws MessagingException {
         JsonResponse<String> response = new JsonResponse<>();
         if (result.hasErrors()) {
             response.setStatus(Status.FAIL);
@@ -107,7 +107,7 @@ public class LoginController {
     @GetMapping(value = "/confirm")
     public String confirmEmail(@RequestParam("id") final long id, @RequestParam("email") final String email, HttpServletResponse resp) throws IOException {
         User user = userRepository.findOne(id);
-        if (user ==null) {
+        if (user == null) {
             log.warn("User with id={} is not found", id);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return null;

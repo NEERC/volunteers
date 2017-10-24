@@ -14,6 +14,7 @@ import ru.ifmo.neerc.volunteers.entity.Day;
 import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
 import ru.ifmo.neerc.volunteers.form.EmailForm;
+import ru.ifmo.neerc.volunteers.form.UserProfileForm;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
 import ru.ifmo.neerc.volunteers.repository.DayRepository;
 import ru.ifmo.neerc.volunteers.repository.UserRepository;
@@ -24,6 +25,7 @@ import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 import ru.ifmo.neerc.volunteers.service.year.YearService;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Locale;
@@ -116,18 +118,19 @@ public class UserController {
     }
 
     @GetMapping("/user/confirm")
-    public String sendConfirmEmail(final Authentication authentication, final HttpServletRequest request) {
+    public String sendConfirmEmail(final Authentication authentication, final RedirectAttributes attributes, final HttpServletRequest request) throws MessagingException {
         emailService.sendSimpleMessage(
                 userService.constructConfirmEmail(
                         userService.getUserByAuthentication(authentication),
                         utils.getAppUrl(request), locale
                 )
         );
-        return "redirect:/";
+        attributes.addFlashAttribute("isConfirmationSent", true);
+        return "redirect:" + Optional.ofNullable(request.getHeader("Referer")).orElse("/");
     }
 
     @PostMapping("/user/email")
-    public String changeEmail(@Valid @ModelAttribute("emailForm") final EmailForm emailForm, final BindingResult result, final Authentication authentication, final RedirectAttributes attributes, final HttpServletRequest request) {
+    public String changeEmail(@Valid @ModelAttribute("emailForm") final EmailForm emailForm, final BindingResult result, final Authentication authentication, final RedirectAttributes attributes, final HttpServletRequest request) throws MessagingException {
         User user = userService.getUserByAuthentication(authentication);
         if (userRepository.findByEmailIgnoreCase(emailForm.getEmail()) != null &&
                 !user.getEmail().equals(emailForm.getEmail())) {
@@ -139,8 +142,9 @@ public class UserController {
         } else {
             userService.changeEmail(user, emailForm, authentication);
             emailService.sendSimpleMessage(userService.constructConfirmEmail(user, utils.getAppUrl(request), locale));
+            attributes.addFlashAttribute("isEmailChanged", true);
         }
-        return "redirect:/";
+        return "redirect:/user/profile";
     }
 
     @GetMapping("/day/{id}")
@@ -154,5 +158,39 @@ public class UserController {
         model.addAttribute("halls", user.getYear().getHalls());
         model.addAttribute("title", day.getName());
         return "showEvent";
+    }
+
+    @GetMapping("/user/profile")
+    public String profile(Model model, Authentication authentication) {
+        User user = userService.getUserByAuthentication(authentication);
+        if (AuthorityUtils.authorityListToSet(user.getAuthorities()).contains("ROLE_ADMIN")) {
+            utils.setModelForAdmin(model, user);
+        } else {
+            utils.setModelForUser(model, user);
+        }
+        if (!model.containsAttribute("profile")) {
+            model.addAttribute("profile", new UserProfileForm(user));
+        }
+        if (!model.containsAttribute("emailForm")) {
+            model.addAttribute("emailForm", new EmailForm(user.getEmail()));
+        }
+        return "profile";
+    }
+
+    @PostMapping("/user/profile")
+    public String updateProfile(@Valid @ModelAttribute("profile") UserProfileForm profile, BindingResult result, RedirectAttributes attributes, Authentication authentication) {
+        profile.setBadgeName(profile.getFirstName() + " " + profile.getLastName());
+        profile.setBadgeNameCyr(profile.getFirstNameCyr() + " " + profile.getLastNameCyr());
+        if (result.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.profile", result);
+            attributes.addFlashAttribute("profile", profile);
+        } else {
+            User user = userRepository.findByEmailIgnoreCase(authentication.getName());
+            user.updateProfile(profile);
+            userRepository.save(user);
+            attributes.addFlashAttribute("isProfileUpdated", true);
+        }
+
+        return "redirect:/user/profile";
     }
 }

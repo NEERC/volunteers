@@ -15,17 +15,21 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
 import org.thymeleaf.util.StringUtils;
+import ru.ifmo.neerc.dev.Pair;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.HallForm;
+import ru.ifmo.neerc.volunteers.form.MailForm;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
 import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.*;
 import ru.ifmo.neerc.volunteers.service.Utils;
 import ru.ifmo.neerc.volunteers.service.day.DayService;
+import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 import ru.ifmo.neerc.volunteers.service.year.YearService;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
@@ -56,7 +60,7 @@ public class AdminController {
     private final ApplicationFormRepository applicationFormRepository;
     private final MessageSource messageSource;
     private final Locale locale = LocaleContextHolder.getLocale();
-    //private final ServletContext context;
+    private final EmailService emailService;
 
     private final UserService userService;
     private final YearService yearService;
@@ -237,28 +241,6 @@ public class AdminController {
         }
         year.setOpenForRegistration(false);
         yearRepository.save(year);
-        /*if (yearOld != null) {
-            final Set<PositionValue> positionValuesOld = yearOld.getPositionValues();
-            final Map<Long, Double> positionValueMap = new HashMap<>();
-            for (final PositionValue positionValue : positionValuesOld) {
-                positionValueMap.put(positionValue.getId(), positionValue.getValue());
-            }
-
-            final Set<PositionValue> positionValues = new HashSet<>();
-            for (final Position position : positions) {
-                if (positionValueMap.containsKey(position.getId())) {
-                    final PositionValue positionValue = new PositionValue(position, year, positionValueMap.get(position.getId()));
-                    positionValues.add(positionValue);
-                }
-            }
-            positionValueRepository.save(positionValues);
-        } else {
-            final Set<PositionValue> positionValues = new HashSet<>();
-            for (final Position position : positions) {
-                positionValues.add(new PositionValue(position, year, 0));
-            }
-            positionValueRepository.save(positionValues);
-        }*/
         return "redirect:/admin/year/" + year.getId();
     }
 
@@ -287,7 +269,7 @@ public class AdminController {
         userService.setUserYear(user, year);
         utils.setModelForAdmin(model, user);
         final Set<ApplicationForm> users = year.getUsers();
-        model.addAttribute("users", users.stream().map(ApplicationForm::getUser).collect(Collectors.toList()));
+        model.addAttribute("users", users);
         /*if (!model.containsAttribute("day")) {
             Day day = new Day();
             day.setYear(year);
@@ -362,33 +344,10 @@ public class AdminController {
         final Year year = user.getYear();
         final Day currentDay = dayRepository.findOne(id);
         utils.setModelForAdmin(model, user);
-        /*final Set<ApplicationForm> yearUsers = new HashSet<>(year.getUsers());
-        yearUsers.removeAll(currentDay.getUsers().stream().map(UserDay::getUserYear).collect(Collectors.toSet()));
-        final Hall reserve = yearService.findOrCreateDefaultHall(year, locale);
-
-        final PositionValue defaultPosition = yearService.findOrCreateDefaultPosition(year,locale);
-
-        userEventRepository.save(yearUsers.stream().map(af -> {
-            final UserDay ue = new UserDay();
-            ue.setUserYear(af);
-            ue.setHall(reserve);
-            ue.setPosition(defaultPosition);
-            currentDay.addUser(ue);
-            return ue;
-        }).collect(Collectors.toList()));
-
-        final Day day = dayRepository.save(currentDay);
-
-        final HashMap<Hall, List<UserDay>> hallUser = new HashMap<>(
-                day.getUsers().stream().collect(Collectors.groupingBy(UserDay::getHall)));
-        hallUser.forEach((u, v) -> v.sort(Comparator.comparing(lst -> lst.getPosition().getName())));*/
 
         final HashMap<Hall, List<UserDay>> hallUser = dayService.getHallUser(currentDay, locale);
 
         final Set<Hall> halls = year.getHalls();
-        /*hallUser.putAll(halls.stream()
-                .filter(h -> !hallUser.containsKey(h))
-                .collect(Collectors.toMap(Function.identity(), hall -> new ArrayList<>())));*/
 
         model.addAttribute("hallUser", hallUser);
         model.addAttribute("day", currentDay);
@@ -412,6 +371,12 @@ public class AdminController {
         utils.setModelForAdmin(model, user);
         model.addAttribute("day", day);
         model.addAttribute("users", day.getUsers());
+        final Map<UserDay, Map<Year, Set<Pair<Hall, PositionValue>>>> exp = day.getUsers().stream().collect(Collectors.toMap(Function.identity(),
+                u -> u.getUserYear().getUser().getApplicationForms().stream().
+                        filter(uy -> !uy.getYear().equals(user.getYear())).
+                        collect(Collectors.toMap(ApplicationForm::getYear,
+                                uy -> uy.getUserDays().stream().map(ud -> new Pair<>(ud.getHall(), ud.getPosition())).collect(Collectors.toSet())))));
+        model.addAttribute("exp", exp);
         return "day";
     }
 
@@ -549,18 +514,6 @@ public class AdminController {
             return response;
         }
     }
-
-    /*@PostMapping("/day/assessments/add")
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addAttendance(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, final RedirectAttributes attributes, final HttpServletRequest request) {
-        if (result.hasErrors()) {
-            attributes.addFlashAttribute("org.springframework.validation.BindingResult.newAssessment", result);
-            attributes.addFlashAttribute("newAssessment", assessment);
-        } else {
-            userEventAssessmentRepository.save(assessment);
-        }
-        return "redirect:/admin/day/assessments?id=" + request.getParameter("day");
-    }*/
 
     @PostMapping("/day/attendance")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -760,5 +713,27 @@ public class AdminController {
         yearRepository.save(year);
         response.setStatus(Status.OK);
         return response;
+    }
+
+    @GetMapping("/email")
+    public String sendEmail(final Model model, final Authentication authentication) {
+        User user = userService.getUserByAuthentication(authentication);
+        utils.setModelForAdmin(model, user);
+        model.addAttribute("mailform", new MailForm());
+        return "email";
+    }
+
+    @PostMapping("/email")
+    public String sendEmail(@Valid @ModelAttribute("mailform") final MailForm mailForm, final BindingResult result, Authentication authentication, final Model model) throws MessagingException {
+        User user = userService.getUserByAuthentication(authentication);
+        if (result.hasErrors()) {
+            utils.setModelForAdmin(model, user);
+            model.addAttribute("mailform", mailForm);
+            return "email";
+        }
+        emailService.sendSimpleMessage(emailService.constructEmail(mailForm.getSubject(), mailForm.getBody(),
+                user.getYear().getUsers().stream().map(ApplicationForm::getUser).toArray(User[]::new)));
+        model.addAttribute("result", "ok");
+        return "redirect:/admin/year/" + user.getYear().getId();
     }
 }

@@ -2312,3 +2312,7 @@ a.mytooltip:hover span {
   border: 1px solid #cccccc;
   color: #6c6c6c;
 }
+
+.dataTables_filter, .dataTables_info {
+  display: none;
+}
