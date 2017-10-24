@@ -2221,98 +2221,25 @@ body { /* Margin bottom by footer height */ margin-bottom: 60px; }
 
 .has-error .list-group-item { border-color: #a94442; }
 
-.show-grid {  margin-bottom: 15px; }
+table.table > thead > tr > th { vertical-align: top; }
+table.table > thead > tr > th:hover { color: #0000bb; }
+table.table > thead > tr > th:hover label { cursor: pointer; }
 
-.material-switch > input[type="checkbox"] {
-  display: none;
-}
+.show-grid { margin-bottom: 15px; }
 
-.material-switch > label {
-  cursor: pointer;
-  height: 0px;
-  position: relative;
-  width: 40px;
-}
+.material-switch > input[type="checkbox"] { display: none; }
+.material-switch > input[type="checkbox"]:checked + label::before { background: inherit; opacity: 0.5; }
+.material-switch > input[type="checkbox"]:checked + label::after { background: inherit; left: 20px; }
+.material-switch > label { cursor: pointer; height: 0px; position: relative; width: 40px; }
+.material-switch > label::before { background: black; box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5); border-radius: 8px; content: ''; height: 16px; margin-top: -8px; position: absolute; opacity: 0.3; transition: all 0.4s ease-in-out; width: 40px; }
+.material-switch > label::after { background: white; border-radius: 16px; box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3); content: ''; height: 24px; left: -4px; margin-top: -8px; position: absolute; top: -4px; transition: all 0.3s ease-in-out; width: 24px; }
 
-.material-switch > label::before {
-  background: rgb(0, 0, 0);
-  box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-  border-radius: 8px;
-  content: '';
-  height: 16px;
-  margin-top: -8px;
-  position: absolute;
-  opacity: 0.3;
-  transition: all 0.4s ease-in-out;
-  width: 40px;
-}
+.list-group-horizontal .list-group-item { display: inline-block; margin-bottom: 0; margin-left: -4px; margin-right: 0; border-right-width: 0; }
+.list-group-horizontal .list-group-item:first-child { border-top-right-radius: 0; border-bottom-left-radius: 4px; }
+.list-group-horizontal .list-group-item:last-child { border-top-right-radius: 4px; border-bottom-left-radius: 0; border-right-width: 1px; }
 
-.material-switch > label::after {
-  background: rgb(255, 255, 255);
-  border-radius: 16px;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-  content: '';
-  height: 24px;
-  left: -4px;
-  margin-top: -8px;
-  position: absolute;
-  top: -4px;
-  transition: all 0.3s ease-in-out;
-  width: 24px;
-}
+a:hover { background: #ffffff; /*необходимо для IE6*/ text-decoration: none; }
+a.mytooltip span { display: none; padding: 2px 3px; margin-left: 8px; text-align: left; }
+a.mytooltip:hover span { display: inline; position: absolute; background: #ffffff; border: 1px solid #cccccc; color: #6c6c6c; }
 
-.material-switch > input[type="checkbox"]:checked + label::before {
-  background: inherit;
-  opacity: 0.5;
-}
-
-.material-switch > input[type="checkbox"]:checked + label::after {
-  background: inherit;
-  left: 20px;
-}
-
-.list-group-horizontal .list-group-item {
-  display: inline-block;
-}
-
-.list-group-horizontal .list-group-item {
-  margin-bottom: 0;
-  margin-left: -4px;
-  margin-right: 0;
-  border-right-width: 0;
-}
-
-.list-group-horizontal .list-group-item:first-child {
-  border-top-right-radius: 0;
-  border-bottom-left-radius: 4px;
-}
-
-.list-group-horizontal .list-group-item:last-child {
-  border-top-right-radius: 4px;
-  border-bottom-left-radius: 0;
-  border-right-width: 1px;
-}
-
-a:hover {
-  background: #ffffff; /*необходимо для IE6*/
-  text-decoration: none;
-}
-
-a.mytooltip span {
-  display: none;
-  padding: 2px 3px;
-  margin-left: 8px;
-  text-align: left;
-}
-
-a.mytooltip:hover span {
-  display: inline;
-  position: absolute;
-  background: #ffffff;
-  border: 1px solid #cccccc;
-  color: #6c6c6c;
-}
-
-.dataTables_filter, .dataTables_info {
-  display: none;
-}
+.dataTables_filter, .dataTables_info { display: none; }

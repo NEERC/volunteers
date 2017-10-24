@@ -41,47 +41,56 @@
     <div class="table-responsive">
         <table class="table" id="table">
             <thead>
-            <th class="col-md-2">
-                <label th:text="#{volunteers.day.volunteer}">User</label>
-                <input type="text" class="form-control"
-                       th:placeholder="#{volunteers.day.search}+' '+#{volunteers.day.volunteer}"/>
-            </th>
-            <th class="col-md-1">
-                <label th:text="#{volunteers.day.positions.wish}">Positions desired</label>
-                <input type="text" class="form-control"
-                       th:placeholder="#{volunteers.day.search}+' '+#{volunteers.day.positions.wish}"/>
-            </th>
-            <th class="col-md-2">
-                <label th:text="#{volunteers.day.comments}">Comments</label>
-                <input type="text" class="form-control"
-                       th:placeholder="#{volunteers.day.search}+' '+#{volunteers.day.comments}"/>
-
-            </th>
-            <th th:text="#{volunteers.day.experience}" class="col-md-3">
-                Experience
-            </th>
-            <th th:text="#{volunteers.day.position}" class="col-md-2">
-                Position
-            </th>
-            <th th:text="#{volunteers.day.hall}" class="col-md-2">
-                Hall
-            </th>
+                <tr>
+                    <th class="col-md-2">
+                        <label th:text="#{volunteers.day.volunteer}">User</label>
+                        <input type="text" class="form-control"
+                               th:placeholder="#{volunteers.day.search}"/>
+                    </th>
+                    <th class="col-md-1">
+                        <label th:text="#{volunteers.day.positions.wish}">Positions</label>
+                        <input type="text" class="form-control"
+                               th:placeholder="#{volunteers.day.search}"/>
+                    </th>
+                    <th class="col-md-2">
+                        <label th:text="#{volunteers.day.comments}">Comments</label>
+                        <input type="text" class="form-control"
+                               th:placeholder="#{volunteers.day.search}"/>
+                    </th>
+                    <th class="col-md-3">
+                        <label th:text="#{volunteers.day.experience}">Experience</label>
+                        <input type="text" class="form-control"
+                               th:placeholder="#{volunteers.day.search}"/>
+                    </th>
+                    <th class="col-md-2">
+                        <label th:text="#{volunteers.day.position}">Position</label>
+                        <input type="text" class="form-control"
+                               th:placeholder="#{volunteers.day.search}"/>
+                    </th>
+                    <th class="col-md-2">
+                        <label th:text="#{volunteers.day.hall}">Hall</label>
+                        <input type="text" class="form-control" id="hall-search"
+                               th:placeholder="#{volunteers.day.search}"/>
+                    </th>
+                </tr>
             </thead>
+
             <tbody>
             <!--<form th:action="@{/admin/day/save}" method="post">-->
             <!--<input type="hidden" th:name="day" th:value="${day.id}"/>-->
-            <th:block th:each="user:${users}">
+            <th:block th:each="user, idx:${users}">
 
                 <tr>
                     <td th:text="${user.userYear.user.badgeName}+' ('+${user.userYear.group}+')'"></td>
                     <td class="list-group">
-                        <span th:each="position:${user.userYear.positions}" class="list-group-item"
-                              th:text="${position.name}"></span>
+                        <span th:text="${user.userYear.positionsStr()}"></span>
+                        <!--<span th:each="position:${user.userYear.positions}" class="list-group-item"-->
+                              <!--th:text="${position.name}"></span>-->
 
                     </td>
                     <td th:text="${user.userYear.suggestions}"></td>
                     <td>
-                        <ul class="list-group">
+                        <ul th:if="${exp.get(user).keySet().size() > 0}" class="list-group">
                             <li th:each="year:${exp.get(user).keySet()}" class="list-group-item">
                                 <label th:text="${year.name}"></label>
                                 <ul class="list-group">
@@ -94,9 +103,10 @@
                         <label th:if="${exp.get(user).keySet().isEmpty()}"
                                th:text="#{volunteers.day.exp.noExp}"></label>
                     </td>
-                    <td>
+                    <td th:id="'pos-'+${idx.index}">
+                        <span style="display:none" th:text="'---'+${user.position.name}"></span>
                         <select class="form-control" th:name="p+${user.id}"
-                                th:onchange="'savePosition('+${user.id}+', this.value);'"
+                                th:onchange="'savePosition('+${user.id}+', this.value);uh.updateSearchText(\'pos-'+${idx.index}+'\');'"
                                 th:id="'position'+${user.id}">
                             <th:block th:each="position:${positions}">
                                 <option th:value="${position.id}" th:selected="${position.id}==${user.position.id}"
@@ -104,9 +114,10 @@
                             </th:block>
                         </select>
                     </td>
-                    <td>
+                    <td th:id="'hall-'+${idx.index}">
+                        <span style="display:none" th:text="'---'+${user.hall.name}"></span>
                         <select class="form-control" th:name="h+${user.id}"
-                                th:onchange="'saveHall('+${user.id}+', this.value);'"
+                                th:onchange="'saveHall('+${user.id}+', this.value);uh.updateSearchText(\'hall-'+${idx.index}+'\');'"
                                 th:id="'hall'+${user.id}">
                             <th:block th:each="hall:${halls}">
                                 <option th:value="${hall.id}" th:selected="${hall.id}==${user.hall.id}"
@@ -203,6 +214,14 @@
             })
         }
 
+        $.fn.dataTable.ext.order['dom-select'] = function  ( settings, col )
+        {
+            return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+                return $('select', td).val();
+            } );
+        };
+        var uh = {};
+
         $(document).ready(function () {
             /*$('#table thead th').each( function () {
                 var title = $(this).text();
@@ -218,21 +237,50 @@
                 "bInfo": false,
                 "bAutoWidth": false,
                 "autowidth": false,
-                "ordering": false
+                "ordering": true,
+                "columns": [
+                    {"orderable": false },
+                    {"orderable": false },
+                    {"orderable": false },
+                    {"orderable": false },
+                    { "orderable": false, "orderDataType": "dom-select" },
+                    { "orderable": false, "orderDataType": "dom-select" }
+                ]
             });
 
             // Apply the search
             table.columns().every(function () {
-                var that = this;
+                var that = this; // column
 
                 $('input', this.header()).on('keyup change', function () {
-                    if (that.search() !== this.value) {
+                    var f = (that.index() >= 4 ? '---' : '') + this.value;
+                    if (that.search() !== f) {
                         that
-                            .search(this.value)
+                            .search(f)
                             .draw();
+                        console.log(this.value)
                     }
                 });
+                $('label', this.header()).on('click', function () {
+                    var current = table.order();
+                    var currentOrder = null;
+                    if (current) {
+                        if (current[0][0] == that.index()) {
+                            currentOrder = current[0][1];
+                        }
+                    }
+                    that.order(currentOrder == 'asc' ? 'desc' : 'asc').draw();
+                });
             });
+
+            uh.updateSearchText = function(id) {
+                var element = $('#'+id + ' select')[0];
+                var text = element.options[element.selectedIndex].text;
+                $('#'+id + ' span').text('---'+text);
+                table.cell($('#'+id).get()).invalidate();
+            }
+
+
         });
 
     </script>
