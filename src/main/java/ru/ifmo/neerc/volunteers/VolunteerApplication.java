@@ -6,8 +6,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import ru.ifmo.neerc.volunteers.service.DBTestDataGenerator;
-
 @SpringBootApplication
 @EnableTransactionManagement
 @EnableScheduling
