@@ -42,6 +42,11 @@
         <table class="table" id="table">
             <thead>
                 <tr>
+                    <th class="col-md-1">
+                        <label th:text="#{volunteers.day.id}">ID</label>
+                        <input type="text" class="form-control"
+                               th:placeholder="#{volunteers.day.search}"/>
+                    </th>
                     <th class="col-md-2">
                         <label th:text="#{volunteers.day.volunteer}">User</label>
                         <input type="text" class="form-control"
@@ -57,7 +62,7 @@
                         <input type="text" class="form-control"
                                th:placeholder="#{volunteers.day.search}"/>
                     </th>
-                    <th class="col-md-3">
+                    <th class="col-md-2">
                         <label th:text="#{volunteers.day.experience}">Experience</label>
                         <input type="text" class="form-control"
                                th:placeholder="#{volunteers.day.search}"/>
@@ -81,6 +86,7 @@
             <th:block th:each="user, idx:${users}">
 
                 <tr>
+                    <td th:text="${user.id}"></td>
                     <td th:text="${user.userYear.user.badgeName}+' ('+${user.userYear.group}+')'"></td>
                     <td class="list-group">
                         <span th:text="${user.userYear.positionsStr()}"></span>
@@ -243,6 +249,7 @@
                     {"orderable": false },
                     {"orderable": false },
                     {"orderable": false },
+                    {"orderable": false },
                     { "orderable": false, "orderDataType": "dom-select" },
                     { "orderable": false, "orderDataType": "dom-select" }
                 ]
@@ -253,7 +260,7 @@
                 var that = this; // column
 
                 $('input', this.header()).on('keyup change', function () {
-                    var f = (that.index() >= 4 ? '---' : '') + this.value;
+                    var f = (that.index() >= 5 ? '---' : '') + this.value;
                     if (that.search() !== f) {
                         that
                             .search(f)
