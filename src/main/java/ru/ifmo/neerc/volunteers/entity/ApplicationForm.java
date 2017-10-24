@@ -2,12 +2,14 @@ package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
 
 import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by Lapenok Akesej on 26.02.2017.
@@ -16,6 +18,7 @@ import java.util.Set;
 @Data
 @ToString(exclude = {"id", "year", "userDays"}, includeFieldNames = false)
 @EqualsAndHashCode(exclude = {"id", "year", "userDays"})
+@NoArgsConstructor
 public class ApplicationForm {
 
     @Id
@@ -43,10 +46,6 @@ public class ApplicationForm {
     @OrderBy("day ASC")
     private List<UserDay> userDays;
 
-    public ApplicationForm() {
-
-    }
-
     public ApplicationForm(User user, Year year) {
         setUser(user);
         setYear(year);
@@ -61,5 +60,9 @@ public class ApplicationForm {
         this.positions = form.getPositions();
         this.group = form.getGroup();
         this.suggestions = form.getSuggestions();
+    }
+
+    public String positionsStr() {
+        return String.join(", ", positions.stream().map(PositionValue::getName).collect(Collectors.toList()));
     }
 }

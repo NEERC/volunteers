@@ -108,7 +108,7 @@ public class User implements UserDetails {
             email = form.getEmail();
             result = true;
         }*/
-        if (!phone.equals(form.getPhone())) {
+        if (phone == null || !phone.equals(form.getPhone())) {
             phone = form.getPhone();
             result = true;
         }
