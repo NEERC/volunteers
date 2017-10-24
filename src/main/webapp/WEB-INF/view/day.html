@@ -86,7 +86,7 @@
             <th:block th:each="user, idx:${users}">
 
                 <tr>
-                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.userYear.id}"></td>
                     <td th:text="${user.userYear.user.badgeName}+' ('+${user.userYear.group}+')'"></td>
                     <td class="list-group">
                         <span th:text="${user.userYear.positionsStr()}"></span>
