@@ -7,6 +7,7 @@ import lombok.ToString;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,6 +46,8 @@ public class ApplicationForm {
     @OneToMany(mappedBy = "userYear")
     @OrderBy("day ASC")
     private List<UserDay> userDays;
+
+    private Date registrationDate = new Date();
 
     public ApplicationForm(User user, Year year) {
         setUser(user);

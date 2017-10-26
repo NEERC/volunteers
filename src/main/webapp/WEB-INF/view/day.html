@@ -42,7 +42,7 @@
         <table class="table" id="table">
             <thead>
                 <tr>
-                    <th class="col-md-1">
+                    <th class="col-md-2">
                         <label th:text="#{volunteers.day.id}">ID</label>
                         <input type="text" class="form-control"
                                th:placeholder="#{volunteers.day.search}"/>
@@ -57,7 +57,7 @@
                         <input type="text" class="form-control"
                                th:placeholder="#{volunteers.day.search}"/>
                     </th>
-                    <th class="col-md-2">
+                    <th class="col-md-1">
                         <label th:text="#{volunteers.day.comments}">Comments</label>
                         <input type="text" class="form-control"
                                th:placeholder="#{volunteers.day.search}"/>
@@ -86,7 +86,7 @@
             <th:block th:each="user, idx:${users}">
 
                 <tr>
-                    <td th:text="${user.userYear.id}"></td>
+                    <td th:text="${user.userYear.registrationDate==null}?${user.userYear.id}:${user.userYear.registrationDate}"></td>
                     <td th:text="${user.userYear.user.badgeName}+' ('+${user.userYear.group}+')'"></td>
                     <td class="list-group">
                         <span th:text="${user.userYear.positionsStr()}"></span>

@@ -45,12 +45,12 @@ public class DayServiceImpl implements DayService {
 
         final HashMap<Hall, List<UserDay>> hallUser = new HashMap<>(
                 day.getUsers().stream().collect(Collectors.groupingBy(UserDay::getHall)));
-        hallUser.forEach((u, v) -> {
-            v.sort(Comparator
-                    .comparing((Function<UserDay, Long>) d -> d.getPosition().getOrd())
-                .thenComparing(lst -> lst.getUserYear().getUser().getLastNameCyr())
-            );
-        });
+        hallUser.forEach((u, v) ->
+                v.sort(Comparator
+                        .comparing((Function<UserDay, Long>) d -> d.getPosition().getOrd())
+                        .thenComparing(lst -> lst.getUserYear().getUser().getLastNameCyr())
+                )
+        );
 
         hallUser.putAll(year.getHalls().stream()
                 .filter(h -> !hallUser.containsKey(h))

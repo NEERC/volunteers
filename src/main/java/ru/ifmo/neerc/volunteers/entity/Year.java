@@ -40,7 +40,7 @@ public class Year {
     private Set<Day> days;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "year")
-    @OrderBy(value = "id ASC ")
+    @OrderBy(value = "registrationDate ASC, id ASC ")
     private Set<ApplicationForm> users;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "year")
