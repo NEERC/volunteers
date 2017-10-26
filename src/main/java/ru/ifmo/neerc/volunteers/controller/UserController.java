@@ -9,10 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
-import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
-import ru.ifmo.neerc.volunteers.entity.Day;
-import ru.ifmo.neerc.volunteers.entity.User;
-import ru.ifmo.neerc.volunteers.entity.Year;
+import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.form.UserProfileForm;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
@@ -31,6 +28,7 @@ import javax.validation.Valid;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by Lapenok Akesej on 26.02.2017.
@@ -81,6 +79,7 @@ public class UserController {
         Year year = yearRepository.findOne(id);
         userService.setUserYear(user, year);
         utils.setModelForUser(model, user);
+        model.addAttribute("positions", year.getPositionValues().stream().filter(PositionValue::isInForm).collect(Collectors.toSet()));
         if (!model.containsAttribute("applicationForm")) {
             ApplicationForm form = yearService.getApplicationForm(user, year);
             model.addAttribute("applicationForm", new UserYearForm(form));

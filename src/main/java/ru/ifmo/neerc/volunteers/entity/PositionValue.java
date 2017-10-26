@@ -5,10 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -21,6 +18,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(indexes = {@Index(columnList = "inForm")})
 public class PositionValue {
 
     @Id
@@ -45,8 +43,11 @@ public class PositionValue {
     @NonNull
     private long ord;
 
+    @NonNull
+    private boolean inForm;
+
     public PositionValue(PositionForm positionForm, Year year) {
-        this(positionForm.getName(), false, positionForm.getValue(), year, positionForm.getOrder());
+        this(positionForm.getName(), false, positionForm.getValue(), year, positionForm.getOrder(), positionForm.isForUser());
     }
 
 }

@@ -149,6 +149,24 @@ public class AdminController {
         return response;
     }
 
+    @PostMapping("/position/inform")
+    public @ResponseBody
+    JsonResponse<Exception> setPositionInForm(@RequestParam final long id, @RequestParam final boolean inForm) {
+        JsonResponse<Exception> response = new JsonResponse<>();
+        try {
+            PositionValue positionValue = positionValueRepository.findOne(id);
+            if (positionValue.isInForm() != inForm) {
+                positionValue.setInForm(inForm);
+                positionValueRepository.save(positionValue);
+            }
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e);
+        }
+        return response;
+    }
+
     @PostMapping("/position/delete")
     //@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody

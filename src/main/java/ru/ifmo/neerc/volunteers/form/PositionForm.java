@@ -20,4 +20,6 @@ public class PositionForm {
     private double value;
 
     private Long order;
+
+    private boolean forUser;
 }

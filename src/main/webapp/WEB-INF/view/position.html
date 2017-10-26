@@ -14,7 +14,8 @@
             <thead>
             <th th:text="#{volunteers.position.name}" class="text-center">Position</th>
             <th th:text="#{volunteers.position.value}" class="text-center" th:unless="${isUser}">Value</th>
-            <th th:text="#{volunteers.position.orger}" class="text-center" th:unless="${isUser}">Order</th>
+            <th th:text="#{volunteers.position.order}" class="text-center" th:unless="${isUser}">Order</th>
+            <th th:text="#{volunteers.position.inForm}" class="text-center" th:unless="${isUser}">In form</th>
             <th th:unless="${isUser}"></th>
             </thead>
             <tbody>
@@ -38,6 +39,10 @@
                                th:onblur="'changePositionOrder('+${position.id}+', this.value);'"/>
                         <input type="hidden" th:value="${position.ord}"
                                th:id="originOrder+${position.id}"/>
+                    </td>
+                    <td th:unless="${isUser}">
+                        <input type="checkbox" th:checked="${position.inForm}" th:value="${position.id}"
+                               th:id="'inForm'+${position.id}"/>
                     </td>
                     <td th:unless="${isUser}">
                         <a th:unless="${position.def}"
@@ -90,8 +95,24 @@
                              th:class="${#fields.hasErrors('order')? 'has-error form-group': 'form-group'}">
                             <label for="positionOrder" th:text="#{volunteers.form.position.order}">Position
                                 order</label>
-                            <input type="number" class="form-control" id="positionOrder" th:field="*{order}" value="0"/>
+                            <input type="number" class="form-control" id="positionOrder" th:field="*{order}"
+                                   th:value="0"/>
                             <span class="help-block" th:if="${#fields.hasErrors('order')}">Error</span>
+
+
+                        </div>
+                        <div class="form-group"
+                             th:class="${#fields.hasErrors('forUser')? 'has-error form-group': 'form-group'}">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" id="positionPublic"
+                                           th:field="*{forUser}"
+                                           value="true"/>
+                                    <span th:text="#{volunteers.form.position.inForm}">Position
+                                    order</span>
+                                </label>
+                            </div>
+                            <span class="help-block" th:if="${#fields.hasErrors('forUser')}">Error</span>
                         </div>
                     </div>
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
@@ -149,10 +170,14 @@
                                     '<input type="hidden" value="' + data.result.ord + '" id="originOrder' + data.result.id + '" />' +
                                     '</td>' +
                                     '<td>' +
+                                    '<input type="checkbox" value="' + data.result.id + '" id="inForm' + data.result.id + '" onchange="changeInForm(this);"/>' +
+                                    '</td>' +
+                                    '<td>' +
                                     '<a class="btn btn-default" role="button" onclick="deletePosition(' + data.result.id + '); return false;">' + note + '</a>' +
                                     '</td>' +
                                     '</tr>';
                                 $("#positions tbody").find("tr:last").before(str);
+                                $('#inForm' + data.result.id).prop('checked', data.result.inForm);
                                 $("#positionForm").modal("hide");
                                 form.reset();
                             }
@@ -247,6 +272,38 @@
             }
 
         }
+
+        function changeInForm(it) {
+            var data = {
+                id: $(it).val()
+            };
+            data['inForm'] = !!it.checked;
+            data[_csrf_param_name] = _csrf_token;
+            $.ajax({
+                type: "POST",
+                url: /*[[@{/admin/position/inform}]]*/'',
+                data: data,
+                success: function (data) {
+                    if (data.status === "OK") {
+                        console.log("ok");
+                    }
+                    else {
+                        $(it).prop("checked", !it.checked);
+                        console.error(data);
+                    }
+                },
+                error: function (e) {
+                    $(it).prop("checked", !it.checked);
+                    console.error(e);
+                }
+            })
+        }
+
+        $('input[id^="inForm"]').each(function (i, it) {
+            $(it).change(function () {
+                changeInForm(it);
+            });
+        })
     </script>
 </div>
 
