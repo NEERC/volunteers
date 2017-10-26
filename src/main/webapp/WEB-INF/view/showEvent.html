@@ -13,94 +13,99 @@
 
             <table class="table table-hover table-bordered table-fixed">
                 <thead>
-                <th th:text="#{volunteers.day.hall}">
-                    Hall
-                </th>
-                <th th:text="#{volunteers.day.volunteer}">
-                    Volunteer
-                </th>
-                <th th:text="#{volunteers.day.position}">
-                    Position
-                </th>
-                <th:block th:unless="${isUser}">
-                    <th th:unless="${assessment}" th:text="#{volunteers.day.attendance}">
-                        Attendance
-                    </th>
+                    <tr>
+                        <th th:text="#{volunteers.day.hall}">
+                            Hall
+                        </th>
+                        <th th:text="#{volunteers.day.volunteer}">
+                            Имя
+                        </th>
+                        <th th:text="#{volunteers.day.badgeName}">
+                            Badge Name
+                        </th>
+                        <th th:text="#{volunteers.day.position}">
+                            Position
+                        </th>
+                        <th:block th:unless="${isUser}">
+                            <th th:unless="${assessment}" th:text="#{volunteers.day.attendance}">
+                                Attendance
+                            </th>
 
-                    <th th:if="${assessment}" th:text="#{volunteers.day.assessments}">
-                        Assessments
-                    </th>
-                </th:block>
-
+                            <th th:if="${assessment}" th:text="#{volunteers.day.assessments}">
+                                Assessments
+                            </th>
+                        </th:block>
+                    </tr>
                 </thead>
                 <tbody>
-                <tr th:if="${attendance}">
-                    <td colspan="3"></td>
-                    <td>
-                        <select class="form-control" onchange="selectAll(this)" th:id="hall">
-                            <option disabled="disabled" selected="selected" value=""></option>
-                            <th:block th:each="att:${attendances}">
-                                <option th:text="${attendanceMap.get(att)}" th:value="${att.name()}"></option>
-                            </th:block>
-                        </select>
-                    </td>
-                </tr>
-                <th:block th:each="hall:${halls}">
-                    <tr>
-                        <td th:text="${hall.name}" th:rowspan="${hallUser.get(hall).size()+1}"></td>
-                        <td colspan="2" th:if="${attendance}"></td>
-                        <td th:if="${attendance}">
-                            <select class="form-control" onchange="selectAll(this)" th:id="hall+${hall.id}+'_'">
+                    <tr th:if="${attendance}">
+                        <td colspan="4"></td>
+                        <td>
+                            <select class="form-control" onchange="selectAll(this)" th:id="hall">
                                 <option disabled="disabled" selected="selected" value=""></option>
                                 <th:block th:each="att:${attendances}">
                                     <option th:text="${attendanceMap.get(att)}" th:value="${att.name()}"></option>
                                 </th:block>
                             </select>
                         </td>
-                        <th:block th:each="user:${hallUser.get(hall)}">
-                    <tr>
-                        <td th:text="${user.userYear.user.badgeName}"></td>
-                        <td th:text="${user.position.name}">name position</td>
-                        <td th:if="${attendance}">
-                            <select class="form-control" th:name="${user.id}"
-                                    th:id="'hall'+${hall.id}+'_'+${user.id}"
-                                    th:onchange="'save('+${user.id}+', this.value)'">
-                                <th:block th:if="${user.attendance}==null">
-                                    <option selected="selected" th:value="" disabled="disabled"></option>
-                                </th:block>
-                                <th:block th:each="att:${attendances}">
-                                    <option th:selected="${user.attendance}==${att}" th:text="${attendanceMap.get(att)}"
-                                            th:value="${att.name()}"></option>
-                                </th:block>
-                            </select>
-                        </td>
-                    <th:block th:unless="${isUser}">
-                        <td th:unless="${attendance} or ${assessment}"
-                            th:text="${attendanceMap.get(user.attendance)}"></td>
-                        <td th:if="${assessments}" th:id="'user'+${user.id}">
-                            <ul class="list-group-horizontal">
-                                <th:block th:each="a: ${user.assessments}">
-                                    <li class="list-group-item">
-                                        <button type="button" class="btn btn-default btn-xs" data-toggle="tooltip"
-                                                th:title="${a.value}"
-                                                th:text="${a.comment}" th:id="${a.id}"
-                                                th:onclick="'showForm('+${user.id}+', '+${a.id}+', '+${a.value}+', \''+${a.comment}+'\');'"></button>
-                                    </li>
-                                </th:block>
-                                <li class="list-group-item">
-                                    <button type="button" class="btn btn-primary btn-xs" data-toggle="tooltip"
-                                            th:title="#{volunteers.day.button.addAssessment}"
-                                            th:onclick="'openForm('+${user.id}+');'">
-                                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                    </button>
-                                </li>
-                            </ul>
-                        </td>
-                    </th:block>
                     </tr>
-                </th:block>
-                </tr>
-                </th:block>
+                    <th:block th:each="hall:${halls}">
+                        <tr>
+                            <td th:text="${hall.name}" th:rowspan="${hallUser.get(hall).size()+1}"></td>
+                            <td colspan="3" th:if="${attendance}"></td>
+                            <td th:if="${attendance}">
+                                <select class="form-control" onchange="selectAll(this)" th:id="hall+${hall.id}+'_'">
+                                    <option disabled="disabled" selected="selected" value=""></option>
+                                    <th:block th:each="att:${attendances}">
+                                        <option th:text="${attendanceMap.get(att)}" th:value="${att.name()}"></option>
+                                    </th:block>
+                                </select>
+                            </td>
+                        </tr>
+                        <th:block th:each="user:${hallUser.get(hall)}">
+                            <tr>
+                                <td th:text="${user.userYear.user.badgeNameCyr}"></td>
+                                <td th:text="${user.userYear.user.badgeName}"></td>
+                                <td th:text="${user.position.name}">name position</td>
+                                <td th:if="${attendance}">
+                                    <select class="form-control" th:name="${user.id}"
+                                            th:id="'hall'+${hall.id}+'_'+${user.id}"
+                                            th:onchange="'save('+${user.id}+', this.value)'">
+                                        <th:block th:if="${user.attendance}==null">
+                                            <option selected="selected" th:value="" disabled="disabled"></option>
+                                        </th:block>
+                                        <th:block th:each="att:${attendances}">
+                                            <option th:selected="${user.attendance}==${att}" th:text="${attendanceMap.get(att)}"
+                                                    th:value="${att.name()}"></option>
+                                        </th:block>
+                                    </select>
+                                </td>
+                                <th:block th:unless="${isUser}">
+                                    <td th:unless="${attendance} or ${assessment}"
+                                        th:text="${attendanceMap.get(user.attendance)}"></td>
+                                    <td th:if="${assessments}" th:id="'user'+${user.id}">
+                                        <ul class="list-group-horizontal">
+                                            <th:block th:each="a: ${user.assessments}">
+                                                <li class="list-group-item">
+                                                    <button type="button" class="btn btn-default btn-xs" data-toggle="tooltip"
+                                                            th:title="${a.value}"
+                                                            th:text="${a.comment}" th:id="${a.id}"
+                                                            th:onclick="'showForm('+${user.id}+', '+${a.id}+', '+${a.value}+', \''+${a.comment}+'\');'"></button>
+                                                </li>
+                                            </th:block>
+                                            <li class="list-group-item">
+                                                <button type="button" class="btn btn-primary btn-xs" data-toggle="tooltip"
+                                                        th:title="#{volunteers.day.button.addAssessment}"
+                                                        th:onclick="'openForm('+${user.id}+');'">
+                                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </th:block>
+                            </tr>
+                        </th:block>
+                    </th:block>
                 </tbody>
             </table>
 
