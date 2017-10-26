@@ -7,9 +7,9 @@ import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
 import ru.ifmo.neerc.volunteers.repository.*;
 
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.Optional;
+import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Lapenok Akesej on 03.09.2017.
@@ -83,9 +83,16 @@ public class YearServiceImpl implements YearService {
             }
         }
         if (positionValue == null) {
-            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "Reserve", locale), true, 0, year);
+            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "Reserve", locale), true, 0, year, 0L, false);
             positionValueRepository.save(positionValue);
         }
         return positionValue;
+    }
+
+    @PostConstruct
+    public void modifyApplicationsForms() {
+        Set<ApplicationForm> changeRegistrationDate = applicationFormRepository.findAll().stream().filter(u -> u.getRegistrationDate() == null).collect(Collectors.toSet());
+        changeRegistrationDate.forEach(u -> u.setRegistrationDate(new Date()));
+        applicationFormRepository.save(changeRegistrationDate);
     }
 }
