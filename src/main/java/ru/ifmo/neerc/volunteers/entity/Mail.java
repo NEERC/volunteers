@@ -2,16 +2,14 @@ package ru.ifmo.neerc.volunteers.entity;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Lob;
+import javax.persistence.*;
 
 /**
  * Created by Lapenok Akesej on 26.10.2017.
  */
 @Entity
 @Data
+@Table(indexes = {@Index(columnList = "sent")})
 public class Mail {
 
     @Id
@@ -24,4 +22,6 @@ public class Mail {
     private String body;
 
     private String subject;
+
+    private boolean sent = false;
 }

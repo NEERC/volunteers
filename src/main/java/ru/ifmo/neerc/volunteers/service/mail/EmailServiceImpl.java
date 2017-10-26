@@ -44,8 +44,8 @@ public class EmailServiceImpl implements EmailService {
     @Scheduled(fixedDelay = 1000)
     public void sendMessages() {
         final String emailFrom = messageSource.getMessage("volunteers.email.from", null, "neerc@mail.ifmo.ru", locale);
-        Iterable<Mail> mails = mailRepository.findAll();
-        Set<Mail> forDelete = new HashSet<>();
+        Iterable<Mail> mails = mailRepository.findAllBySent(false);
+        Set<Mail> success = new HashSet<>();
         for (Mail mail : mails) {
             try {
                 MimeMessage message = mailSender.createMimeMessage();
@@ -56,14 +56,15 @@ public class EmailServiceImpl implements EmailService {
                 messageHelper.setText(mail.getBody());
                 mailSender.send(message);
                 logger.info("Mail for {} sent successfully", mail.getEmail());
-                forDelete.add(mail);
+                mail.setSent(true);
+                success.add(mail);
             } catch (MailException e) {
                 logger.error("Error to send mail", e);
             } catch (MessagingException e) {
                 logger.error("Error to create mail", e);
             }
         }
-        mailRepository.delete(forDelete);
+        mailRepository.save(success);
     }
 
     @Override
