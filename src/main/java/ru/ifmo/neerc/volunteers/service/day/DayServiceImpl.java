@@ -47,7 +47,7 @@ public class DayServiceImpl implements DayService {
                 day.getUsers().stream().collect(Collectors.groupingBy(UserDay::getHall)));
         hallUser.forEach((u, v) -> {
             v.sort(Comparator
-                .comparing((Function<UserDay, String>) d -> d.getPosition().getName())
+                    .comparing((Function<UserDay, Long>) d -> d.getPosition().getOrd())
                 .thenComparing(lst -> lst.getUserYear().getUser().getLastNameCyr())
             );
         });

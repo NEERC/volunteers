@@ -18,4 +18,6 @@ public class PositionForm {
 
     @Min(0)
     private double value;
+
+    private Long order;
 }

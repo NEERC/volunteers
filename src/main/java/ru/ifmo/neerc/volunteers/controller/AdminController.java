@@ -114,8 +114,8 @@ public class AdminController {
 
     @PostMapping("/position/value")
     public @ResponseBody
-    JsonResponse setPositionValue(@RequestParam final long id, @RequestParam final double value) {
-        JsonResponse response = new JsonResponse();
+    JsonResponse<Exception> setPositionValue(@RequestParam final long id, @RequestParam final double value) {
+        JsonResponse<Exception> response = new JsonResponse<>();
         try {
             PositionValue positionValue = positionValueRepository.findOne(id);
             if (positionValue.getValue() != value) {
@@ -125,9 +125,28 @@ public class AdminController {
             response.setStatus(Status.OK);
         } catch (Exception e) {
             response.setStatus(Status.FAIL);
+            response.setResult(e);
         }
         return response;
 
+    }
+
+    @PostMapping("/position/order")
+    public @ResponseBody
+    JsonResponse<Exception> setPositionOrder(@RequestParam final long id, @RequestParam final long order) {
+        JsonResponse<Exception> response = new JsonResponse<>();
+        try {
+            PositionValue positionValue = positionValueRepository.findOne(id);
+            if (positionValue.getOrd() != order) {
+                positionValue.setOrd(order);
+                positionValueRepository.save(positionValue);
+            }
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e);
+        }
+        return response;
     }
 
     @PostMapping("/position/delete")

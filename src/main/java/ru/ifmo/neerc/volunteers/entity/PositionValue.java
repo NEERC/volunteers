@@ -42,8 +42,11 @@ public class PositionValue {
     @JsonIgnore
     private Year year;
 
+    @NonNull
+    private long ord;
+
     public PositionValue(PositionForm positionForm, Year year) {
-        this(positionForm.getName(), false, positionForm.getValue(), year);
+        this(positionForm.getName(), false, positionForm.getValue(), year, positionForm.getOrder());
     }
 
 }

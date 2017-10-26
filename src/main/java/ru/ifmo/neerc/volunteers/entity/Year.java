@@ -48,6 +48,7 @@ public class Year {
     private Set<Hall> halls;
 
     @OneToMany(mappedBy = "year", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OrderBy(value = "id ASC")
     private Set<PositionValue> positionValues;
 
     @Lob

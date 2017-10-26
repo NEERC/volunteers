@@ -67,12 +67,12 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public List<Mail> constructEmail(String subject, String templateName, IContext context, User... users) throws MessagingException {
+    public List<Mail> constructEmail(String subject, String templateName, IContext context, User... users) {
         return constructEmail(subject, templateEngine.process(templateName, context), users);
     }
 
     @Override
-    public List<Mail> constructEmail(String subject, String body, User... users) throws MessagingException {
+    public List<Mail> constructEmail(String subject, String body, User... users) {
         if (users.length == 0) {
             throw new IllegalArgumentException("users.length == 0");
         }
