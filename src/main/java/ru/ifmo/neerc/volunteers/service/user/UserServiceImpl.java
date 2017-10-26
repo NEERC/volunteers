@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.thymeleaf.context.Context;
 import ru.ifmo.neerc.volunteers.config.SecurityConfig;
-import ru.ifmo.neerc.volunteers.entity.ResetPasswordToken;
-import ru.ifmo.neerc.volunteers.entity.Role;
-import ru.ifmo.neerc.volunteers.entity.User;
-import ru.ifmo.neerc.volunteers.entity.Year;
+import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.ChangePasswordForm;
 import ru.ifmo.neerc.volunteers.form.EmailForm;
 import ru.ifmo.neerc.volunteers.form.UserForm;
@@ -30,7 +27,6 @@ import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.security.SecurityService;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.xml.bind.DatatypeConverter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -91,7 +87,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public MimeMessage constructResetTokenEmail(final String contextPath, final Locale locale, final ResetPasswordToken token) throws MessagingException {
+    public List<Mail> constructResetTokenEmail(final String contextPath, final Locale locale, final ResetPasswordToken token) throws MessagingException {
         String url = contextPath + "/changePassword/?id=" + token.getUser().getId() + "&token=" + token.getToken() + "&hash=" + getHash(token);
         String message = messageSource.getMessage("volunteers.email.resetPassword.email", new Object[]{url}, locale);
         Context context = new Context();
@@ -155,7 +151,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public MimeMessage constructConfirmEmail(User user, String contextPath, Locale locale) throws MessagingException {
+    public List<Mail> constructConfirmEmail(User user, String contextPath, Locale locale) throws MessagingException {
         String url = contextPath + "/confirm/?id=" + user.getId() + "&email=" + user.getEmail();
         String message = messageSource.getMessage("volunteers.email.confirm.email", new Object[]{url}, locale);
         Context context = new Context();
