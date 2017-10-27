@@ -20,6 +20,9 @@
                         <th th:text="#{volunteers.day.volunteer}">
                             Имя
                         </th>
+                        <th th:text="#{volunteers.contacts.group}">
+                            Group
+                        </th>
                         <th th:text="#{volunteers.day.badgeName}">
                             Badge Name
                         </th>
@@ -65,6 +68,7 @@
                         <th:block th:each="user:${hallUser.get(hall)}">
                             <tr>
                                 <td th:text="${user.userYear.user.badgeNameCyr}"></td>
+                                <td th:text="${user.userYear.group}"></td>
                                 <td th:text="${user.userYear.user.badgeName}"></td>
                                 <td th:text="${user.position.name}">name position</td>
                                 <td th:if="${attendance}">
