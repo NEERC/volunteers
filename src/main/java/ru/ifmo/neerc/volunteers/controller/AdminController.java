@@ -26,6 +26,7 @@ import ru.ifmo.neerc.volunteers.repository.*;
 import ru.ifmo.neerc.volunteers.service.Utils;
 import ru.ifmo.neerc.volunteers.service.day.DayService;
 import ru.ifmo.neerc.volunteers.service.mail.EmailService;
+import ru.ifmo.neerc.volunteers.service.token.TokenService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 import ru.ifmo.neerc.volunteers.service.year.YearService;
 
@@ -65,6 +66,7 @@ public class AdminController {
     private final UserService userService;
     private final YearService yearService;
     private final DayService dayService;
+    private final TokenService tokenService;
     private final Utils utils;
 
     @GetMapping
@@ -772,5 +774,13 @@ public class AdminController {
                 user.getYear().getUsers().stream().map(ApplicationForm::getUser).toArray(User[]::new)));
         model.addAttribute("result", "ok");
         return "redirect:/admin/year/" + user.getYear().getId();
+    }
+
+    @GetMapping("/tokens")
+    public String getTokens(final Model model, final Authentication authentication) {
+        User user = userService.getUserByAuthentication(authentication);
+        utils.setModelForAdmin(model, user);
+        model.addAttribute("token", tokenService.getToken());
+        return "tokens";
     }
 }
