@@ -393,12 +393,12 @@ public class AdminController {
         model.addAttribute("halls", halls);
         model.addAttribute("title", currentDay.getName());
 
-        Map<Attendance, String> attendanceMap = getAttendaceMap();
+        Map<Attendance, String> attendanceMap = getAttendanceMap();
         model.addAttribute("attendanceMap", attendanceMap);
         return "showEvent";
     }
 
-    private Map<Attendance, String> getAttendaceMap() {
+    private Map<Attendance, String> getAttendanceMap() {
         return new HashMap<>(Arrays.stream(Attendance.values())
                 .collect(Collectors.toMap(Function.identity(), attendance -> messageSource.getMessage("volunteers.attendance." + attendance.name().toLowerCase(), null, attendance.name(), locale))));
     }
@@ -631,6 +631,7 @@ public class AdminController {
         final Map<Long, List<String>> assessmentsGroupByDays = new HashMap<>();
         final Map<Long, Double> experience = new HashMap<>();
         final Map<ApplicationForm, Set<Hall>> halls = new HashMap<>();
+        Map<Attendance, String> attendanceComments = getAttendanceMap();
         for (final ApplicationForm user : users) {
             double exp = 0;
             double totalExp = 0;
@@ -643,7 +644,7 @@ public class AdminController {
                 }
 
                 Set<Assessment> allAssessments = new HashSet<>(userDay.getAssessments());
-                allAssessments.add(getAssessmentByAttendace(userDay.getAttendance(), userDay.getDay()));
+                allAssessments.add(userDay.createFakeAssessmentByAttendace(attendanceComments.get(userDay.getAttendance())));
 
                 halls.get(user).add(userDay.getHall());
                 allAssessments.forEach(
@@ -695,38 +696,19 @@ public class AdminController {
         return "results";
     }
 
-    private Assessment getAssessmentByAttendace(Attendance attendance, Day day) {
-        Assessment back = new Assessment();
-        Map<Attendance, String> attendanceMap = getAttendaceMap();
-        back.setComment(day.getName() + " (" + attendanceMap.get(attendance) + ")");
-        switch (attendance) {
-            case YES:
-                back.setValue(day.getAttendanceValue());
-                break;
-            case LATE:
-                back.setValue(day.getAttendanceValue() / 2);
-                break;
-            case NO:
-                back.setValue(-day.getAttendanceValue());
-                break;
-            case SICK:
-                back.setValue(0);
-                break;
-        }
-        return back;
-    }
 
     @GetMapping("/results/user/{id}")
     public String detailedResultUser(@PathVariable final long id, final Model model, final Authentication authentication) {
         ApplicationForm applicationForm = applicationFormRepository.findOne(id);
-        List<Assessment> assessments = new ArrayList<>();
-        applicationForm.getUserDays().forEach(user -> {
-            assessments.addAll(user.getAssessments());
-            assessments.add(getAssessmentByAttendace(user.getAttendance(), user.getDay()));
-        });
+        Map<Attendance, String> attendanceComments = getAttendanceMap();
+        Map<Long, Pair<Double, String>> attendance = applicationForm.getUserDays().stream().collect(Collectors.toMap(
+                UserDay::getId,
+                d -> new Pair<>(d.calcAttendanceScore(), attendanceComments.get(d.getAttendance()))
+        ));
 
         utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
-        model.addAttribute("table", assessments);
+        model.addAttribute("assessmentattendance", attendance);
+        model.addAttribute("assessmentuser", applicationForm);
         return "detailedResult";
     }
 

@@ -2243,3 +2243,8 @@ a.mytooltip span { display: none; padding: 2px 3px; margin-left: 8px; text-align
 a.mytooltip:hover span { display: inline; position: absolute; background: #ffffff; border: 1px solid #cccccc; color: #6c6c6c; }
 
 .dataTables_filter, .dataTables_info { display: none; }
+
+.top-buttons-panel { margin-bottom: 20px; }
+
+ul.flat-list { padding: 0; margin: -4px 0; }
+ul.flat-list li { display: inline-block; margin: 4px 0; }

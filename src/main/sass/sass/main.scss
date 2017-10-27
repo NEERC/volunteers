@@ -173,3 +173,18 @@ table.table > thead > tr > th {
   .dataTables_filter, .dataTables_info {
     display: none;
   }
+
+  .top-buttons-panel {
+    margin-bottom: 20px;
+  }
+
+
+
+  ul.flat-list {
+    padding: 0;
+    margin: -4px 0;
+    li {
+      display: inline-block;
+      margin: 4px 0;
+    }
+  }

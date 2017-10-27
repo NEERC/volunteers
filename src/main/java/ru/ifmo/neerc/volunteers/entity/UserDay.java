@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -41,4 +43,41 @@ public class UserDay {
 
     @Enumerated(EnumType.STRING)
     Attendance attendance = Attendance.UNKNOWN;
+
+    public double totalAssessment() {
+        return Optional.ofNullable(assessments).map(a -> a.stream().mapToDouble(Assessment::getValue).sum()).orElse(0d)
+                + calcAttendanceScore();
+    }
+
+    public String totalAssessmentComment() {
+        return String.format("Total Score in %s", hall.getName());
+    }
+
+    public Assessment createFakeAssessmentByAttendace(String attendanceComment) {
+        Assessment back = new Assessment();
+        back.setComment(String.format("%s (%s)",day.getName(), attendanceComment));
+        back.setValue(calcAttendanceScore());
+        return back;
+    }
+
+    public double calcAttendanceScore() {
+        double score;
+        switch (attendance) {
+            case YES:
+                score = day.getAttendanceValue();
+                break;
+            case LATE:
+                score = day.getAttendanceValue() / 2;
+                break;
+            case NO:
+                score = -day.getAttendanceValue();
+                break;
+            case SICK:
+            default:
+                score = 0;
+                break;
+        }
+        return score;
+    }
+
 }
