@@ -53,7 +53,8 @@ public class EmailServiceImpl implements EmailService {
                 messageHelper.setTo(mail.getEmail());
                 messageHelper.setFrom(emailFrom);
                 messageHelper.setSubject(mail.getSubject());
-                messageHelper.setText(mail.getBody());
+                messageHelper.setText(mail.getBody(), true);
+
                 mailSender.send(message);
                 logger.info("Mail for {} sent successfully", mail.getEmail());
                 mail.setSent(true);
