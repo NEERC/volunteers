@@ -18,11 +18,14 @@
                     <label for="registration" class="label-success"></label>
                 </div>
             </li>
-            <li><a href="#eventsList" data-toggle="collapse" aria-expanded="true" aria-controls="eventsList">
-                <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
-                <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
-                <span th:text="#{volunteers.admin.menu.days}">Events</span>
-            </a>
+            <li th:unless="${isUser}"><a th:href="@{ (${isUser} ? '/' : '/admin/year/'+${year.id}+'/')}"
+                                         th:text="#{volunteers.admin.menu.volunteers}">Volunteers</a></li>
+            <li>
+                <a href="#eventsList" data-toggle="collapse" aria-expanded="true" aria-controls="eventsList">
+                    <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                    <span th:text="#{volunteers.admin.menu.days}">Days</span>
+                </a>
                 <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm"
                         th:unless="${isUser}">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
@@ -43,30 +46,65 @@
                 </ul>
             </li>
             <li th:unless="${isUser}">
-                <a th:href="@{/admin/events/}" class="collapsed" th:text="#{volunteers.calendar.events.edit}">Edit
-                    events</a>
-            </li>
-            <li>
-                <a th:href="@{${isUser}? '/position/':'/admin/position/'}" class="collapsed"
-                   th:text="#{volunteers.admin.menu.positions}">
-                    Positions</a>
-            </li>
-            <li>
-                <a th:href="@{${isUser}?'/hall/':'/admin/hall/'}" class="collapsed"
-                   th:text="#{volunteers.admin.menu.halls}">
-                    Halls</a>
+                <a th:href="@{/admin/email}" class="collapsed" th:text="#{volunteers.admin.menu.email}">Send email</a>
             </li>
             <li th:unless="${isUser}">
-                <a th:href="@{/admin/medals/}" class="collapsed" th:text="#{volunteers.admin.menu.medals}">Medals</a>
+                <a th:href="@{/admin/results/}" class="collapsed"
+                   th:text="#{volunteers.admin.menu.results}">Show results</a>
             </li>
 
             <li th:unless="${isUser}">
-                <a th:href="@{/admin/results/}" class="collapsed" th:text="#{volunteers.admin.menu.results}">Show
-                    results</a>
+                <a href="#baseData" th:classappend="${
+                    #httpServletRequest.requestURI.contains('position') ||
+                    #httpServletRequest.requestURI.contains('hall') ||
+                    #httpServletRequest.requestURI.contains('events') ||
+                    #httpServletRequest.requestURI.contains('medals')
+                    } ? '' : 'collapsed'" data-toggle="collapse" th:attr="aria-expanded=${
+                    #httpServletRequest.requestURI.contains('position') ||
+                    #httpServletRequest.requestURI.contains('hall') ||
+                    #httpServletRequest.requestURI.contains('events') ||
+                    #httpServletRequest.requestURI.contains('medals')
+                    }" aria-controls="baseData">
+                    <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
+                    <span th:text="#{volunteers.admin.menu.settings}">Settings</span>
+                </a>
+                <ul class="collapse" id="baseData"  th:classappend="${
+                    #httpServletRequest.requestURI.contains('position') ||
+                    #httpServletRequest.requestURI.contains('hall') ||
+                    #httpServletRequest.requestURI.contains('events') ||
+                    #httpServletRequest.requestURI.contains('medals')
+                    } ? 'in' : ''">
+                    <li>
+                        <a th:href="@{'/admin/position/'}"
+                           th:text="#{volunteers.admin.menu.positions}">Positions</a>
+                    </li>
+                    <li>
+                        <a th:href="@{'/admin/hall/'}"
+                           th:text="#{volunteers.admin.menu.halls}">Halls</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/admin/events/}" class="collapsed"
+                           th:text="#{volunteers.calendar.events.edit}">Calendar</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/admin/medals/}" class="collapsed"
+                           th:text="#{volunteers.admin.menu.medals}">Medals</a>
+                    </li>
+
+                </ul>
             </li>
-            <li th:unless="${isUser}">
-                <a th:href="@{/admin/email}" class="collapsed" th:text="#{volunteers.admin.menu.email}">Send email</a>
-            </li>
+            <th:block th:if="${isUser}">
+                <li>
+                    <a th:href="@{'/position/'}" class="collapsed"
+                       th:text="#{volunteers.admin.menu.positions}">Positions</a>
+                </li>
+                <li>
+                    <a th:href="@{'/hall/'}" class="collapsed"
+                       th:text="#{volunteers.admin.menu.halls}">Halls</a>
+                </li>
+            </th:block>
+
             <li th:unless="${isUser}">
                 <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">
                     <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
@@ -200,7 +238,7 @@
                             <button type="button" class="btn btn-default" data-dismiss="modal"
                                     th:text="#{volunteers.form.button.close}">Close
                             </button>
-                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.day.button.edit}">Edit
+                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.day.button.edit}">Save
                             </button>
                         </div>
                     </form>

@@ -10,7 +10,23 @@
             method="post">
         <div class="table-responsive">
             <input type="hidden" th:value="${day.id}" name="day"/>
-
+            <div class="text-center top-buttons-panel" th:unless="${isUser}">
+                <!--<th:block th:if="${assessments}">
+                    <input class="btn btn-primary" role="button" type="submit" value="Save assessments"/>
+                    <button type="button" class="btn btn-default" data-toggle="modal"
+                            data-target="#assessmentForm" th:text="#{volunteers.day.button.addAssessment}">
+                        Add assessments
+                    </button>
+                </th:block>-->
+                <th:block th:unless="${assessments} or ${attendance}">
+                    <a th:href="@{'/admin/day/'+${day.id}+'/edit/'}" class="btn btn-default"
+                       role="button" th:text="#{volunteers.day.button.edit}">Edit</a>
+                    <a th:href="@{'/admin/day/'+${day.id}+'/attendance/'}" class="btn btn-default"
+                       role="button" th:text="#{volunteers.day.button.editAttendance}">Set attendance</a>
+                    <a th:href="@{'/admin/day/'+${day.id}+'/assessments'}" class="btn btn-default"
+                       role="button" th:text="#{volunteers.day.button.editAssessments}">Set assessments</a>
+                </th:block>
+            </div>
             <table class="table table-hover table-bordered table-fixed">
                 <thead>
                     <tr>
@@ -42,7 +58,7 @@
                 </thead>
                 <tbody>
                     <tr th:if="${attendance}">
-                        <td colspan="4"></td>
+                        <td colspan="5"></td>
                         <td>
                             <select class="form-control" onchange="selectAll(this)" th:id="hall">
                                 <option disabled="disabled" selected="selected" value=""></option>
@@ -55,7 +71,7 @@
                     <th:block th:each="hall:${halls}">
                         <tr>
                             <td th:text="${hall.name}" th:rowspan="${hallUser.get(hall).size()+1}"></td>
-                            <td colspan="3" th:if="${attendance}"></td>
+                            <td colspan="4" th:if="${attendance}"></td>
                             <td th:if="${attendance}">
                                 <select class="form-control" onchange="selectAll(this)" th:id="hall+${hall.id}+'_'">
                                     <option disabled="disabled" selected="selected" value=""></option>
@@ -88,16 +104,16 @@
                                     <td th:unless="${attendance} or ${assessment}"
                                         th:text="${attendanceMap.get(user.attendance)}"></td>
                                     <td th:if="${assessments}" th:id="'user'+${user.id}">
-                                        <ul class="list-group-horizontal">
+                                        <ul class="flat-list">
                                             <th:block th:each="a: ${user.assessments}">
-                                                <li class="list-group-item">
+                                                <li class="flat-list-item">
                                                     <button type="button" class="btn btn-default btn-xs" data-toggle="tooltip"
                                                             th:title="${a.value}"
                                                             th:text="${a.comment}" th:id="${a.id}"
                                                             th:onclick="'showForm('+${user.id}+', '+${a.id}+', '+${a.value}+', \''+${a.comment}+'\');'"></button>
                                                 </li>
                                             </th:block>
-                                            <li class="list-group-item">
+                                            <li class="flat-list-item">
                                                 <button type="button" class="btn btn-primary btn-xs" data-toggle="tooltip"
                                                         th:title="#{volunteers.day.button.addAssessment}"
                                                         th:onclick="'openForm('+${user.id}+');'">

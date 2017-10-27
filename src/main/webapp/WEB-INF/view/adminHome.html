@@ -8,17 +8,19 @@
 <div th:fragment="content" class="col-md-10">
     <table class="table table-hover">
         <thead>
+        <th th:text="#{volunteers.contacts.badgeNameCyr}"> Имя</th>
         <th th:text="#{volunteers.contacts.badgeName}">Badge name</th>
+        <th th:text="#{volunteers.contacts.group}">Group</th>
         <th th:text="#{volunteers.contacts.email}">Email</th>
         <th th:text="#{volunteers.contacts.phone}">Phone</th>
-        <th th:text="#{volunteers.contacts.group}">Group</th>
         </thead>
         <tbody>
         <tr th:each="user : ${users}">
+            <td th:text="${user.user.badgeNameCyr}"></td>
             <td th:text="${user.user.badgeName}"></td>
+            <th th:text="${user.group}"></th>
             <td th:text="${user.user.confirmed}?${user.user.email}:${user.user.oldEmail}"></td>
             <td th:text="${user.user.phone}"></td>
-            <th th:text="${user.group}"></th>
         </tr>
         </tbody>
     </table>

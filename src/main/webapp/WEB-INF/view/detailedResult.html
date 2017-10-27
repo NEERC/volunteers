@@ -6,22 +6,38 @@
 </head>
 <body>
 <div th:fragment="content" class="col-md-10">
-    <table class="table table-hover table-fixed">
+    <h3 th:text="'Assessment for ' + ${assessmentuser.user.badgeNameCyr}">
+
+    </h3>
+    <table class="table table-hover table-bordered">
         <thead>
-        <th th:text="#{volunteers.result.details.score}" class="text-center">
-
-        </th>
-        <th th:text="#{volunteers.result.details.comment}" class="text-center">
-
-        </th>
+            <tr>
+                <th th:text="#{volunteers.result.details.what}" class="text-center"></th>
+                <th th:text="#{volunteers.result.details.score}" class="text-center"></th>
+                <th th:text="#{volunteers.result.details.comment}"></th>
+            </tr>
         </thead>
         <tbody>
-        <th:block th:each="row:${table}">
-            <tr>
-                <td th:text="${row.value}" class="text-center"></td>
-                <td th:text="${row.comment}" class="text-center"></td>
-            </tr>
-        </th:block>
+            <th:block th:each="day:${assessmentuser.userDays}">
+                <tr>
+                    <th class="text-center" th:text="${day.day.name}"></th>
+                    <th class="text-center" th:text="${day.totalAssessment()}"></th>
+                    <th  th:text="${day.totalAssessmentComment()}"></th>
+                </tr>
+                <tr>
+                    <td class="text-right" th:text="#{volunteers.result.details.attendance}">Attendance</td>
+                    <td class="text-center" th:text="${assessmentattendance.get(day.id).key}"></td>
+                    <td th:text="${assessmentattendance.get(day.id).value}"></td>
+                </tr>
+                <th:block th:each="ass,assi:${day.assessments}">
+                <tr>
+                    <td  class="text-right" th:if="${assi.index}==0" th:rowspan="${day.assessments.size()}"
+                         th:text="#{volunteers.result.details.extra}">Extra</td>
+                    <td th:text="${ass.value}" class="text-center"></td>
+                    <td th:text="${ass.comment}"></td>
+                </tr>
+                </th:block>
+            </th:block>
         </tbody>
     </table>
 </div>
