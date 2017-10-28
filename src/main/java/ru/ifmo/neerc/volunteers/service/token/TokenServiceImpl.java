@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +23,7 @@ public class TokenServiceImpl implements TokenService {
     private static final String CLIENT_ID = "volunteers";
 
     private final AuthorizationServerTokenServices tokenServices;
+    private final ConsumerTokenServices consumerTokenServices;
 
     @Override
     public String getToken() {
@@ -46,5 +48,10 @@ public class TokenServiceImpl implements TokenService {
 
         OAuth2AccessToken token = tokenServices.createAccessToken(authentication);
         return token.getValue();
+    }
+
+    @Override
+    public void revokeToken(String token) {
+        consumerTokenServices.revokeToken(token);
     }
 }

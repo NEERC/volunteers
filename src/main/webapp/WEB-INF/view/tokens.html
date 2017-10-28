@@ -6,7 +6,17 @@
 </head>
 <body>
     <div th:fragment="content" class="col-md-10">
-        <div class="well" th:text="${token}"></div>
+        <ul class="list-group">
+            <form th:action="@{/admin/tokens}" method="post">
+                <li class="list-group-item clearfix">
+                    <code th:text="${token}"></code>
+                    <input type="hidden" name="_method" value="delete"/>
+                    <input type="hidden" name="token" th:value="${token}"/>
+                    <button class="btn btn-danger btn-xs pull-right" type="submit"
+                            th:text="#{volunteers.tokens.regenerate}">Regenerate</button>
+                </li>
+            </form>
+        </ul>
     </div>
 </body>
 </html>

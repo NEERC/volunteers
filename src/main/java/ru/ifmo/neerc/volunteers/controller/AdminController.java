@@ -1,6 +1,8 @@
 package ru.ifmo.neerc.volunteers.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
@@ -47,6 +49,7 @@ import java.util.stream.Collectors;
 @Layout("publicAdmin")
 @EnableTransactionManagement
 @AllArgsConstructor
+@Slf4j
 public class AdminController {
 
     private final YearRepository yearRepository;
@@ -764,5 +767,13 @@ public class AdminController {
         utils.setModelForAdmin(model, user);
         model.addAttribute("token", tokenService.getToken());
         return "tokens";
+    }
+
+    @DeleteMapping("/tokens")
+    public String revokeToken(@RequestParam final String token, final Authentication authentication) {
+        tokenService.revokeToken(token);
+        User user = userService.getUserByAuthentication(authentication);
+        log.info("User {} revoked token {}", user.getEmail(), token);
+        return "redirect:/admin/tokens";
     }
 }
