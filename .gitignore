@@ -35,5 +35,7 @@ src/main/java/ru/ifmo/neerc/volunteers/bean/
 src/main/java/ru/ifmo/neerc/volunteers/lib/
 src/main/webapp/fonts/
 
-data.sql
 src/main/webapp/ckeditor
+dump.sql
+test.yml
+/data.sql
