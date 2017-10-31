@@ -18,6 +18,7 @@ import ru.ifmo.neerc.volunteers.config.SecurityConfig;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.ChangePasswordForm;
 import ru.ifmo.neerc.volunteers.form.EmailForm;
+import ru.ifmo.neerc.volunteers.form.UserEditForm;
 import ru.ifmo.neerc.volunteers.form.UserForm;
 import ru.ifmo.neerc.volunteers.repository.ResetPasswordTokenRepository;
 import ru.ifmo.neerc.volunteers.repository.RoleRepository;
@@ -184,5 +185,21 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         User userDetails = (User) authentication.getPrincipal();
         userDetails.setEmail(emailForm.getEmail());
+    }
+
+    @Override
+    public void editUser(final User user, final UserEditForm editForm) {
+        user.setFirstName(editForm.getFirstName());
+        user.setLastName(editForm.getLastName());
+        user.setFirstNameCyr(editForm.getFirstNameCyr());
+        user.setLastNameCyr(editForm.getLastNameCyr());
+        user.setBadgeName(editForm.getBadgeName());
+        user.setBadgeNameCyr(editForm.getBadgeNameCyr());
+        user.setPhone(editForm.getPhone());
+
+        Role role = roleRepository.findByName(editForm.isAdministrator() ? "ROLE_ADMIN" : "ROLE_USER");
+        user.setRole(role);
+
+        userRepository.save(user);
     }
 }

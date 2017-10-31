@@ -22,6 +22,7 @@ import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.HallForm;
 import ru.ifmo.neerc.volunteers.form.MailForm;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
+import ru.ifmo.neerc.volunteers.form.UserEditForm;
 import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.*;
@@ -783,5 +784,31 @@ public class AdminController {
         utils.setModelForAdmin(model, user);
         model.addAttribute("users", userRepository.findAll());
         return "users";
+    }
+
+    @GetMapping("/users/{id}")
+    public String getUser(@PathVariable final long id, final Model model, final Authentication authentication) {
+        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+
+        if (!model.containsAttribute("editForm")) {
+            User user = userRepository.findOne(id);
+            model.addAttribute("editForm", new UserEditForm(user));
+        }
+
+        return "userEdit";
+    }
+
+    @PutMapping("/users/{id}")
+    public String editUser(@PathVariable final long id, @Valid @ModelAttribute final UserEditForm editForm, final BindingResult result, final RedirectAttributes attributes, final Model model, final Authentication authentication) {
+        if (result.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.editForm", result);
+            attributes.addFlashAttribute("editForm", editForm);
+        } else {
+            User user = userRepository.findOne(id);
+            userService.editUser(user, editForm);
+            attributes.addFlashAttribute("isUserSaved", true);
+        }
+
+        return "redirect:/admin/users/" + id;
     }
 }
