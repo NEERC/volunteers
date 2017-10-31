@@ -494,23 +494,6 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/add")
-    public @ResponseBody
-    JsonResponse addAdmin(@RequestParam final long userId) {
-        JsonResponse<String> response = new JsonResponse<>();
-        try {
-            final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
-            final User user = userRepository.findOne(userId);
-            user.setRole(roleAdmin);
-            userRepository.save(user);
-            response.setStatus(Status.OK);
-        } catch (Exception e) {
-            response.setStatus(Status.FAIL);
-            response.setResult(e.getMessage());
-        }
-        return response;
-    }
-
     @GetMapping("/day/{id}/attendance")
     public String attendance(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);

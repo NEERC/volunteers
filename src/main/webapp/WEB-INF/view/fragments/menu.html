@@ -106,23 +106,6 @@
             </th:block>
 
             <li th:unless="${isUser}">
-                <a href="#adminList" class="collapsed" aria-expanded="false" data-toggle="collapse" aria-controls="adminList">
-                    <span class="glyphicon glyphicon-chevron-down expanded" aria-hidden="true"></span>
-                    <span class="glyphicon glyphicon-chevron-up collapsed" aria-hidden="true"></span>
-                    <span th:text="#{volunteers.admin.menu.admins}">Admins</span>
-                </a>
-                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#adminForm">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                </button>
-                <ul class="collapse" id="adminList">
-                    <th:block th:each="admin:${roleAdmin}">
-                        <li>
-                            <span th:text="${admin.badgeName}" style="color: #337ab7"></span>
-                        </li>
-                    </th:block>
-                </ul>
-            </li>
-            <li th:unless="${isUser}">
                 <a th:href="@{/admin/users}" th:text="#{volunteers.admin.menu.users}">Users</a>
             </li>
             <li th:unless="${isUser}">
@@ -161,36 +144,6 @@
                                 <span class="help-block" th:if="${#fields.hasErrors('information')}"
                                       th:text="#{volunteers.form.day.information.error.empty}"></span>
                             </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal"
-                                    th:text="#{volunteers.form.button.close}">Close
-                            </button>
-                            <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.add}">Add
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="adminForm" tabindex="-1" role="dialog" aria-labelledby="adminLabel"
-             th:unless="${isUser}">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <form method="post" id="formAdmin">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="adminLabel" th:text="#{volunteers.form.admin.header}">Add new
-                                admin</h4>
-                        </div>
-                        <div class="modal-body">
-                            <select class="form-control" name="userId" id="userId">
-                                <th:block th:each="user : ${roleUsers}">
-                                    <option th:value="${user.id}" th:text="${user.badgeName}"></option>
-                                </th:block>
-                            </select>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal"
@@ -287,28 +240,6 @@
                         console.log("error", e);
                     }
                 })
-            });
-            $('#formAdmin').validate({
-                submitHandler: function (form) {
-                    var data = $(form).serialize();
-                    var id = $("#formAdmin").find('select[name="userId"]').val();
-                    var name = $('#userId option[value="' + id + '"]').html();
-                    $.ajax({
-                        type: "post",
-                        data: data,
-                        url: /*[[@{/admin/add/}]]*/"/admin/add/",
-                        dataType: "json",
-                        success: function (result) {
-                            if (result.status === "OK") {
-                                $('#userId option[value="' + id + '"]').remove();
-                                $('#adminList').append('<li><span style="color: #337ab7">' + name + '</span></li>');
-                                $("#adminForm").modal("hide");
-                            } else {
-                                console.log(result.result);
-                            }
-                        }
-                    })
-                }
             });
             $('#formEditDay').validate({
                 rules: {
