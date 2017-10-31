@@ -41,7 +41,7 @@ public class EmailServiceImpl implements EmailService {
         mailRepository.save(messages);
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 10 * 1000)
     public void sendMessages() {
         final String emailFrom = messageSource.getMessage("volunteers.email.from", null, "neerc@mail.ifmo.ru", locale);
         Iterable<Mail> mails = mailRepository.findAllBySent(false);
