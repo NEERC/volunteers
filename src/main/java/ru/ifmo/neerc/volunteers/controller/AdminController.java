@@ -776,4 +776,12 @@ public class AdminController {
         log.info("User {} revoked token {}", user.getEmail(), token);
         return "redirect:/admin/tokens";
     }
+
+    @GetMapping("/users")
+    public String getUsers(final Model model, final Authentication authentication) {
+        User user = userService.getUserByAuthentication(authentication);
+        utils.setModelForAdmin(model, user);
+        model.addAttribute("users", userRepository.findAll());
+        return "users";
+    }
 }

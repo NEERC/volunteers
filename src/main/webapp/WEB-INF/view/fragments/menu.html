@@ -123,6 +123,9 @@
                 </ul>
             </li>
             <li th:unless="${isUser}">
+                <a th:href="@{/admin/users}" th:text="#{volunteers.admin.menu.users}">Users</a>
+            </li>
+            <li th:unless="${isUser}">
                 <a th:href="@{/admin/tokens}" th:text="#{volunteers.admin.menu.tokens}">API Tokens</a>
             </li>
         </ul>
