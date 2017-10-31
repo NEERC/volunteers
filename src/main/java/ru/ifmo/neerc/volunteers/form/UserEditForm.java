@@ -42,7 +42,7 @@ public class UserEditForm {
 
     private boolean chatLoginAllowed;
 
-    @Pattern(regexp = "[a-zA-Z0-9-_]")
+    @Pattern(regexp = "[a-zA-Z0-9-_]*")
     private String chatAlias;
 
     public UserEditForm() {
@@ -56,6 +56,10 @@ public class UserEditForm {
         badgeName = user.getBadgeName();
         badgeNameCyr = user.getBadgeNameCyr();
         phone = user.getPhone();
+
         administrator = user.getRole().getName().equals("ROLE_ADMIN");
+
+        chatLoginAllowed = user.isChatLoginAllowed();
+        chatAlias = user.getChatAlias();
     }
 }

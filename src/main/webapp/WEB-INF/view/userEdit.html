@@ -117,9 +117,32 @@
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox" th:field="*{administrator}"/>
-                                Administrator
+                                <span th:text="#{volunteers.form.userEdit.administrator}" th:remove="tag">Administrator</span>
                             </label>
                         </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-8">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" th:field="*{chatLoginAllowed}"/>
+                                <span th:text="#{volunteers.form.userEdit.chatLoginAllowed}" th:remove="tag">Can login to chat</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" th:class="form-group" th:classappend="${#fields.hasErrors('chatAlias')} ? 'has-error'">
+                    <label for="inputChatAlias" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.userEdit.chatAlias}">Chat alias</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{chatAlias}" class="form-control" id="inputChatAlias"/>
+
+                        <span class="help-block" th:if="${#fields.hasErrors('chatAlias')}"
+                              th:text="#{volunteers.form.userEdit.chatAlias.error.invalid}">Invalid chat alias</span>
                     </div>
                 </div>
 
@@ -172,6 +195,9 @@
                         phone: {
                             required: true,
                             regex: /^\+7[\(]\d{3}[\)]\d{3}[\-]\d{2}[\-]\d{2}$/
+                        },
+                        chatAlias: {
+                            regex: /[a-zA-Z0-9-]*/
                         }
                     },
                     messages: {
@@ -202,6 +228,9 @@
                         phone: {
                             required: /*[[#{volunteers.form.signUp.phone.error.empty}]]*/"",
                             regex: /*[[#{volunteers.form.signUp.phone.error.invalid}]]*/""
+                        },
+                        chatAlias: {
+                            regex: /*[[#{volunteers.form.userEdit.chatAlias.error.invalid}]]*/""
                         }
                     },
                     errorElement: 'span',

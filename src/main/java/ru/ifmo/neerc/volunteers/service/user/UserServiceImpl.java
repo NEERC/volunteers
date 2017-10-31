@@ -200,6 +200,9 @@ public class UserServiceImpl implements UserService {
         Role role = roleRepository.findByName(editForm.isAdministrator() ? "ROLE_ADMIN" : "ROLE_USER");
         user.setRole(role);
 
+        user.setChatLoginAllowed(editForm.isChatLoginAllowed());
+        user.setChatAlias(editForm.getChatAlias());
+
         userRepository.save(user);
     }
 }
