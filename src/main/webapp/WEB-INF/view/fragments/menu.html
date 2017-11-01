@@ -112,6 +112,21 @@
                 <a th:href="@{/admin/tokens}" th:text="#{volunteers.admin.menu.tokens}">API Tokens</a>
             </li>
         </ul>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title" th:text="#{volunteers.chatClient.header}">
+                    Chat
+                </h3>
+            </div>
+            <div class="panel-body">
+                <a th:href="#{volunteers.chatClient.googlePlay.url}">
+                    <img class="img-responsive" alt="Get it on Google Play"
+                         th:alt="#{volunteers.chatClient.googlePlay}" th:src="@{/images/google-play-badge.png}"/>
+                </a>
+            </div>
+        </div>
+
         <!-- Modal -->
 
         <div class="modal fade" id="eventForm" tabindex="-1" role="dialog" aria-labelledby="eventLabel"
