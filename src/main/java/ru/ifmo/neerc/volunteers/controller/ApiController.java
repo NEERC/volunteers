@@ -63,6 +63,11 @@ public class ApiController {
     @GetMapping("/user")
     public ResponseEntity<UserDayDto> getUserDay(@RequestParam final String username, @RequestParam("day") final long dayId) {
         final User user = userRepository.findByEmailIgnoreCase(username);
+
+        if (user.getChatAlias() != null && !user.getChatAlias().isEmpty()) {
+            return ResponseEntity.ok(new UserDayDto(user));
+        }
+
         final Day day = dayRepository.findOne(dayId);
         final Optional<UserDay> userDay = userDayRepository.findByDay(day)
                                                            .stream()
