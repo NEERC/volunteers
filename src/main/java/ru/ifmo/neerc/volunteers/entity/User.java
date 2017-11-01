@@ -64,6 +64,10 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private Set<ApplicationForm> applicationForms;
 
+    private boolean chatLoginAllowed = true;
+
+    private String chatAlias;
+
     public User() {
     }
 

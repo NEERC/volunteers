@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit user</title>
+</head>
+<body>
+    <div th:fragment="content" class="col-md-10">
+        <div class="row">
+            <form action="#" th:object="${editForm}" method="post"
+                class="form-horizontal col-sm-offset-3 col-sm-6" id="editForm">
+                <input type="hidden" name="_method" value="put"/>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <div th:if="${isUserSaved}" th:text="#{volunteers.form.userEdit.saved}"
+                     class="alert alert-success" role="alert">User saved</div>
+
+                <h2 class="col-sm-offset-4" th:text="#{volunteers.form.userEdit.header}">Edit user</h2>
+
+                <div class="form-group" th:class="form-group" th:classappend="${#fields.hasErrors('firstName')} ? 'has-error'">
+                    <label for="inputFirstName" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.signUp.firstName}">First Name</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{firstName}" class="form-control" id="inputFirstName"
+                               placeholder="First name" th:placeholder="#{volunteers.form.signUp.firstName}"
+                               oninput="badgeNameOnInput()"/>
+
+                        <span class="help-block" th:if="${#fields.hasErrors('firstName')}"
+                              th:text="#{volunteers.form.signUp.firstName.error.empty}">Can't be empty</span>
+                    </div>
+                </div>
+
+                <div class="form-group" th:class="form-group" th:classappend="${#fields.hasErrors('lastName')} ? 'has-error'">
+                    <label for="inputLastName" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.signUp.lastName}">Last Name</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{lastName}" class="form-control" id="inputLastName"
+                               placeholder="Last name" th:placeholder="#{volunteers.form.signUp.lastName}"
+                               oninput="badgeNameOnInput()"/>
+
+                        <span class="help-block" th:if="${#fields.hasErrors('lastName')}"
+                              th:text="#{volunteers.form.signUp.lastName.error.empty}">Can't be empty</span>
+                    </div>
+                </div>
+
+                <div class="form-group" th:class="form-group" th:classappend="${#fields.hasErrors('firstNameCyr')} ? 'has-error'">
+                    <label for="inputFirstNameCyr" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.signUp.firstNameCyr}">Имя</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{firstNameCyr}" class="form-control" id="inputFirstNameCyr"
+                               placeholder="Имя" th:placeholder="#{volunteers.form.signUp.firstNameCyr}"
+                               oninput="badgeNameCyrOnInput()"/>
+
+                        <span class="help-block" th:if="${#fields.hasErrors('firstNameCyr')}"
+                              th:text="#{volunteers.form.signUp.firstNameCyr.error.empty}">Can't be empty</span>
+                    </div>
+                </div>
+
+                <div class="form-group" th:class="form-group" th:classappend="${#fields.hasErrors('lastNameCyr')} ? 'has-error'">
+                    <label for="inputLastNameCyr" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.signUp.lastNameCyr}">Фамилия</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{lastNameCyr}" class="form-control" id="inputLastNameCyr"
+                               placeholder="Фамилия" th:placeholder="#{volunteers.form.signUp.lastNameCyr}"
+                               oninput="badgeNameCyrOnInput()"/>
+
+                        <span class="help-block" th:if="${#fields.hasErrors('lastNameCyr')}"
+                              th:text="#{volunteers.form.signUp.lastNameCyr.error.empty}">Can't be empty</span>
+                    </div>
+                </div>
+
+                <div class="form-group" th:class="form-group" th:classappend="${#fields.hasErrors('badgeName')} ? 'has-error'">
+                    <label for="inputBadgeName" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.signUp.badgeName}">Badge name</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{badgeName}" class="form-control" id="inputBadgeName"
+                               placeholder="Badge name" th:placeholder="#{volunteers.form.signUp.badgeName}"/>
+
+                        <span class="help-block" th:if="${#fields.hasErrors('badgeName')}"
+                              th:text="#{volunteers.form.signUp.badgeName.error.empty}">Can't be empty</span>
+                    </div>
+                </div>
+
+                <div class="form-group" th:class="form-group" th:classappend="${#fields.hasErrors('badgeNameCyr')} ? 'has-error'">
+                    <label for="inputBadgeNameCyr" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.signUp.badgeNameCyr}">Имя на бейдже</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{badgeNameCyr}" class="form-control" id="inputBadgeNameCyr"
+                               placeholder="Имя на бейдже" th:placeholder="#{volunteers.form.signUp.badgeNameCyr}"/>
+
+                        <span class="help-block" th:if="${#fields.hasErrors('badgeNameCyr')}"
+                              th:text="#{volunteers.form.signUp.badgeNameCyr.error.empty}">Не может быть пустым</span>
+                    </div>
+                </div>
+
+                <div class="form-group" th:class="form-group" th:classappend="${#fields.hasErrors('phone')} ? 'has-error'">
+                    <label for="inputPhone" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.signUp.phone}">Phone</label>
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{phone}" class="form-control" id="inputPhone"
+                               placeholder="Phone" th:placeholder="#{volunteers.form.signUp.phone}"
+                               pattern="\+7[\(]\d{3}[\)]\d{3}[\-]?\d{2}[\-]?\d{2}"
+                        />
+                        <span class="help-block" th:if="${#fields.hasErrors('phone')}"
+                              th:text="#{volunteers.form.signUp.phone.error.invalid}">Incorrect phone number</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-8">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" th:field="*{administrator}"/>
+                                <span th:text="#{volunteers.form.userEdit.administrator}" th:remove="tag">Administrator</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-8">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" th:field="*{chatLoginAllowed}"/>
+                                <span th:text="#{volunteers.form.userEdit.chatLoginAllowed}" th:remove="tag">Can login to chat</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" th:class="form-group" th:classappend="${#fields.hasErrors('chatAlias')} ? 'has-error'">
+                    <label for="inputChatAlias" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.userEdit.chatAlias}">Chat alias</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{chatAlias}" class="form-control" id="inputChatAlias"/>
+
+                        <span class="help-block" th:if="${#fields.hasErrors('chatAlias')}"
+                              th:text="#{volunteers.form.userEdit.chatAlias.error.invalid}">Invalid chat alias</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-4">
+                        <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.save}">Save</button>
+                        <a th:href="@{/admin/users}" class="btn btn-default"
+                           th:text="#{volunteers.form.button.back}">Back</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <script src="/js/signup.js" th:src="@{/js/signup.js}"></script>
+
+        <script th:inline="javascript">
+            $(function () {
+                $('#inputPhone').mask('+7(999)999-99-99');
+
+                $.validator.addMethod("regex", function (value, element, regexpr) {
+                    return regexpr.test(value);
+                });
+
+                $('#editForm').validate({
+                    rules: {
+                        firstName: {
+                            required: true,
+                            regex: /[a-zA-Z ,.'-]+/
+                        },
+                        lastName: {
+                            required: true,
+                            regex: /[a-zA-Z ,.'-]+/
+                        },
+                        firstNameCyr: {
+                            required: true,
+                            regex: /[а-яА-ЯёЁ ,.'-]+/
+                        },
+                        lastNameCyr: {
+                            required: true,
+                            regex: /[а-яА-ЯёЁ ,.'-]+/
+                        },
+                        badgeName: {
+                            required: true,
+                            regex: /[a-zA-Z ,.'-]+/
+                        },
+                        badgeNameCyr: {
+                            required: true,
+                            regex: /[а-яА-ЯёЁ ,.'-]+/
+                        },
+                        phone: {
+                            required: true,
+                            regex: /^\+7[\(]\d{3}[\)]\d{3}[\-]\d{2}[\-]\d{2}$/
+                        },
+                        chatAlias: {
+                            regex: /[a-zA-Z0-9-]*/
+                        }
+                    },
+                    messages: {
+                        firstName: {
+                            required: /*[[#{volunteers.form.signUp.firstName.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.firstName.error.invalid}]]*/""
+                        },
+                        lastName: {
+                            required: /*[[#{volunteers.form.signUp.lastName.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.lastName.error.invalid}]]*/""
+                        },
+                        firstNameCyr: {
+                            required: /*[[#{volunteers.form.signUp.firstNameCyr.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.firstNameCyr.error.invalid}]]*/""
+                        },
+                        lastNameCyr: {
+                            required: /*[[#{volunteers.form.signUp.lastNameCyr.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.lastNameCyr.error.invalid}]]*/""
+                        },
+                        badgeName: {
+                            required: /*[[#{volunteers.form.signUp.badgeName.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.badgeName.error.invalid}]]*/""
+                        },
+                        badgeNameCyr: {
+                            required: /*[[#{volunteers.form.signUp.badgeNameCyr.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.badgeNameCyr.error.invalid}]]*/""
+                        },
+                        phone: {
+                            required: /*[[#{volunteers.form.signUp.phone.error.empty}]]*/"",
+                            regex: /*[[#{volunteers.form.signUp.phone.error.invalid}]]*/""
+                        },
+                        chatAlias: {
+                            regex: /*[[#{volunteers.form.userEdit.chatAlias.error.invalid}]]*/""
+                        }
+                    },
+                    errorElement: 'span',
+                    errorClass: 'help-block',
+                    highlight: function (element) {
+                        $(element).closest('.form-group').addClass('has-error');
+                    },
+                    unhighlight: function (element) {
+                        $(element).closest('.form-group').removeClass('has-error');
+                    }
+                })
+            });
+        </script>
+
+    </div>
+</body>
+</html>

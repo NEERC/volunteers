@@ -65,10 +65,6 @@ public class Utils {
         if (!model.containsAttribute("newHall")) {
             model.addAttribute("newHall", new HallForm());
         }
-        final Role roleUser = roleRepository.findByName("ROLE_USER");
-        final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
-        model.addAttribute("roleAdmin", roleAdmin.getUsers());
-        model.addAttribute("roleUsers", roleUser.getUsers());
     }
 
     public String getAppUrl(HttpServletRequest request) {

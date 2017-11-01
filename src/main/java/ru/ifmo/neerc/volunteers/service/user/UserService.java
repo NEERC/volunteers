@@ -7,6 +7,7 @@ import ru.ifmo.neerc.volunteers.entity.User;
 import ru.ifmo.neerc.volunteers.entity.Year;
 import ru.ifmo.neerc.volunteers.form.ChangePasswordForm;
 import ru.ifmo.neerc.volunteers.form.EmailForm;
+import ru.ifmo.neerc.volunteers.form.UserEditForm;
 import ru.ifmo.neerc.volunteers.form.UserForm;
 
 import javax.mail.MessagingException;
@@ -40,4 +41,6 @@ public interface UserService {
     void confirmEmail(final User user, final String email);
 
     void changeEmail(final User user, final EmailForm emailForm, Authentication authentication);
+
+    void editUser(final User user, final UserEditForm editForm);
 }

@@ -22,6 +22,7 @@ import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.HallForm;
 import ru.ifmo.neerc.volunteers.form.MailForm;
 import ru.ifmo.neerc.volunteers.form.PositionForm;
+import ru.ifmo.neerc.volunteers.form.UserEditForm;
 import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.*;
@@ -493,23 +494,6 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/add")
-    public @ResponseBody
-    JsonResponse addAdmin(@RequestParam final long userId) {
-        JsonResponse<String> response = new JsonResponse<>();
-        try {
-            final Role roleAdmin = roleRepository.findByName("ROLE_ADMIN");
-            final User user = userRepository.findOne(userId);
-            user.setRole(roleAdmin);
-            userRepository.save(user);
-            response.setStatus(Status.OK);
-        } catch (Exception e) {
-            response.setStatus(Status.FAIL);
-            response.setResult(e.getMessage());
-        }
-        return response;
-    }
-
     @GetMapping("/day/{id}/attendance")
     public String attendance(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
@@ -775,5 +759,39 @@ public class AdminController {
         User user = userService.getUserByAuthentication(authentication);
         log.info("User {} revoked token {}", user.getEmail(), token);
         return "redirect:/admin/tokens";
+    }
+
+    @GetMapping("/users")
+    public String getUsers(final Model model, final Authentication authentication) {
+        User user = userService.getUserByAuthentication(authentication);
+        utils.setModelForAdmin(model, user);
+        model.addAttribute("users", userRepository.findAll());
+        return "users";
+    }
+
+    @GetMapping("/users/{id}")
+    public String getUser(@PathVariable final long id, final Model model, final Authentication authentication) {
+        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+
+        if (!model.containsAttribute("editForm")) {
+            User user = userRepository.findOne(id);
+            model.addAttribute("editForm", new UserEditForm(user));
+        }
+
+        return "userEdit";
+    }
+
+    @PutMapping("/users/{id}")
+    public String editUser(@PathVariable final long id, @Valid @ModelAttribute final UserEditForm editForm, final BindingResult result, final RedirectAttributes attributes, final Model model, final Authentication authentication) {
+        if (result.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.editForm", result);
+            attributes.addFlashAttribute("editForm", editForm);
+        } else {
+            User user = userRepository.findOne(id);
+            userService.editUser(user, editForm);
+            attributes.addFlashAttribute("isUserSaved", true);
+        }
+
+        return "redirect:/admin/users/" + id;
     }
 }

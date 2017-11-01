@@ -41,7 +41,7 @@ public class ApiController {
     @PostMapping("/auth")
     public ResponseEntity<Void> auth(@RequestParam final String username, @RequestParam final String password) {
         User user = userRepository.findByEmailIgnoreCase(username);
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+        if (user != null && passwordEncoder.matches(password, user.getPassword()) && user.isChatLoginAllowed()) {
             log.debug("Authenticated user {}", username);
             return ResponseEntity.ok(null);
         }
