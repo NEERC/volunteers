@@ -120,9 +120,14 @@
                 </h3>
             </div>
             <div class="panel-body">
-                <a th:href="#{volunteers.chatClient.googlePlay.url}">
+                <a th:href="#{volunteers.chatClient.googlePlay.url}" class="btn-block">
                     <img class="img-responsive" alt="Get it on Google Play"
                          th:alt="#{volunteers.chatClient.googlePlay}" th:src="@{/images/google-play-badge.png}"/>
+                </a>
+                <div class="help-block"></div> <!-- Vertical spacing -->
+                <a th:href="@{#{volunteers.chatClient.apk.url}}" class="btn btn-success btn-block">
+                    <span class="glyphicon glyphicon-download-alt"></span>
+                    <span th:text="#{volunteers.chatClient.apk}" th:remove="tag">Download APK</span>
                 </a>
             </div>
         </div>
