@@ -27,6 +27,7 @@ import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.*;
 import ru.ifmo.neerc.volunteers.service.Utils;
 import ru.ifmo.neerc.volunteers.service.day.DayService;
+import ru.ifmo.neerc.volunteers.service.experience.ExperienceService;
 import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.token.TokenService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
@@ -72,6 +73,7 @@ public class AdminController {
     private final YearService yearService;
     private final DayService dayService;
     private final TokenService tokenService;
+    private final ExperienceService experienceService;
     private final Utils utils;
 
     @GetMapping
@@ -797,7 +799,7 @@ public class AdminController {
     }
 
     @GetMapping("/day/{id}/csv")
-    public void getBadges(HttpServletResponse response, @PathVariable("id") long id) throws IOException {
+    public void getBadges(final HttpServletResponse response, @PathVariable("id") long id) throws IOException {
         response.setContentType("text/csv");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"file.csv\"");
@@ -809,5 +811,13 @@ public class AdminController {
         });
         writer.flush();
         writer.close();
+    }
+
+    @GetMapping("/stars")
+    public String stars(Model model, Authentication authentication) {
+        Year year = userService.getUserByAuthentication(authentication).getYear();
+        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+        model.addAttribute("medals", experienceService.getMedals(year));
+        return "star";
     }
 }

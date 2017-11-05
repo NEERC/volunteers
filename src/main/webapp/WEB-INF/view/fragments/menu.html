@@ -52,6 +52,10 @@
                 <a th:href="@{/admin/results/}" class="collapsed"
                    th:text="#{volunteers.admin.menu.results}">Show results</a>
             </li>
+            <li th:unless="${isUser}">
+                <a th:href="@{/admin/stars/}" class="collapsed"
+                   th:text="#{volunteers.admin.menu.users_medals}">Medals</a>
+            </li>
 
             <li th:unless="${isUser}">
                 <a href="#baseData" th:classappend="${
