@@ -25,6 +25,8 @@
                        role="button" th:text="#{volunteers.day.button.editAttendance}">Set attendance</a>
                     <a th:href="@{'/admin/day/'+${day.id}+'/assessments'}" class="btn btn-default"
                        role="button" th:text="#{volunteers.day.button.editAssessments}">Set assessments</a>
+                    <a th:href="@{'/admin/day/'+${day.id}+'/csv'}" class="btn btn-default"
+                       role="button" th:text="#{volunteers.day.button.csv}">CSV file</a>
                 </th:block>
             </div>
             <table class="table table-hover table-bordered table-fixed">

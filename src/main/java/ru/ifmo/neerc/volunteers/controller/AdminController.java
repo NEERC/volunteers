@@ -2,7 +2,6 @@ package ru.ifmo.neerc.volunteers.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
@@ -35,8 +34,10 @@ import ru.ifmo.neerc.volunteers.service.year.YearService;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
@@ -793,5 +794,20 @@ public class AdminController {
         }
 
         return "redirect:/admin/users/" + id;
+    }
+
+    @GetMapping("/day/{id}/csv")
+    public void getBadges(HttpServletResponse response, @PathVariable("id") long id) throws IOException {
+        response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"file.csv\"");
+        PrintWriter writer = response.getWriter();
+        writer.write("Team,Role,Name,NameCyr\n");
+        dayRepository.findOne(id).getUsers().forEach(u -> {
+            User user = u.getUserYear().getUser();
+            writer.write(u.getHall().getName() + "," + u.getPosition().getName() + "," + user.getBadgeName() + "," + user.getBadgeNameCyr() + "\n");
+        });
+        writer.flush();
+        writer.close();
     }
 }
