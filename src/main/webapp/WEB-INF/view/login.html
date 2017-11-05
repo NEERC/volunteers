@@ -30,6 +30,13 @@
             </button>
             <a th:href="@{/signup}" class="btn btn-link" role="button" th:text="#{volunteers.login.signUp}">Sign up</a>
         </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" name="remember-me"/>
+                <span th:text="#{volunteers.login.rememberme}">Remember me</span>
+            </label>
+        </div>
+
     </form>
 
     <div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="label">

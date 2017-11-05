@@ -55,7 +55,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .csrf()
         .and()
             .exceptionHandling()
-                .accessDeniedPage("/403");
+                .accessDeniedPage("/403")
+                .and()
+                .rememberMe()
+                .key("bf40d4b2-2968-406a-b553-d8fff3b515cc")
+                .rememberMeParameter("remember-me")
+                .alwaysRemember(true)
+                //.useSecureCookie(true)
+                .rememberMeCookieName("my-remember-me")
+                .tokenValiditySeconds(7 * 24 * 60 * 60);
         // @formatter:on
     }
 
