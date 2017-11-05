@@ -805,7 +805,7 @@ public class AdminController {
         writer.write("Team,Role,Name,NameCyr\n");
         dayRepository.findOne(id).getUsers().forEach(u -> {
             User user = u.getUserYear().getUser();
-            writer.write(u.getHall().getName() + "," + u.getPosition().getName() + "," + user.getBadgeName() + "," + user.getBadgeNameCyr() + "\n");
+            writer.write(u.getHall().getName() + "," + u.getPosition().getName() + ",\"" + user.getFirstName() + "\n" + user.getLastName() + "\",\"" + user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"\n");
         });
         writer.flush();
         writer.close();
