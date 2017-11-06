@@ -60,7 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .rememberMe()
                 .key("bf40d4b2-2968-406a-b553-d8fff3b515cc")
                 .rememberMeParameter("remember-me")
-                //.alwaysRemember(true)
+                .alwaysRemember(true)
                 //.useSecureCookie(true)
                 .rememberMeCookieName("my-remember-me")
                 .tokenValiditySeconds(7 * 24 * 60 * 60);
