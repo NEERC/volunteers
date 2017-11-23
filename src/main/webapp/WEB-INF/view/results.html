@@ -41,13 +41,13 @@
                        th:text="${applicationForm.user.badgeName}"></a>
                 </td>
                 <td>
-                    <label th:text="${medals.get(applicationForm.id).name}"></label>
-                    <span th:text="'('+${experience.get(applicationForm.id)}+')'"></span>
+                    <label th:text="${medals.get(applicationForm).name}"></label>
+                    <span th:text="'('+${experience.get(applicationForm)}+')'"></span>
                 </td>
                 <td>
-                    <label th:text="${assessments.get(applicationForm.id)}">
+                    <label th:text="${assessments.get(applicationForm)}">
                     </label>
-                    <th:block th:each="day: ${assessmentsGroupByDays.get(applicationForm.id)}">
+                    <th:block th:each="day: ${assessmentsGroupByDays.get(applicationForm)}">
                         <span th:text="${day}"></span>
                     </th:block>
                 </td>

@@ -15,7 +15,6 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
-import org.thymeleaf.util.StringUtils;
 import ru.ifmo.neerc.dev.Pair;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.HallForm;
@@ -614,75 +613,19 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String showResults(final Model model, final Authentication authentication, final Locale locale) {
         final Year year = userService.getUserByAuthentication(authentication).getYear();
-        final Set<ApplicationForm> users = year.getUsers();
-        final Set<ApplicationForm> needToSave = new HashSet<>();
-        final int countEvents = year.getDays().size();
-        final Map<Long, Integer> assessments = new HashMap<>();
-        final Map<Long, List<String>> assessmentsGroupByDays = new HashMap<>();
-        final Map<Long, Double> experience = new HashMap<>();
-        final Map<ApplicationForm, Set<Hall>> halls = new HashMap<>();
-        Map<Attendance, String> attendanceComments = getAttendanceMap();
-        for (final ApplicationForm user : users) {
-            double exp = 0;
-            double totalExp = 0;
-            final int[] assessment = {0};
-            assessmentsGroupByDays.put(user.getId(), new ArrayList<>());
-            halls.put(user, new HashSet<>());
-            for (final UserDay userDay : user.getUserDays()) {
-                if (userDay.getAttendance() == Attendance.YES || userDay.getAttendance() == Attendance.LATE) {
-                    exp += userDay.getPosition().getValue() / countEvents;
-                }
 
-                Set<Assessment> allAssessments = new HashSet<>(userDay.getAssessments());
-                allAssessments.add(userDay.createFakeAssessmentByAttendace(attendanceComments.get(userDay.getAttendance())));
-
-                halls.get(user).add(userDay.getHall());
-                allAssessments.forEach(
-                        userEventAssessment -> assessment[0] += userEventAssessment.getValue());
-
-                String str = StringUtils.join(allAssessments.stream().map(Assessment::getValue).collect(Collectors.toList()), ", ");
-                assessmentsGroupByDays.get(user.getId()).add("(" + str + ")");
-            }
-            for (final ApplicationForm applicationForm : user.getUser().getApplicationForms()) {
-                totalExp += applicationForm.getExperience();
-            }
-            totalExp -= user.getExperience();
-            totalExp += exp;
-            if (exp != user.getExperience()) {
-                user.setExperience(exp);
-                needToSave.add(user);
-            }
-            assessments.put(user.getId(), assessment[0]);
-            experience.put(user.getId(), totalExp);
-        }
-        applicationFormRepository.save(needToSave);
-        final List<ApplicationForm> applicationForms = new ArrayList<>(users);
-        applicationForms.sort(
-                (user1, user2) -> {
-                    if (experience.get(user1.getId()).equals(experience.get(user2.getId()))) {
-                        return Integer.compare(assessments.get(user2.getId()), assessments.get(user1.getId()));
-                    } else {
-                        return Double.compare(experience.get(user2.getId()), experience.get(user1.getId()));
-                    }
-                }
-        );
-        final Map<Long, Medal> userMedals = new HashMap<>();
-        final List<Medal> medals = new ArrayList<>(medalRepository.findAll());
-        medals.sort(Comparator.comparing(Medal::getValue).reversed());
-        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medal", locale), -1));
-        for (int i = 0, j = 0; i < applicationForms.size(); i++) {
-            while (medals.get(j).getValue() > experience.get(applicationForms.get(i).getId())) {
-                j++;
-            }
-            userMedals.put(applicationForms.get(i).getId(), medals.get(j));
-        }
         utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+
+        Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> assessments = experienceService.getAssessments(year);
+        Map<ApplicationForm, Double> experience = experienceService.getExperience(year);
+        List<ApplicationForm> applicationForms = experienceService.getApplicationForms(experience, assessments.getKey());
+
         model.addAttribute("applicationForms", applicationForms);
-        model.addAttribute("assessments", assessments);
-        model.addAttribute("assessmentsGroupByDays", assessmentsGroupByDays);
+        model.addAttribute("assessments", assessments.getKey());
+        model.addAttribute("assessmentsGroupByDays", assessments.getValue());
         model.addAttribute("experience", experience);
-        model.addAttribute("medals", userMedals);
-        model.addAttribute("halls", halls);
+        model.addAttribute("medals", experienceService.getNewMedals(applicationForms, experience));
+        model.addAttribute("halls", experienceService.getHalls(year));
         return "results";
     }
 

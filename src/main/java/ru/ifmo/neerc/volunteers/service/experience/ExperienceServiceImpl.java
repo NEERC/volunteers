@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 import ru.ifmo.neerc.dev.Pair;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.repository.ApplicationFormRepository;
@@ -22,33 +23,13 @@ public class ExperienceServiceImpl implements ExperienceService {
     final MessageSource messageSource;
     private final Locale locale = LocaleContextHolder.getLocale();
 
-    @Override
-    public Map<ApplicationForm, Double> getExperiences(Year year) {
-        int countEvents = year.getDays().size();
-        Map<ApplicationForm, Double> expsCurYear = year.getUsers().stream().collect(
-                Collectors.toMap(Function.identity(),
-                        u -> u.getUserDays().stream().map(ud -> (ud.getAttendance() == Attendance.YES || ud.getAttendance() == Attendance.LATE) ? ud.getPosition().getValue() / countEvents : 0.0).reduce(0.0, (a, b) -> a + b)
-                ));
-        expsCurYear.forEach((u, exp) -> {
-            if (exp != u.getExperience()) {
-                u.setExperience(exp);
-                applicationFormRepository.save(u);
-            }
-        });
-        Map<ApplicationForm, Double> expExpYear = getExperienceExceptCurrentYear(year);
-        Map<ApplicationForm, Double> totalExps = year.getUsers().stream().collect(
-                Collectors.toMap(Function.identity(),
-                        u -> expsCurYear.get(u) + expExpYear.get(u))
-        );
-        return totalExps;
-    }
 
     @Override
     public Map<ApplicationForm, Double> getExperienceExceptCurrentYear(Year year) {
         return year.getUsers().stream().collect(
                 Collectors.toMap(Function.identity(),
                         u -> u.getUser().getApplicationForms().stream()
-                                .map(ApplicationForm::getExperience).reduce(0.0, (a, b) -> a + b) - u.getExperience())
+                                .mapToDouble(ApplicationForm::getExperience).sum() - u.getExperience())
         );
     }
 
@@ -69,43 +50,91 @@ public class ExperienceServiceImpl implements ExperienceService {
         }).collect(Collectors.toList());
     }
 
+    public List<ApplicationForm> getApplicationForms(Map<ApplicationForm, Double> experience, Map<ApplicationForm, Double> assessments) {
+        final List<ApplicationForm> applicationForms = new ArrayList<>(experience.keySet());
+        applicationForms.sort(
+                (user1, user2) -> {
+                    if (experience.get(user1).equals(experience.get(user2))) {
+                        return Double.compare(assessments.get(user2), assessments.get(user1));
+                    } else {
+                        return Double.compare(experience.get(user2), experience.get(user1));
+                    }
+                }
+        );
+        return applicationForms;
+    }
+
+    public Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> getAssessments(Year year) {
+        final Map<ApplicationForm, Double> assessments = new HashMap<>();
+        final Map<ApplicationForm, List<String>> assessmentsGroupByDays = new HashMap<>();
+        Map<Attendance, String> attendanceComments = getAttendanceMap();
+        for (ApplicationForm user : year.getUsers()) {
+            final double[] assessment = {0.0};
+            assessmentsGroupByDays.put(user, new ArrayList<>());
+            for (UserDay userDay : user.getUserDays()) {
+                Set<Assessment> allAssessments = new HashSet<>(userDay.getAssessments());
+                allAssessments.add(userDay.createFakeAssessmentByAttendace(attendanceComments.get(userDay.getAttendance())));
+
+                allAssessments.forEach(
+                        userEventAssessment -> assessment[0] += userEventAssessment.getValue());
+
+                String str = StringUtils.join(allAssessments.stream().map(Assessment::getValue).collect(Collectors.toList()), ", ");
+                assessmentsGroupByDays.get(user).add("(" + str + ")");
+
+            }
+            assessments.put(user, assessment[0]);
+        }
+        return new Pair<>(assessments, assessmentsGroupByDays);
+    }
+
+    @Override
+    public Map<ApplicationForm, Double> getExperience(Year year) {
+        final Map<ApplicationForm, Double> experience = new HashMap<>();
+        final Set<ApplicationForm> needToSave = new HashSet<>();
+        final Map<ApplicationForm, Double> baseExp = getExperienceExceptCurrentYear(year);
+        final double countEvents = year.getDays().stream().mapToDouble(Day::getAttendanceValue).sum();
+        for (ApplicationForm user : year.getUsers()) {
+            double totalExp = baseExp.get(user);
+            double exp = 0;
+            for (final UserDay userDay : user.getUserDays()) {
+                if (userDay.getAttendance() == Attendance.YES || userDay.getAttendance() == Attendance.LATE) {
+                    exp += userDay.getPosition().getValue() / countEvents;
+                }
+            }
+            totalExp += exp;
+            experience.put(user, totalExp);
+            if (exp != user.getExperience()) {
+                user.setExperience(exp);
+                needToSave.add(user);
+            }
+        }
+        applicationFormRepository.save(needToSave);
+        return experience;
+    }
 
     @Override
     public Map<ApplicationForm, Set<Hall>> getHalls(Year year) {
-        return year.getUsers().stream().collect(Collectors.toMap(Function.identity(),
-                u -> u.getUserDays().stream().map(UserDay::getHall).collect(Collectors.toSet())
+        return year.getUsers().stream().collect(Collectors.toMap(
+                Function.identity(),
+                user -> user.getUserDays().stream().map(UserDay::getHall).collect(Collectors.toSet())
         ));
     }
 
     @Override
-    public Map<ApplicationForm, Double> getAssessments(Year year) {
-        Map<Attendance, String> attendanceString = getAttendanceMap();
-        return year.getUsers().stream().collect(Collectors.toMap(Function.identity(),
-                u -> u.getUserDays().stream().map(ud -> {
-                    Set<Assessment> assessments = ud.getAssessments();
-                    assessments.add(ud.createFakeAssessmentByAttendace(attendanceString.get(ud.getAttendance())));
-                    return assessments.stream().map(Assessment::getValue).reduce(0.0, (a, b) -> a + b);
-                }).reduce(0.0, (a, b) -> a + b)
-        ));
-    }
-
-    @Override
-    public List<Pair<ApplicationForm, Pair<Medal, Double>>> getResults(Year year) {
-        List<ApplicationForm> applicationForms = new ArrayList<>(year.getUsers());
-        Map<ApplicationForm, Double> exps = getExperienceExceptCurrentYear(year);
-        Map<ApplicationForm, Double> asses = getAssessments(year);
-        applicationForms.sort((user1, user2) -> Double.compare(exps.get(user2), exps.get(user1)));
-        List<Medal> medals = new ArrayList<>(medalRepository.findAll());
-        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medals", locale), -1));
+    public Map<ApplicationForm, Medal> getNewMedals(List<ApplicationForm> applicationForms, Map<ApplicationForm, Double> experience) {
+        final Map<ApplicationForm, Medal> userMedals = new HashMap<>();
+        final List<Medal> medals = new ArrayList<>(medalRepository.findAll());
         medals.sort(Comparator.comparing(Medal::getValue).reversed());
-        final int[] j = new int[0];
-        return applicationForms.stream().map(u -> {
-            while (medals.get(j[0]).getValue() > exps.get(u)) {
-                j[0]++;
+        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medal", locale), -1));
+        for (int i = 0, j = 0; i < applicationForms.size(); i++) {
+            while (medals.get(j).getValue() > experience.get(applicationForms.get(i))) {
+                j++;
             }
-            return new Pair<>(u, new Pair<>(medals.get(j[0]), asses.get(u)));
-        }).collect(Collectors.toList());
+            userMedals.put(applicationForms.get(i), medals.get(j));
+        }
+        return userMedals;
     }
+
 
     private Map<Attendance, String> getAttendanceMap() {
         return new HashMap<>(Arrays.stream(Attendance.values())
