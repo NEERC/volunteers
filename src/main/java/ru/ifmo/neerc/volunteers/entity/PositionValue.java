@@ -28,6 +28,9 @@ public class PositionValue {
     @NonNull
     private String name;
 
+    @NonNull
+    private String curName;
+
     @NotNull
     @NonNull
     private boolean def;
@@ -47,7 +50,7 @@ public class PositionValue {
     private boolean inForm;
 
     public PositionValue(PositionForm positionForm, Year year) {
-        this(positionForm.getName(), false, positionForm.getValue(), year, positionForm.getOrder(), positionForm.isForUser());
+        this(positionForm.getName(), positionForm.getCurName(), false, positionForm.getValue(), year, positionForm.getOrder(), positionForm.isForUser());
     }
 
 }

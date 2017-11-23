@@ -16,10 +16,14 @@ public class PositionForm {
     @NotEmpty(message = "надо указать имя")
     private String name;
 
+    @NotNull
+    @NotEmpty()
+    private String curName;
+
     @Min(0)
     private double value;
 
-    private Long order;
+    private Long order = 0L;
 
     private boolean forUser;
 }

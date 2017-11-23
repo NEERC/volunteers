@@ -13,6 +13,7 @@
         <table class="table table-hover text-center" id="positions">
             <thead>
             <th th:text="#{volunteers.position.name}" class="text-center">Position</th>
+            <th th:text="#{volunteers.position.name.cur}" class="text-center">Позиция</th>
             <th th:text="#{volunteers.position.value}" class="text-center" th:unless="${isUser}">Value</th>
             <th th:text="#{volunteers.position.order}" class="text-center" th:unless="${isUser}">Order</th>
             <th th:text="#{volunteers.position.inForm}" class="text-center" th:unless="${isUser}">In form</th>
@@ -24,6 +25,9 @@
                     <td>
                         <label th:text="${position.name}" th:for="position+${position.id}">
                         </label>
+                    </td>
+                    <td>
+                        <label th:text="${position.curName}" th:for="position+${position.id}"></label>
                     </td>
                     <td th:unless="${isUser}">
                         <input type="number" step="any" class="form-control"
@@ -84,6 +88,14 @@
                                   th:text="#{volunteers.form.position.positionName.error}"></span>
                         </div>
                         <div class="form-group"
+                             th:class="${#fields.hasErrors('curName')}?'has-error form-group':'form-group'">
+                            <label for="positionCurName" th:text="#{volunteers.form.position.positionCurName}">Position
+                                cur-name</label>
+                            <input type="text" class="form-control" id="positionCurName" th:field="*{curName}"/>
+                            <span class="help-block" th:if="${#fields.hasErrors('curName')}"
+                                  th:text="#{volunteers.form.position.positionCurName.error}"></span>
+                        </div>
+                        <div class="form-group"
                              th:class="${#fields.hasErrors('value')}? 'has-error form-group':'form-group'">
                             <label for="positionValue" th:text="#{volunteers.form.position.positionValue}">Position
                                 value</label>
@@ -96,7 +108,7 @@
                             <label for="positionOrder" th:text="#{volunteers.form.position.order}">Position
                                 order</label>
                             <input type="number" class="form-control" id="positionOrder" th:field="*{order}"
-                                   th:value="0"/>
+                                   value="0"/>
                             <span class="help-block" th:if="${#fields.hasErrors('order')}">Error</span>
 
 
@@ -133,10 +145,15 @@
                     name: {
                         minlength: 1,
                         required: true
+                    },
+                    curName: {
+                        minlength: 1,
+                        required: true
                     }
                 },
                 messages: {
-                    name: /*[[#{volunteers.form.position.positionName.error}]]*/""
+                    name: /*[[#{volunteers.form.position.positionName.error}]]*/"",
+                    curName: /*[[#{volunteers.form.position.positionCurName.error}]]*/""
                 },
                 errorElement: 'span',
                 errorClass: 'help-block',
@@ -160,6 +177,9 @@
                                 var str = '<tr id="' + data.result.id + '">' +
                                     '<td>' +
                                     '<label for="position' + data.result.id + '">' + data.result.name + '</label>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<label for="position+' + data.result.id + '">' + data.result.curName + '</label>' +
                                     '</td>' +
                                     '<td>' +
                                     '<input type="number" step="any" class="form-control" min="0" id="position' + data.result.id + '" name="v' + data.result.id + '" value="' + data.result.value + '" onblur="changePositionValue(' + data.result.id + ', this.value);"/>' +
