@@ -14,7 +14,7 @@
             <a class="navbar-brand" href="#" th:href="@{ (${isUser} ? '/' : '/admin/year/'+${year.id}+'/')}"
                th:text="#{volunteers.header}">Volunteers</a>
         </div>
-        <div class="navbar-collapse collapse">
+        <div class="navbar-collapse collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li class="dropdown" th:inline="text">
                     <a th:href="@{${isUser} ? '/year/'+${year.id} : '/admin/year/'+${year.id}}" class="dropdown-toggle"
