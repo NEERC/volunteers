@@ -26,6 +26,9 @@ public class Hall {
     private String name;
 
     @NonNull
+    private String curName;
+
+    @NonNull
     private boolean def;
 
     @NonNull
@@ -36,7 +39,7 @@ public class Hall {
     private Year year;
 
     public Hall(HallForm form, Year year) {
-        this(form.getName(), false, form.getDescription(), year);
+        this(form.getName(), form.getCurName(), false, form.getDescription(), year);
     }
 
 

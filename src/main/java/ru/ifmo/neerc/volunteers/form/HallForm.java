@@ -13,5 +13,8 @@ public class HallForm {
     String name;
 
     @NotEmpty
+    String curName;
+
+    @NotEmpty
     String description;
 }

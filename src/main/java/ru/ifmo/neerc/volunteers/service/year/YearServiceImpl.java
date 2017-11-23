@@ -68,7 +68,9 @@ public class YearServiceImpl implements YearService {
                 hall = hall1;
         }
         if (hall == null) {
-            hall = new Hall(messageSource.getMessage("volunteers.reserve.hall", null, "Reserve", locale), true, "", year);
+            hall = new Hall(messageSource.getMessage("volunteers.reserve.hall", null, "Reserve", locale),
+                    messageSource.getMessage("volunteers.reserve.hall.cur", null, "Reserve", locale),
+                    true, "", year);
             hallRepository.save(hall);
         }
         return hall;
