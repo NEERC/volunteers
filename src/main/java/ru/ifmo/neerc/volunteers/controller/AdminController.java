@@ -747,10 +747,10 @@ public class AdminController {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"file.csv\"");
         PrintWriter writer = response.getWriter();
-        writer.write("Team,Role,Name,NameCyr\n");
+        writer.write("Team,TeamCur,Role,RoleCur,Name,NameCyr\n");
         dayRepository.findOne(id).getUsers().forEach(u -> {
             User user = u.getUserYear().getUser();
-            writer.write(u.getHall().getName() + "," + u.getPosition().getName() + ",\"" + user.getFirstName() + "\n" + user.getLastName() + "\",\"" + user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"\n");
+            writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," + u.getPosition().getName() + "," + u.getPosition().getCurName() + ",\"" + user.getFirstName() + "\n" + user.getLastName() + "\",\"" + user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"\n");
         });
         writer.flush();
         writer.close();
