@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Entity
 @Data
 @ToString(exclude = {"id", "year", "userDays"}, includeFieldNames = false)
-@EqualsAndHashCode(exclude = {"id", "year", "userDays"})
+@EqualsAndHashCode(exclude = {"id", "year", "userDays", "experience"})
 @NoArgsConstructor
 public class ApplicationForm {
 
