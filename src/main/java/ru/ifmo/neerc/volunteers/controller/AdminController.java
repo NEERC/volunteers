@@ -117,53 +117,19 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/position/value")
+    @PostMapping("/position/edit")
     public @ResponseBody
-    JsonResponse<Exception> setPositionValue(@RequestParam final long id, @RequestParam final double value) {
+    JsonResponse<Exception> setCurName(@Valid @ModelAttribute("position") final PositionForm positionForm, final BindingResult result, @RequestParam long id) {
         JsonResponse<Exception> response = new JsonResponse<>();
-        try {
-            PositionValue positionValue = positionValueRepository.findOne(id);
-            if (positionValue.getValue() != value) {
-                positionValue.setValue(value);
-                positionValueRepository.save(positionValue);
-            }
-            response.setStatus(Status.OK);
-        } catch (Exception e) {
+        if (result.hasErrors()) {
             response.setStatus(Status.FAIL);
-            response.setResult(e);
+            response.setResult(new Exception("invalid form"));
+            return response;
         }
-        return response;
-
-    }
-
-    @PostMapping("/position/order")
-    public @ResponseBody
-    JsonResponse<Exception> setPositionOrder(@RequestParam final long id, @RequestParam final long order) {
-        JsonResponse<Exception> response = new JsonResponse<>();
         try {
             PositionValue positionValue = positionValueRepository.findOne(id);
-            if (positionValue.getOrd() != order) {
-                positionValue.setOrd(order);
-                positionValueRepository.save(positionValue);
-            }
-            response.setStatus(Status.OK);
-        } catch (Exception e) {
-            response.setStatus(Status.FAIL);
-            response.setResult(e);
-        }
-        return response;
-    }
-
-    @PostMapping("/position/inform")
-    public @ResponseBody
-    JsonResponse<Exception> setPositionInForm(@RequestParam final long id, @RequestParam final boolean inForm) {
-        JsonResponse<Exception> response = new JsonResponse<>();
-        try {
-            PositionValue positionValue = positionValueRepository.findOne(id);
-            if (positionValue.isInForm() != inForm) {
-                positionValue.setInForm(inForm);
-                positionValueRepository.save(positionValue);
-            }
+            positionValue.setFields(positionForm);
+            positionValueRepository.save(positionValue);
             response.setStatus(Status.OK);
         } catch (Exception e) {
             response.setStatus(Status.FAIL);

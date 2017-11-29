@@ -53,4 +53,12 @@ public class PositionValue {
         this(positionForm.getName(), positionForm.getCurName(), false, positionForm.getValue(), year, positionForm.getOrder(), positionForm.isForUser());
     }
 
+    public void setFields(PositionForm positionForm) {
+        setName(positionForm.getName());
+        setCurName(positionForm.getCurName());
+        setValue(positionForm.getValue());
+        setOrd(positionForm.getOrder());
+        setInForm(positionForm.isForUser());
+    }
+
 }
