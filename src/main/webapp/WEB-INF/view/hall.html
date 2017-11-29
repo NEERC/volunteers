@@ -21,6 +21,7 @@
                     <th:block th:each="hall : ${halls}">
                         <tr th:id="${hall.id}">
                             <td>
+                                <label th:text="${hall.name}" th:if="${isUser}"></label>
                                 <input type="text" th:value="${hall.name}" class="form-control"
                                        th:onblur="'editHall('+${hall.id}+');'"
                                        th:id="'name'+${hall.id}" th:unless="${isUser}"/>
@@ -28,6 +29,7 @@
                                        th:unless="${isUser}"/>
                             </td>
                             <td>
+                                <label th:text="${hall.curName}" th:if="${isUser}"></label>
                                 <input type="text" th:value="${hall.curName}" class="form-control"
                                        th:onblur="'editHall('+${hall.id}+');'"
                                        th:id="curName+${hall.id}" th:unless="${isUser}"/>
@@ -35,6 +37,7 @@
                                        th:unless="${isUser}"/>
                             </td>
                             <td>
+                                <label th:text="${hall.description}" th:if="${isUser}"></label>
                                 <input type="text" th:value="${hall.description}" class="form-control"
                                        th:onblur="'editHall('+${hall.id}+');'"
                                        th:id="'description'+${hall.id}" th:unless="${isUser}"/>
