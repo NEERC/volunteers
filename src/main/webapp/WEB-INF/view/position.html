@@ -256,7 +256,7 @@
                 'curName': $('#curName' + id).val(),
                 'value': $('#value' + id).val(),
                 'order': $('#order' + id).val(),
-                'forUser': !!$('#inForm' + id).checked
+                'forUser': !!$('#inForm' + id).prop('checked')
             };
             data[_csrf_param_name] = _csrf_token;
             $.ajax({
@@ -270,7 +270,7 @@
                         $("#originCurName" + id).val($("#curName" + id).val());
                         $("#originValue" + id).val($("#value" + id).val());
                         $("#originOrder" + id).val($("#order" + id).val());
-                        $("#originInForm" + id).prop('checked', !!$('#inForm').checked)
+                        $("#originInForm" + id).prop('checked', $('#inForm').prop('checked'))
                     }
                     else {
                         $("#name" + id).val($("#originName" + id).val());
