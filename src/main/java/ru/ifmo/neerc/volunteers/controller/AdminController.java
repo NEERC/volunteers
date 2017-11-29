@@ -17,10 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.dev.Pair;
 import ru.ifmo.neerc.volunteers.entity.*;
-import ru.ifmo.neerc.volunteers.form.HallForm;
-import ru.ifmo.neerc.volunteers.form.MailForm;
-import ru.ifmo.neerc.volunteers.form.PositionForm;
-import ru.ifmo.neerc.volunteers.form.UserEditForm;
+import ru.ifmo.neerc.volunteers.form.*;
 import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.*;
@@ -565,7 +562,7 @@ public class AdminController {
         utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
         model.addAttribute("medals", medalRepository.findAll());
         if (!model.containsAttribute("newMedal")) {
-            model.addAttribute("newMedal", new Medal());
+            model.addAttribute("newMedal", new MedalForm());
         }
         return "medals";
     }
@@ -573,7 +570,7 @@ public class AdminController {
     @PostMapping("/medals/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
-    JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final Medal medal, final BindingResult result) {
+    JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final MedalForm medal, final BindingResult result) {
         try {
             if (result.hasErrors()) {
                 JsonResponse<List<ObjectError>> response = new JsonResponse<>();
@@ -582,8 +579,8 @@ public class AdminController {
                 return response;
             } else {
                 JsonResponse<Medal> response = new JsonResponse<>();
-                medalRepository.save(medal);
-                response.setResult(medal);
+                medalRepository.save(new Medal(medal));
+                response.setResult(new Medal(medal));
                 response.setStatus(Status.OK);
                 return response;
             }

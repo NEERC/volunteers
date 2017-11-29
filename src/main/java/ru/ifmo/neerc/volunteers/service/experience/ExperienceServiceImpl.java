@@ -40,7 +40,7 @@ public class ExperienceServiceImpl implements ExperienceService {
         applicationForms.sort((user1, user2) -> Double.compare(exps.get(user2), exps.get(user1)));
         List<Medal> medals = new ArrayList<>(medalRepository.findAll());
         medals.sort(Comparator.comparing(Medal::getValue).reversed());
-        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medals", locale), -1));
+        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medals", locale), -1, 0));
         final int[] j = new int[]{0};
         return applicationForms.stream().map(u -> {
             while (medals.get(j[0]).getValue() > exps.get(u)) {
@@ -125,7 +125,7 @@ public class ExperienceServiceImpl implements ExperienceService {
         final Map<ApplicationForm, Medal> userMedals = new HashMap<>();
         final List<Medal> medals = new ArrayList<>(medalRepository.findAll());
         medals.sort(Comparator.comparing(Medal::getValue).reversed());
-        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medal", locale), -1));
+        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medal", locale), -1, 0));
         for (int i = 0, j = 0; i < applicationForms.size(); i++) {
             while (medals.get(j).getValue() > experience.get(applicationForms.get(i))) {
                 j++;

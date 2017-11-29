@@ -10,6 +10,7 @@
         <thead>
         <th th:text="#{volunteers.medals.name}">Medal name</th>
         <th th:text="#{volunteers.medals.value}">Medal value</th>
+        <th th:text="#{volunteers.medals.stars}">Medal stars</th>
         <th></th>
         </thead>
         <tbody>
@@ -20,6 +21,13 @@
                 </td>
                 <td>
                     <label th:text="${medal.value}"></label>
+                </td>
+                <td>
+                    <label th:if="${medal.stars > 0}">
+                        <th:block th:utext="#{volunteers.medals.star}" th:each="i:${#numbers.sequence(1,medal.stars)}">
+
+                        </th:block>
+                    </label>
                 </td>
                 <td>
                     <a class="btn btn-default" role="button"
@@ -64,6 +72,14 @@
                             <input type="number" class="form-control" id="medalValue" th:field="*{value}"/>
                             <span class="help-block" th:if="${#fields.hasErrors('value')}"></span>
                         </div>
+                        <div class="form-group"
+                             th:class="${#fields.hasErrors('stars')} ? 'has-error form-group':'form-group'">
+
+                            <label for="medalStars"
+                                   th:text="#{volunteers.form.medal.medalStars}">Medal stars</label>
+                            <input type="number" class="form-control" id="medalStars" th:field="*{stars}"/>
+                            <span class="help-block" th:if="${#fields.hasErrors('stars')}"></span>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
@@ -107,9 +123,16 @@
                         success: function (data) {
                             if (data.status === "OK") {
                                 var label = /*[[#{volunteers.form.button.delete}]]*/'Delete';
+                                var medals = "";
+                                /*<![CDATA[*/
+                                for (var i = 1; i <= data.result.stars; i++) {
+                                    medals += /*[[#{volunteers.medals.star}]]*/"";
+                                }
+                                /*]]>*/
                                 var str = '<tr id="' + data.result.id + '">' +
                                     '<td><label>' + data.result.name + '</label></td>' +
                                     '<td><label>' + data.result.value + '</label></td>' +
+                                    '<td><label>' + medals + '</label></td>' +
                                     '<td><a href="#" class="btn btn-default" role="button" onclick="deleteMedal(' + data.result.id + ');">' + label + '</a></td>' +
                                     '</tr>';
                                 $("#medals tbody").find("tr:last").before(str);
