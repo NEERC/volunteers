@@ -42,5 +42,10 @@ public class Hall {
         this(form.getName(), form.getCurName(), false, form.getDescription(), year);
     }
 
+    public void setFields(HallForm form) {
+        setName(form.getName());
+        setCurName(form.getCurName());
+        setDescription(form.getDescription());
+    }
 
 }

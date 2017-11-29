@@ -189,22 +189,16 @@ public class AdminController {
 
     @PostMapping("hall/edit")
     public @ResponseBody
-    JsonResponse editHall(@RequestParam final long id, @RequestParam final String name, @RequestParam final String description) {
+    JsonResponse editHall(@RequestParam final long id, @Valid @ModelAttribute("hall") final HallForm hallForm, final BindingResult result) {
         JsonResponse<String> response = new JsonResponse<>();
+        if (result.hasErrors()) {
+            response.setResult("Invalid form");
+            response.setStatus(Status.FAIL);
+        }
         try {
             Hall hall = hallRepository.findOne(id);
-            boolean isChanged = false;
-            if (!description.isEmpty() && !hall.getDescription().equals(description)) {
-                hall.setDescription(description);
-                isChanged = true;
-            }
-            if (!name.isEmpty() && !hall.getName().equals(name)) {
-                hall.setName(name);
-                isChanged = true;
-            }
-            if (isChanged) {
-                hallRepository.save(hall);
-            }
+            hall.setFields(hallForm);
+            hallRepository.save(hall);
             response.setStatus(Status.OK);
         } catch (Exception e) {
             response.setStatus(Status.FAIL);
