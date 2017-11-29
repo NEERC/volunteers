@@ -41,8 +41,14 @@
                        th:text="${applicationForm.user.badgeName}"></a>
                 </td>
                 <td>
-                    <label th:text="${medals.get(applicationForm).name}"></label>
-                    <span th:text="'('+${experience.get(applicationForm)}+')'"></span>
+                    <h5><label th:text="${medals.get(applicationForm).name}"></label>
+                        <span th:text="'('+${experience.get(applicationForm)}+')'"></span></h5>
+                    <h5><label th:if="${medals.get(applicationForm).stars > 0}">
+                        <th:block th:utext="#{volunteers.medals.star}"
+                                  th:each="i:${#numbers.sequence(1,medals.get(applicationForm).stars)}">
+
+                        </th:block>
+                    </label></h5>
                 </td>
                 <td>
                     <label th:text="${assessments.get(applicationForm)}">

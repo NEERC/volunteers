@@ -22,7 +22,15 @@
                     <label th:text="${applicationForm.key.user.badgeName}"></label>
                 </td>
                 <td>
-                    <label th:text="${applicationForm.value.name}"></label>
+                    <h5><label
+                            th:text="${applicationForm.value.name} + ' ('+${exp.get(applicationForm.key)}+')'"></label>
+                    </h5>
+                    <h5><label th:if="${applicationForm.value.stars > 0}">
+                        <th:block th:utext="#{volunteers.medals.star}"
+                                  th:each="i:${#numbers.sequence(1,applicationForm.value.stars)}">
+
+                        </th:block>
+                    </label></h5>
                 </td>
             </tr>
         </th:block>

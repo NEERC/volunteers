@@ -718,6 +718,7 @@ public class AdminController {
         Year year = userService.getUserByAuthentication(authentication).getYear();
         utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
         model.addAttribute("medals", experienceService.getMedals(year));
+        model.addAttribute("exp", experienceService.getExperienceExceptCurrentYear(year));
         return "star";
     }
 }
