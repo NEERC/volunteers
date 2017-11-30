@@ -15,6 +15,7 @@
                 <th th:text="#{volunteers.hall.hallName}">Hall name</th>
                 <th th:text="#{volunteers.hall.hallName.cur}">Hall name</th>
                 <th th:text="#{volunteers.hall.hallDescription}">Hall description</th>
+                <th th:text="#{volunteers.hall.chatAlias}">Chat alias</th>
                 <th th:if="${isUser}"></th>
                 </thead>
                 <tbody>
@@ -43,6 +44,13 @@
                                        th:id="'description'+${hall.id}" th:unless="${isUser}"/>
                                 <input type="hidden" th:value="${hall.description}"
                                        th:id="'originDescription'+${hall.id}" th:unless="${isUser}"/>
+                            </td>
+                            <td th:unless="${isUser}">
+                                <input type="text" th:value="${hall.chatAlias}" class="form-control"
+                                       th:onblur="'editHall('+${hall.id}+');'"
+                                       th:id="'chatAlias'+${hall.id}"/>
+                                <input type="hidden" th:value="${hall.chatAlias}"
+                                       th:id="'originChatAlias'+${hall.id}"/>
                             </td>
                             <td th:unless="${isUser}">
                                 <a th:if="${hall.def}" class="btn btn-default" role="button"
@@ -166,6 +174,10 @@
                                         '<input type="hidden" value="' + data.result.name + '" id="origindescription' + data.result.id + '"/>' +
                                         '</td>' +
                                         '<td>' +
+                                        '<input type="text" class="form-control" id="chatAlias' + data.result.id + '" value="" onblur="editHall(' + data.result.id + ', this.value);" />' +
+                                        '<input type="hidden" value="' + data.result.name + '" id="originChatAlias' + data.result.id + '"/>' +
+                                        '</td>' +
+                                        '<td>' +
                                         '<a href="' + url + '" class="btn btn-default" role="button" onclick="deleteHall(' + data.result.id + '); return false;">' + note + '</a>' +
                                         '</td>' +
                                         '</tr>';
@@ -184,7 +196,8 @@
                     "id": id,
                     "name": $("#name" + id).val(),
                     "description": $("#description" + id).val(),
-                    "curName": $("#curName" + id).val()
+                    "curName": $("#curName" + id).val(),
+                    "chatAlias": $("#chatAlias" + id).val()
                 };
                 data[_csrf_param_name] = _csrf_token;
                 $.ajax({
@@ -197,17 +210,20 @@
                             $("#originName" + id).val($("#name" + id).val());
                             $("#originDesctiption" + id).val($("#description" + id).val());
                             $("#originCurName" + id).val($("#curName" + id).val());
+                            $("#originChatAlias" + id).val($("#chatAlias" + id).val());
                         }
                         else {
                             $("#name" + id).val($("#originName" + id).val());
                             $("#desctiption" + id).val($("#originDescription" + id).val());
                             $("#curName" + id).val($("#originCurName" + id).val());
+                            $("#chatAlias" + id).val($("#originChatAlias" + id).val());
                         }
                     },
                     error: function () {
                         $("#name" + id).val($("#originName" + id).val());
                         $("#desctiption" + id).val($("#originDescription" + id).val());
                         $("#curName" + id).val($("#originCurName" + id).val());
+                        $("#chatAlias" + id).val($("#originChatAlias" + id).val());
                     }
                 });
             }

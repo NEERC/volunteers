@@ -12,7 +12,11 @@ public class UserDayDto {
 
     public UserDayDto(UserDay userDay) {
         this.username = userDay.getUserYear().getUser().getEmail();
-        this.hall = userDay.getHall().getName();
+        final String chatAlias = userDay.getHall().getChatAlias();
+        if (chatAlias != null && !chatAlias.isEmpty())
+            this.hall = chatAlias;
+        else
+            this.hall = userDay.getHall().getName();
     }
 
     public UserDayDto(User user) {
