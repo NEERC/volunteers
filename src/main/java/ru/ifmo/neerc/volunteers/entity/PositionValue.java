@@ -29,6 +29,9 @@ public class PositionValue {
     private String name;
 
     @NonNull
+    private String engName;
+
+    @NonNull
     private String curName;
 
     @NotNull
@@ -50,11 +53,12 @@ public class PositionValue {
     private boolean inForm;
 
     public PositionValue(PositionForm positionForm, Year year) {
-        this(positionForm.getName(), positionForm.getCurName(), false, positionForm.getValue(), year, positionForm.getOrder(), positionForm.isForUser());
+        this(positionForm.getName(), positionForm.getEngName(), positionForm.getCurName(), false, positionForm.getValue(), year, positionForm.getOrder(), positionForm.isForUser());
     }
 
     public void setFields(PositionForm positionForm) {
         setName(positionForm.getName());
+        setEngName(positionForm.getEngName());
         setCurName(positionForm.getCurName());
         setValue(positionForm.getValue());
         setOrd(positionForm.getOrder());
