@@ -530,7 +530,7 @@ public class AdminController {
     @PostMapping("/medals/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
-    JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final MedalForm medal, final BindingResult result) {
+    JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final MedalForm medalForm, final BindingResult result) {
         try {
             if (result.hasErrors()) {
                 JsonResponse<List<ObjectError>> response = new JsonResponse<>();
@@ -539,8 +539,8 @@ public class AdminController {
                 return response;
             } else {
                 JsonResponse<Medal> response = new JsonResponse<>();
-                medalRepository.save(new Medal(medal));
-                response.setResult(new Medal(medal));
+                Medal medal = medalRepository.save(new Medal(medalForm));
+                response.setResult(medal);
                 response.setStatus(Status.OK);
                 return response;
             }
@@ -558,6 +558,27 @@ public class AdminController {
         JsonResponse<String> response = new JsonResponse<>();
         try {
             medalRepository.delete(id);
+            response.setStatus(Status.OK);
+        } catch (Exception e) {
+            response.setStatus(Status.FAIL);
+            response.setResult(e.getMessage());
+        }
+        return response;
+    }
+
+    @PostMapping("/medals/edit")
+    public @ResponseBody
+    JsonResponse updateMedal(@Valid @ModelAttribute("medal") final MedalForm medalForm, final BindingResult result, @RequestParam("id") final long id) {
+        JsonResponse<String> response = new JsonResponse<>();
+        if (result.hasErrors()) {
+            response.setStatus(Status.FAIL);
+            response.setResult("invalid form");
+            return response;
+        }
+        try {
+            Medal medal = medalRepository.findOne(id);
+            medal.setFields(medalForm);
+            medalRepository.save(medal);
             response.setStatus(Status.OK);
         } catch (Exception e) {
             response.setStatus(Status.FAIL);
@@ -704,10 +725,18 @@ public class AdminController {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"file.csv\"");
         PrintWriter writer = response.getWriter();
-        writer.write("Team,TeamCur,Role,RoleCur,Name,NameCyr\n");
-        dayRepository.findOne(id).getUsers().forEach(u -> {
+        writer.write("Team,TeamCur,Role,RoleCur,Name,NameCyr,Medal,Stars\n");
+        Day day = dayRepository.findOne(id);
+        Map<ApplicationForm, Double> exp = experienceService.getExperienceExceptCurrentYear(day.getYear());
+        Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(experienceService.getApplicationForms(exp), exp);
+        day.getUsers().forEach(u -> {
             User user = u.getUserYear().getUser();
-            writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," + u.getPosition().getName() + "," + u.getPosition().getCurName() + ",\"" + user.getFirstName() + "\n" + user.getLastName() + "\",\"" + user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"\n");
+            String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '★');
+            writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," +
+                    u.getPosition().getName() + "," + u.getPosition().getCurName() + ",\""
+                    + user.getFirstName() + "\n" + user.getLastName() + "\",\"" +
+                    user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"," +
+                    medals.get(u.getUserYear()).getName() + "," + stars + "\n");
         });
         writer.flush();
         writer.close();

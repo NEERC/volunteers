@@ -1,5 +1,6 @@
 package ru.ifmo.neerc.volunteers.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -15,6 +16,7 @@ import javax.persistence.Id;
 @Data
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 public class Medal {
 
     @Id
@@ -24,19 +26,28 @@ public class Medal {
     @NotEmpty
     private String name;
 
+    @NotEmpty
+    private String curName;
+
     private long value;
 
     private long stars;
 
-    public Medal(String name, long value, long stars) {
+    public Medal(String name, String curName, long value, long stars) {
         this.name = name;
+        this.curName = curName;
         this.value = value;
         this.stars = stars;
     }
 
     public Medal(MedalForm form) {
-        name = form.getName();
-        value = form.getValue();
-        stars = form.getStars();
+        this(form.getName(), form.getCurName(), form.getValue(), form.getStars());
+    }
+
+    public void setFields(MedalForm form) {
+        setName(form.getName());
+        setCurName(form.getCurName());
+        setValue(form.getValue());
+        setStars(form.getStars());
     }
 }

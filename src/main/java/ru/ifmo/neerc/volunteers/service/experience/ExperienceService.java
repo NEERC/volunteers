@@ -24,5 +24,7 @@ public interface ExperienceService {
 
     List<ApplicationForm> getApplicationForms(Map<ApplicationForm, Double> experience, Map<ApplicationForm, Double> assessments);
 
+    List<ApplicationForm> getApplicationForms(Map<ApplicationForm, Double> experience);
+
     Map<ApplicationForm, Medal> getNewMedals(List<ApplicationForm> applicationForms, Map<ApplicationForm, Double> experience);
 }

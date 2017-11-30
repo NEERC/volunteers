@@ -9,6 +9,7 @@
     <table class="table table-hover" id="medals">
         <thead>
         <th th:text="#{volunteers.medals.name}">Medal name</th>
+        <th th:text="#{volunteers.medals.curName}">Имя медали</th>
         <th th:text="#{volunteers.medals.value}">Medal value</th>
         <th th:text="#{volunteers.medals.stars}">Medal stars</th>
         <th></th>
@@ -17,17 +18,31 @@
         <th:block th:each="medal:${medals}">
             <tr th:id="${medal.id}">
                 <td>
-                    <label th:text="${medal.name}"></label>
+                    <!--<label th:text="${medal.name}"></label>-->
+                    <input type="text" class="form-control" th:value="${medal.name}"
+                           th:onblur="'editMedal('+${medal.id}+');'" th:id="'name'+${medal.id}"/>
+                    <input type="hidden" th:id="'originName'+${medal.id}" th:value="${medal.name}"/>
                 </td>
                 <td>
-                    <label th:text="${medal.value}"></label>
-                </td>
-                <td>
-                    <label th:if="${medal.stars > 0}">
-                        <th:block th:utext="#{volunteers.medals.star}" th:each="i:${#numbers.sequence(1,medal.stars)}">
+                    <!--<label th:text="${medal.curName}"></label>-->
 
-                        </th:block>
-                    </label>
+                    <input type="text" class="form-control" th:value="${medal.curName}"
+                           th:onblur="'editMedal('+${medal.id}+');'" th:id="'curName'+${medal.id}"/>
+                    <input type="hidden" th:id="'originCurName'+${medal.id}" th:value="${medal.curName}"/>
+                </td>
+                <td>
+                    <!--<label th:text="${medal.value}"></label>-->
+
+                    <input type="number" class="form-control" th:value="${medal.value}"
+                           th:onblur="'editMedal('+${medal.id}+');'" th:id="'value'+${medal.id}"/>
+                    <input type="hidden" th:id="'originValue'+${medal.id}" th:value="${medal.value}"/>
+                </td>
+                <td>
+                    <!--<label th:text="${medal.stars}"></label>-->
+
+                    <input type="text" class="form-control" th:value="${medal.stars}"
+                           th:onblur="'editMedal('+${medal.id}+');'" th:id="'stars'+${medal.id}"/>
+                    <input type="hidden" th:id="'originStars'+${medal.id}" th:value="${medal.stars}"/>
                 </td>
                 <td>
                     <a class="btn btn-default" role="button"
@@ -37,7 +52,7 @@
             </tr>
         </th:block>
         <tr>
-            <td colspan="3" class="text-center">
+            <td colspan="5" class="text-center">
                 <a align="center" href="#" data-toggle="modal" data-target="#medalForm" class="btn btn-default"
                    role="button" th:text="#{volunteers.hall.button.add}">Add</a>
             </td>
@@ -64,6 +79,13 @@
                             <input type="text" class="form-control" id="medalName" th:field="*{name}"/>
                             <span class="help-block" th:if="${#fields.hasErrors('name')}"
                                   th:text="#{volunteers.form.medal.medalName.error.empty}"></span>
+                        </div>
+                        <div class="form-group"
+                             th:class="${#fields.hasErrors('curName')}? 'has-error form-group' : 'form-group'">
+                            <label for="medalCurName" th:text="#{volunteers.form.medal.medalCurName}">Medal name</label>
+                            <input type="text" class="form-control" id="medalCurName" th:field="*{curName}"/>
+                            <span class="help-block" th:if="${#fields.hasErrors('curName')}"
+                                  th:text="#{volunteers.form.medal.medalCurName.error.empty}"></span>
                         </div>
                         <div class="form-group"
                              th:class="${#fields.hasErrors('value')}? 'has-error form-group' : 'form-group'">
@@ -100,10 +122,15 @@
                     name: {
                         minlength: 1,
                         required: true
+                    },
+                    curName: {
+                        required: true,
+                        minlength: 1
                     }
                 },
                 messages: {
-                    name: /*[[#{volunteers.form.medal.medalName.error.empty}]]*/""
+                    name: /*[[#{volunteers.form.medal.medalName.error.empty}]]*/"",
+                    curName: /*[[#{volunteers.form.medal.medalCurName.error.empty}]]*/""
                 },
                 errorElement: 'span',
                 errorClass: 'help-block',
@@ -130,9 +157,23 @@
                                 }
                                 /*]]>*/
                                 var str = '<tr id="' + data.result.id + '">' +
-                                    '<td><label>' + data.result.name + '</label></td>' +
-                                    '<td><label>' + data.result.value + '</label></td>' +
-                                    '<td><label>' + medals + '</label></td>' +
+                                    '<td>' +
+                                    '<input type="text" class="form-control" value="' + data.result.name + '" id="name' + data.result.id + '" onblur="editMedal(' + data.result.id + ');" />' +
+                                    '<input type="hidden" value="' + data.result.name + '" id="originName' + data.result.id + '" />' +
+                                    '</td>' +
+
+                                    '<td>' +
+                                    '<input type="text" class="form-control" value="' + data.result.curName + '" id="curName' + data.result.id + '" onblur="editMedal(' + data.result.id + ');" />' +
+                                    '<input type="hidden" value="' + data.result.curName + '" id="originCurName' + data.result.id + '" />' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<input type="number" class="form-control" value="' + data.result.value + '" id="value' + data.result.id + '" onblur="editMedal(' + data.result.id + ');" />' +
+                                    '<input type="hidden" value="' + data.result.value + '" id="originValue' + data.result.id + '" />' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<input type="number" class="form-control" value="' + data.result.stars + '" id="stars' + data.result.id + '" onblur="editMedal(' + data.result.id + ');" />' +
+                                    '<input type="hidden" value="' + data.result.stars + '" id="originStars' + data.result.id + '" />' +
+                                    '</td>' +
                                     '<td><a href="#" class="btn btn-default" role="button" onclick="deleteMedal(' + data.result.id + ');">' + label + '</a></td>' +
                                     '</tr>';
                                 $("#medals tbody").find("tr:last").before(str);
@@ -167,6 +208,37 @@
                     }
                 }
             })
+        }
+
+        function editMedal(id) {
+            data = {
+                'id': id,
+                'name': $('#name' + id).val(),
+                'curName': $('#curName' + id).val(),
+                'value': $('#value' + id).val(),
+                'stars': $('#stars' + id).val()
+            };
+            data[_csrf_param_name] = _csrf_token;
+            $.ajax({
+                type: "post",
+                data: data,
+                url: /*[[@{/admin/medals/edit/}]]*/"",
+                dataYype: "json",
+                success: function (data) {
+                    if (data.status === "OK") {
+                        $('#originName' + id).val($('#name' + id).val());
+                        $('#originCurName' + id).val($('#curName' + id).val());
+                        $('#originValue' + id).val($('#value' + id).val());
+                        $('#originStars' + id).val($('#stars' + id).val());
+                    }
+                    else {
+                        $('#name' + id).val($('#originName' + id).val());
+                        $('#curName' + id).val($('#originCurName' + id).val());
+                        $('#value' + id).val($('#originValue' + id).val());
+                        $('#stars' + id).val($('#originStars' + id).val());
+                    }
+                }
+            });
         }
     </script>
 </div>

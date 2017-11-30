@@ -40,7 +40,9 @@ public class ExperienceServiceImpl implements ExperienceService {
         applicationForms.sort((user1, user2) -> Double.compare(exps.get(user2), exps.get(user1)));
         List<Medal> medals = new ArrayList<>(medalRepository.findAll());
         medals.sort(Comparator.comparing(Medal::getValue).reversed());
-        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medals", locale), -1, 0));
+        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medals", locale),
+                messageSource.getMessage("volunteers.results.noMedal.cur", null, "No medals", locale),
+                -1, 0));
         final int[] j = new int[]{0};
         return applicationForms.stream().map(u -> {
             while (medals.get(j[0]).getValue() > exps.get(u)) {
@@ -60,6 +62,15 @@ public class ExperienceServiceImpl implements ExperienceService {
                         return Double.compare(experience.get(user2), experience.get(user1));
                     }
                 }
+        );
+        return applicationForms;
+    }
+
+    @Override
+    public List<ApplicationForm> getApplicationForms(Map<ApplicationForm, Double> experience) {
+        final List<ApplicationForm> applicationForms = new ArrayList<>(experience.keySet());
+        applicationForms.sort(
+                (user1, user2) -> Double.compare(experience.get(user2), experience.get(user1))
         );
         return applicationForms;
     }
@@ -125,7 +136,9 @@ public class ExperienceServiceImpl implements ExperienceService {
         final Map<ApplicationForm, Medal> userMedals = new HashMap<>();
         final List<Medal> medals = new ArrayList<>(medalRepository.findAll());
         medals.sort(Comparator.comparing(Medal::getValue).reversed());
-        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medal", locale), -1, 0));
+        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medal", locale),
+                messageSource.getMessage("volunteers.results.noMedal.cur", null, "No medals", locale),
+                -1, 0));
         for (int i = 0, j = 0; i < applicationForms.size(); i++) {
             while (medals.get(j).getValue() > experience.get(applicationForms.get(i))) {
                 j++;

@@ -13,6 +13,9 @@ public class MedalForm {
     @NotEmpty
     private String name;
 
+    @NotEmpty
+    private String curName;
+
     private long value;
 
     private long stars;
