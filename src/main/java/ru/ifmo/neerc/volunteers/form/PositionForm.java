@@ -17,6 +17,10 @@ public class PositionForm {
     private String name;
 
     @NotNull
+    @NotEmpty
+    private String engName;
+
+    @NotNull
     @NotEmpty()
     private String curName;
 

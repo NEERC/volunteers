@@ -733,7 +733,7 @@ public class AdminController {
             User user = u.getUserYear().getUser();
             String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '★');
             writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," +
-                    u.getPosition().getName() + "," + u.getPosition().getCurName() + ",\""
+                    u.getPosition().getEngName() + "," + u.getPosition().getCurName() + ",\""
                     + user.getFirstName() + "\n" + user.getLastName() + "\",\"" +
                     user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"," +
                     medals.get(u.getUserYear()).getName() + "," + stars + "\n");

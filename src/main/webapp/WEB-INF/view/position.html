@@ -12,7 +12,8 @@
         </div>
         <table class="table table-hover text-center" id="positions">
             <thead>
-            <th th:text="#{volunteers.position.name}" class="text-center">Position</th>
+            <th th:text="#{volunteers.position.systemName}" class="text-center">Position</th>
+            <th th:text="#{volunteers.position.name}" class="text-center"></th>
             <th th:text="#{volunteers.position.name.cur}" class="text-center">Позиция</th>
             <th th:text="#{volunteers.position.value}" class="text-center" th:unless="${isUser}">Value</th>
             <th th:text="#{volunteers.position.order}" class="text-center" th:unless="${isUser}">Order</th>
@@ -30,6 +31,13 @@
                                th:id="'name'+${position.id}"
                                th:name="name+${position.id}" th:onblur="'updatePosition('+${position.id}+');'"/>
                         <input type="hidden" th:id="originName+${position.id}" th:value="${position.name}"/>
+                    </td>
+                    <td>
+                        <label th:if="${isUser}" th:text="${position.engName}" th:for="position+${position.id}"></label>
+                        <input th:unless="${isUser}" type="text" class="form-control" th:value="${position.engName}"
+                               th:id="'engName'+${position.id}"
+                               th:onblur="'updatePosition('+${position.id}+');'"/>
+                        <input type="hidden" th:id="originEngName+${position.id}" th:value="${position.engName}"/>
                     </td>
                     <td>
                         <label th:if="${isUser}" th:text="${position.curName}" th:for="position+${position.id}"></label>
@@ -99,6 +107,14 @@
                                   th:text="#{volunteers.form.position.positionName.error}"></span>
                         </div>
                         <div class="form-group"
+                             th:class="${#fields.hasErrors('engName')}? 'has-error form-group' : 'form-group'">
+                            <label for="positionName" th:text="#{volunteers.form.position.positionEngName}">Position
+                                name</label>
+                            <input type="text" class="form-control" id="positionEngName" th:field="*{engName}"/>
+                            <span class="help-block" th:if="${#fields.hasErrors('engName')}"
+                                  th:text="#{volunteers.form.position.positionEngName.error}"></span>
+                        </div>
+                        <div class="form-group"
                              th:class="${#fields.hasErrors('curName')}?'has-error form-group':'form-group'">
                             <label for="positionCurName" th:text="#{volunteers.form.position.positionCurName}">Position
                                 cur-name</label>
@@ -121,8 +137,6 @@
                             <input type="number" class="form-control" id="positionOrder" th:field="*{order}"
                                    value="0"/>
                             <span class="help-block" th:if="${#fields.hasErrors('order')}">Error</span>
-
-
                         </div>
                         <div class="form-group"
                              th:class="${#fields.hasErrors('forUser')? 'has-error form-group': 'form-group'}">
@@ -193,6 +207,10 @@
                                     '<input type="hidden" id="originName' + data.result.id + '" value="' + data.result.name + '" onblur="updatePosition(' + data.result.id + '); "/>' +
                                     '</td>' +
                                     '<td>' +
+                                    '<input type="text" class="form-control" id="engName' + data.result.id + '" value="' + data.result.engName + '" onblur="updatePosition(' + data.result.id + '); "/>' +
+                                    '<input type="hidden" id="originEngName' + data.result.id + '" value="' + data.result.engName + '" onblur="updatePosition(' + data.result.id + '); "/>' +
+                                    '</td>' +
+                                    '<td>' +
                                     '<input type="text" class="form-control" id="curName' + data.result.id + '" value="' + data.result.curName + '" onblur="updatePosition(' + data.result.id + '); "/>' +
                                     '<input type="hidden" id="originCurName' + data.result.id + '" value="' + data.result.curName + '" onblur="updatePosition(' + data.result.id + '); "/>' +
                                     '</td>' +
@@ -253,6 +271,7 @@
             var data = {
                 'id': id,
                 'name': $('#name' + id).val(),
+                'engName': $('#engName' + id).val(),
                 'curName': $('#curName' + id).val(),
                 'value': $('#value' + id).val(),
                 'order': $('#order' + id).val(),
@@ -267,6 +286,7 @@
                 success: function (data) {
                     if (data.status === "OK") {
                         $("#originName" + id).val($("#name" + id).val());
+                        $("#originEngName" + id).val($("#engName" + id).val());
                         $("#originCurName" + id).val($("#curName" + id).val());
                         $("#originValue" + id).val($("#value" + id).val());
                         $("#originOrder" + id).val($("#order" + id).val());
@@ -274,6 +294,7 @@
                     }
                     else {
                         $("#name" + id).val($("#originName" + id).val());
+                        $("#engName" + id).val($("#originEngName" + id).val());
                         $("#curName" + id).val($("#originCurName" + id).val());
                         $("#value" + id).val($("#originValue" + id).val());
                         $("#order" + id).val($("#originOrder" + id).val());
