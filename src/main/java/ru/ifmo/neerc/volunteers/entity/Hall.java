@@ -38,6 +38,8 @@ public class Hall {
     @NonNull
     private Year year;
 
+    private String chatAlias;
+
     public Hall(HallForm form, Year year) {
         this(form.getName(), form.getCurName(), false, form.getDescription(), year);
     }
@@ -46,6 +48,7 @@ public class Hall {
         setName(form.getName());
         setCurName(form.getCurName());
         setDescription(form.getDescription());
+        setChatAlias(form.getChatAlias());
     }
 
 }

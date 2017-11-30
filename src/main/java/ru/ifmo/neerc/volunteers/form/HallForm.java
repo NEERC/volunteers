@@ -17,4 +17,6 @@ public class HallForm {
 
     @NotEmpty
     String description;
+
+    String chatAlias;
 }
