@@ -30,14 +30,16 @@
                         <input th:unless="${isUser}" type="text" class="form-control" th:value="${position.name}"
                                th:id="'name'+${position.id}"
                                th:name="name+${position.id}" th:onblur="'updatePosition('+${position.id}+');'"/>
-                        <input type="hidden" th:id="originName+${position.id}" th:value="${position.name}"/>
+                        <input type="hidden" th:id="originName+${position.id}" th:value="${position.name}"
+                               th:unless="${isUser}"/>
                     </td>
                     <td>
                         <label th:if="${isUser}" th:text="${position.engName}" th:for="position+${position.id}"></label>
                         <input th:unless="${isUser}" type="text" class="form-control" th:value="${position.engName}"
                                th:id="'engName'+${position.id}"
                                th:onblur="'updatePosition('+${position.id}+');'"/>
-                        <input type="hidden" th:id="originEngName+${position.id}" th:value="${position.engName}"/>
+                        <input type="hidden" th:id="originEngName+${position.id}" th:value="${position.engName}"
+                               th:unless="${isUser}"/>
                     </td>
                     <td>
                         <label th:if="${isUser}" th:text="${position.curName}" th:for="position+${position.id}"></label>
@@ -53,19 +55,20 @@
                                th:name="v+${position.id}" min="0"
                                th:onblur="'updatePosition('+${position.id}+');'"/>
                         <input type="hidden" th:value="${position.value}"
-                               th:id="originValue+${position.id}"/>
+                               th:id="originValue+${position.id}" th:unless="${isUser}"/>
                     </td>
                     <td th:unless="${isUser}">
                         <input type="number" class="form-control" th:value="${position.ord}"
                                th:id="'order'+${position.id}"
                                th:onblur="'updatePosition('+${position.id}+');'"/>
                         <input type="hidden" th:value="${position.ord}"
-                               th:id="originOrder+${position.id}"/>
+                               th:id="originOrder+${position.id}" th:unless="${isUser}"/>
                     </td>
                     <td th:unless="${isUser}">
                         <input type="checkbox" th:checked="${position.inForm}" th:value="${position.id}"
                                th:id="'inForm'+${position.id}" th:onblur="'updatePosition('+${position.id}+');'"/>
-                        <input type="hidden" th:checked="${position.inForm}" th:id="originInForm+${position.id}"/>
+                        <input type="hidden" th:checked="${position.inForm}" th:id="originInForm+${position.id}"
+                               th:unless="${isUser}"/>
                     </td>
                     <td th:unless="${isUser}">
                         <a th:unless="${position.def}"
