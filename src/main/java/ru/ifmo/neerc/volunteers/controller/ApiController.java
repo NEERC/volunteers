@@ -46,7 +46,7 @@ public class ApiController {
             return ResponseEntity.ok(null);
         }
 
-        log.debug("Failed to authenticate user {}", username);
+        log.warn("Failed to authenticate user {}", username);
         return ResponseEntity.notFound().build();
     }
 
@@ -64,6 +64,11 @@ public class ApiController {
     public ResponseEntity<UserDayDto> getUserDay(@RequestParam final String username, @RequestParam("day") final long dayId) {
         final User user = userRepository.findByEmailIgnoreCase(username);
 
+        if (user == null) {
+            log.warn("User {} not found", username);
+            return ResponseEntity.notFound().build();
+        }
+
         if (user.getChatAlias() != null && !user.getChatAlias().isEmpty()) {
             return ResponseEntity.ok(new UserDayDto(user));
         }
@@ -77,6 +82,7 @@ public class ApiController {
             return ResponseEntity.ok(new UserDayDto(userDay.get()));
         }
 
+        log.warn("User {} is not registered for day {}", username, dayId);
         return ResponseEntity.notFound().build();
     }
 }
