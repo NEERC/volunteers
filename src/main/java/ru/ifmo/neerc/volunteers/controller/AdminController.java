@@ -731,7 +731,7 @@ public class AdminController {
         Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(experienceService.getApplicationForms(exp), exp);
         day.getUsers().forEach(u -> {
             User user = u.getUserYear().getUser();
-            String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', (char) 0x66d);
+            String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '٭');
             writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," +
                     u.getPosition().getEngName() + "," + u.getPosition().getCurName() + ",\""
                     + user.getFirstName() + "\n" + user.getLastName() + "\",\"" +
@@ -749,5 +749,22 @@ public class AdminController {
         model.addAttribute("medals", experienceService.getMedals(year));
         model.addAttribute("exp", experienceService.getExperienceExceptCurrentYear(year));
         return "star";
+    }
+
+    @PostMapping("/default")
+    public @ResponseBody
+    JsonResponse<String> setDefaultYear(Authentication authentication) {
+        Year year = userService.getUserByAuthentication(authentication).getYear();
+        JsonResponse<String> result = new JsonResponse<>();
+        try {
+            Set<User> users = userRepository.findAll();
+            users.forEach(it -> it.setYear(year));
+            userRepository.save(users);
+            result.setStatus(Status.OK);
+        } catch (Exception e) {
+            result.setStatus(Status.FAIL);
+            result.setResult(e.getMessage());
+        }
+        return result;
     }
 }

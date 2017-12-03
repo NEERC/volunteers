@@ -95,7 +95,10 @@
                         <a th:href="@{/admin/medals/}" class="collapsed"
                            th:text="#{volunteers.admin.menu.medals}">Medals</a>
                     </li>
-
+                    <li>
+                        <a href="#" class="collapsed" th:text="#{volunteers.admin.default}" onclick="setDefaultYear()">Set
+                            as default for all</a>
+                    </li>
                 </ul>
             </li>
             <th:block th:if="${isUser}">
@@ -236,6 +239,24 @@
                 $("#dayScore").val($("#day" + id + "value").val());
                 $("#dayInformation").val($("#day" + id + "information").val());
                 $("#editDayForm").modal("show");
+            }
+
+            function setDefaultYear() {
+                var data = {};
+                data[_csrf_param_name] = _csrf_token;
+                $.ajax({
+                    type: 'POST',
+                    url: /*[[@{/admin/default/}]]*/"",
+                    data: data,
+                    success: function (data) {
+                        if (data.status === "OK") {
+
+                        }
+                        else {
+                            alert(data.result);
+                        }
+                    }
+                })
             }
             $('#registration').change(function () {
                 /*<![CDATA[*/
