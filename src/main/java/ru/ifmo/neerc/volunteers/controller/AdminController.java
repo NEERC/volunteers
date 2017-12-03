@@ -731,7 +731,7 @@ public class AdminController {
         Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(experienceService.getApplicationForms(exp), exp);
         day.getUsers().forEach(u -> {
             User user = u.getUserYear().getUser();
-            String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '★');
+            String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', (char) 0x66d);
             writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," +
                     u.getPosition().getEngName() + "," + u.getPosition().getCurName() + ",\""
                     + user.getFirstName() + "\n" + user.getLastName() + "\",\"" +
