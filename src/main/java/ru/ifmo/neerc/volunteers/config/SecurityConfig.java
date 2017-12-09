@@ -36,9 +36,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
             .authorizeRequests()
                 .antMatchers("/components/**", "/css/**", "/fonts/**", "/images/**", "/js/**", "/signup", "/login", "/reset-password/**", "/changePassword/**", "/favicon.ico", "/confirm/**", "/api/**").permitAll()
+                .antMatchers("/admin/day/*/",
+                             "/admin/day/*/attendance/",
+                             "/admin/day/*/assessments",
+                             "/admin/day/attendance/",
+                             "/admin/day/assessments/",
+                             "/admin/results/**").hasAnyRole("ADMIN", "MANAGER")
                 .antMatchers("/admin/**", "/users/**").hasRole("ADMIN")
                 .antMatchers("/updatePassword/**").hasAuthority(PASSWORD_RESET_AUTHORITY)
-                .anyRequest().hasAnyRole("USER", "ADMIN")
+                .anyRequest().hasAnyRole("USER", "MANAGER", "ADMIN")
         .and()
             .formLogin()
                 .failureUrl("/login?error")

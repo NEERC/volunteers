@@ -19,13 +19,15 @@
                     </button>
                 </th:block>-->
                 <th:block th:unless="${assessments} or ${attendance}">
-                    <a th:href="@{'/admin/day/'+${day.id}+'/edit/'}" class="btn btn-default"
+                    <a sec:authorize="hasRole('ADMIN')"
+                       th:href="@{'/admin/day/'+${day.id}+'/edit/'}" class="btn btn-default"
                        role="button" th:text="#{volunteers.day.button.edit}">Edit</a>
                     <a th:href="@{'/admin/day/'+${day.id}+'/attendance/'}" class="btn btn-default"
                        role="button" th:text="#{volunteers.day.button.editAttendance}">Set attendance</a>
                     <a th:href="@{'/admin/day/'+${day.id}+'/assessments'}" class="btn btn-default"
                        role="button" th:text="#{volunteers.day.button.editAssessments}">Set assessments</a>
-                    <a th:href="@{'/admin/day/'+${day.id}+'/csv'}" class="btn btn-default"
+                    <a sec:authorize="hasRole('ADMIN')"
+                       th:href="@{'/admin/day/'+${day.id}+'/csv'}" class="btn btn-default"
                        role="button" th:text="#{volunteers.day.button.csv}">CSV file</a>
                 </th:block>
             </div>
@@ -141,7 +143,8 @@
                 </button>
             </th:block>-->
             <th:block th:unless="${assessments} or ${attendance}">
-                <a th:href="@{'/admin/day/'+${day.id}+'/edit/'}" class="btn btn-default"
+                <a sec:authorize="hasRole('ADMIN')"
+                   th:href="@{'/admin/day/'+${day.id}+'/edit/'}" class="btn btn-default"
                    role="button" th:text="#{volunteers.day.button.edit}">Edit</a>
                 <a th:href="@{'/admin/day/'+${day.id}+'/attendance/'}" class="btn btn-default"
                    role="button" th:text="#{volunteers.day.button.editAttendance}">Set attendance</a>

@@ -33,7 +33,7 @@
                 <ul class="collapse in" id="eventsList">
                     <th:block th:each="day : ${days}">
                         <li>
-                            <a th:href="@{(${#authorization.expression('hasRole(''ROLE_ADMIN'')')}? '/admin/':'/')+'day/'+${day.id}+'/'}" th:text="${day.name}"
+                            <a th:href="@{(${#authorization.expression('hasAnyRole(''ROLE_ADMIN'', ''ROLE_MANAGER'')')}? '/admin/':'/')+'day/'+${day.id}+'/'}" th:text="${day.name}"
                                th:id="'day'+${day.id}+'name'"></a>
                             <span class="glyphicon glyphicon-pencil" th:onclick="'editDay('+${day.id}+');'"
                                   sec:authorize="hasRole('ADMIN')"></span>
@@ -48,7 +48,7 @@
             <li sec:authorize="hasRole('ADMIN')">
                 <a th:href="@{/admin/email}" class="collapsed" th:text="#{volunteers.admin.menu.email}">Send email</a>
             </li>
-            <li sec:authorize="hasAnyRole('ADMIN')">
+            <li sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
                 <a th:href="@{/admin/results/}" class="collapsed"
                    th:text="#{volunteers.admin.menu.results}">Show results</a>
             </li>
@@ -101,7 +101,7 @@
                     </li>
                 </ul>
             </li>
-            <th:block sec:authorize="hasAnyRole('USER')">
+            <th:block sec:authorize="hasAnyRole('USER', 'MANAGER')">
                 <li>
                     <a th:href="@{'/position/'}" class="collapsed"
                        th:text="#{volunteers.admin.menu.positions}">Positions</a>
