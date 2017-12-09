@@ -113,13 +113,11 @@
                 </div>
 
                 <div class="form-group">
-                    <div class="col-sm-offset-4 col-sm-8">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" th:field="*{administrator}"/>
-                                <span th:text="#{volunteers.form.userEdit.administrator}" th:remove="tag">Administrator</span>
-                            </label>
-                        </div>
+                    <label for="inputRole" class="col-sm-4 control-label">Role</label>
+                    <div class="col-sm-8">
+                        <select th:field="*{role}" class="form-control" id="inputRole">
+                            <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+                        </select>
                     </div>
                 </div>
 

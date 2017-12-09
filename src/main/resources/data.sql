@@ -2,7 +2,8 @@
 INSERT IGNORE INTO role
 (id, name) VALUES
   (1, 'ROLE_ADMIN'),
-  (2, 'ROLE_USER');
+  (2, 'ROLE_USER'),
+  (3, 'ROLE_MANAGER');
 
 -- admin: login 'lapenok.aleksej@gmail.com'
 INSERT IGNORE INTO user

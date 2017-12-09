@@ -197,8 +197,7 @@ public class UserServiceImpl implements UserService {
         user.setBadgeNameCyr(editForm.getBadgeNameCyr());
         user.setPhone(editForm.getPhone());
 
-        Role role = roleRepository.findByName(editForm.isAdministrator() ? "ROLE_ADMIN" : "ROLE_USER");
-        user.setRole(role);
+        user.setRole(editForm.getRole());
 
         user.setChatLoginAllowed(editForm.isChatLoginAllowed());
         user.setChatAlias(editForm.getChatAlias());

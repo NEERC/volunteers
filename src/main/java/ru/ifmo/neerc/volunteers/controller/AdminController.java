@@ -696,6 +696,7 @@ public class AdminController {
     @GetMapping("/users/{id}")
     public String getUser(@PathVariable final long id, final Model model, final Authentication authentication) {
         utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+        model.addAttribute("roles", roleRepository.findAll());
 
         if (!model.containsAttribute("editForm")) {
             User user = userRepository.findOne(id);

@@ -19,6 +19,8 @@
                         <span th:text="${user.badgeName}" th:remove="tag"></span>
                         <span class="label label-primary" th:text="#{volunteers.users.admin}"
                               th:if="${user.role.name == 'ROLE_ADMIN'}">Admin</span>
+                        <span class="label label-success" th:text="#{volunteers.users.manager}"
+                              th:if="${user.role.name == 'ROLE_MANAGER'}">Manager</span>
                     </td>
                     <td th:text="${user.email}"></td>
                     <td th:text="${user.phone}"></td>
