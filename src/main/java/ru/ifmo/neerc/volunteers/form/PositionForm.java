@@ -30,4 +30,6 @@ public class PositionForm {
     private Long order = 0L;
 
     private boolean forUser;
+
+    private boolean manager;
 }

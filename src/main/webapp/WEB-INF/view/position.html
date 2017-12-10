@@ -18,6 +18,7 @@
             <th th:text="#{volunteers.position.value}" class="text-center" th:unless="${isUser}">Value</th>
             <th th:text="#{volunteers.position.order}" class="text-center" th:unless="${isUser}">Order</th>
             <th th:text="#{volunteers.position.inForm}" class="text-center" th:unless="${isUser}">In form</th>
+            <th th:text="#{volunteers.position.manager}" class="text-center" th:unless="${isUser}">Manager</th>
             <th th:unless="${isUser}"></th>
             </thead>
             <tbody>
@@ -68,6 +69,12 @@
                         <input type="checkbox" th:checked="${position.inForm}" th:value="${position.id}"
                                th:id="'inForm'+${position.id}" th:onblur="'updatePosition('+${position.id}+');'"/>
                         <input type="hidden" th:checked="${position.inForm}" th:id="originInForm+${position.id}"
+                               th:unless="${isUser}"/>
+                    </td>
+                    <td th:unless="${isUser}">
+                        <input type="checkbox" th:checked="${position.manager}" th:value="${position.id}"
+                               th:id="'manager'+${position.id}" th:onblur="'updatePosition('+${position.id}+');'"/>
+                        <input type="hidden" th:checked="${position.manager}" th:id="originManager+${position.id}"
                                th:unless="${isUser}"/>
                     </td>
                     <td th:unless="${isUser}">
@@ -230,12 +237,17 @@
                                     '<input type="hidden"' + checked + ' value="' + data.result.id + '" id="originInForm' + data.result.id + '"/>' +
                                     '</td>' +
                                     '<td>' +
+                                    '<input type="checkbox"' + checked + ' value="' + data.result.id + '" id="manager' + data.result.id + '" onblur="updatePosition(' + data.result.id + ');"/>' +
+                                    '<input type="hidden"' + checked + ' value="' + data.result.id + '" id="originManager' + data.result.id + '"/>' +
+                                    '</td>' +
+                                    '<td>' +
                                     '<a class="btn btn-default" role="button" onclick="deletePosition(' + data.result.id + '); return false;">' + note + '</a>' +
                                     '</td>' +
                                     '</tr>';
                                 /*]]>*/
                                 $("#positions tbody").find("tr:last").before(str);
                                 $('#inForm' + data.result.id).prop('checked', data.result.inForm);
+                                $('#manager' + data.result.id).prop('checked', data.result.manager);
                                 $("#positionForm").modal("hide");
                                 form.reset();
                             }
@@ -278,7 +290,8 @@
                 'curName': $('#curName' + id).val(),
                 'value': $('#value' + id).val(),
                 'order': $('#order' + id).val(),
-                'forUser': !!$('#inForm' + id).prop('checked')
+                'forUser': !!$('#inForm' + id).prop('checked'),
+                'manager': !!$('#manager' + id).prop('checked')
             };
             data[_csrf_param_name] = _csrf_token;
             $.ajax({
@@ -294,6 +307,7 @@
                         $("#originValue" + id).val($("#value" + id).val());
                         $("#originOrder" + id).val($("#order" + id).val());
                         $("#originInForm" + id).prop('checked', $('#inForm').prop('checked'))
+                        $("#originManager" + id).prop('checked', $('#manager').prop('checked'))
                     }
                     else {
                         $("#name" + id).val($("#originName" + id).val());
@@ -302,6 +316,7 @@
                         $("#value" + id).val($("#originValue" + id).val());
                         $("#order" + id).val($("#originOrder" + id).val());
                         $("#inForm" + id).prop('checked', !!$('#originInForm').checked)
+                        $("#manager" + id).prop('checked', !!$('#originManager').checked)
                     }
                 }
             });
