@@ -33,7 +33,9 @@
                 <ul class="collapse in" id="eventsList">
                     <th:block th:each="day : ${days}">
                         <li>
-                            <a th:href="@{(${#authorization.expression('hasRole(''ROLE_ADMIN'')')}? '/admin/':'/')+'day/'+${day.id}+'/'}" th:text="${day.name}"
+                            <a th:href="@{((${#authorization.expression('hasRole(''ROLE_ADMIN'')')}
+                                         or ${@dayService.isManagerForDay(currentUser, day)})
+                                         ? '/admin/' : '/') + 'day/' + ${day.id} + '/'}" th:text="${day.name}"
                                th:id="'day'+${day.id}+'name'"></a>
                             <span class="glyphicon glyphicon-pencil" th:onclick="'editDay('+${day.id}+');'"
                                   sec:authorize="hasRole('ADMIN')"></span>

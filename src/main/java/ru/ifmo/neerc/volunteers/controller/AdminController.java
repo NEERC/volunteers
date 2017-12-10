@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -282,6 +283,7 @@ public class AdminController {
     }
 
     @PostMapping("/day/edit")
+    @PreAuthorize("hasRole('ADMIN')")
     public @ResponseBody
     JsonResponse<Day> saveEvent(@Valid @ModelAttribute final Day day, final BindingResult result, final Authentication authentication) {
         JsonResponse<Day> response = new JsonResponse<>();
@@ -308,6 +310,7 @@ public class AdminController {
     }
 
     @PostMapping("/day/add")
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String addEvent(@Valid @ModelAttribute("newDay") final Day dayForm, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
         JsonResponse<Day> response = saveEvent(dayForm, result, authentication);
@@ -340,6 +343,7 @@ public class AdminController {
 
 
     @GetMapping("day/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForDay(authentication, #id)")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String event(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final User user = userService.getUserByAuthentication(authentication);
@@ -367,6 +371,7 @@ public class AdminController {
     }
 
     @GetMapping("/day/{id}/edit")
+    @PreAuthorize("hasRole('ADMIN')")
     public String editEvent(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final User user = userService.getUserByAuthentication(authentication);
         final Day day = dayRepository.findOne(id);
@@ -383,6 +388,7 @@ public class AdminController {
     }
 
     @PostMapping("/day/save")
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse save(@RequestParam final long userId, @RequestParam final long hallId, @RequestParam final long positionId) {
@@ -412,6 +418,7 @@ public class AdminController {
     }
 
     @PostMapping("/day/copy")
+    @PreAuthorize("hasRole('ADMIN')")
     public @ResponseBody
     JsonResponse copy(@RequestParam final long eventId, @RequestParam final long baseEventId) {
         try {
@@ -454,6 +461,7 @@ public class AdminController {
     }
 
     @GetMapping("/day/{id}/attendance")
+    @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForDay(authentication, #id)")
     public String attendance(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
         model.addAttribute("attendances", Attendance.values());
@@ -462,6 +470,7 @@ public class AdminController {
     }
 
     @GetMapping("/day/{id}/assessments")
+    @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForDay(authentication, #id)")
     public String assessments(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         event(id, model, authentication);
         final Day day = dayRepository.findOne(id);
@@ -474,6 +483,7 @@ public class AdminController {
     }
 
     @PostMapping("/day/assessments")
+    @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForUserDay(authentication, #userId)")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse setAssessments(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, @RequestParam final long userId) {
@@ -501,6 +511,7 @@ public class AdminController {
     }
 
     @PostMapping("/day/attendance")
+    @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForUserDay(authentication, #id)")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse setAttendance(@RequestParam final long id, @RequestParam final String value) {
@@ -720,6 +731,7 @@ public class AdminController {
     }
 
     @GetMapping("/day/{id}/csv")
+    @PreAuthorize("hasRole('ADMIN')")
     public void getBadges(final HttpServletResponse response, @PathVariable("id") long id) throws IOException {
         response.setContentType("text/csv");
         response.setCharacterEncoding("UTF-8");
