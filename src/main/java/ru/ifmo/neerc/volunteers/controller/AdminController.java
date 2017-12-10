@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.util.Pair;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -15,7 +16,6 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
-import ru.ifmo.neerc.dev.Pair;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.*;
 import ru.ifmo.neerc.volunteers.modal.JsonResponse;
@@ -377,7 +377,7 @@ public class AdminController {
                 u -> u.getUserYear().getUser().getApplicationForms().stream().
                         filter(uy -> !uy.getYear().equals(user.getYear())).
                         collect(Collectors.toMap(ApplicationForm::getYear,
-                                uy -> uy.getUserDays().stream().map(ud -> new Pair<>(ud.getHall(), ud.getPosition())).collect(Collectors.toSet())))));
+                                uy -> uy.getUserDays().stream().map(ud -> Pair.of(ud.getHall(), ud.getPosition())).collect(Collectors.toSet())))));
         model.addAttribute("exp", exp);
         return "day";
     }
@@ -594,15 +594,18 @@ public class AdminController {
 
         utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
 
-        Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> assessments = experienceService.getAssessments(year);
+        Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> assessments =
+                experienceService.getAssessments(year);
         Map<ApplicationForm, Double> experience = experienceService.getExperience(year);
-        List<ApplicationForm> applicationForms = experienceService.getApplicationForms(experience, assessments.getKey());
+        Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(experience);
+        List<ApplicationForm> applicationForms = experienceService.getSortedApplicationForms(
+                assessments.getFirst(), medals);
 
         model.addAttribute("applicationForms", applicationForms);
-        model.addAttribute("assessments", assessments.getKey());
-        model.addAttribute("assessmentsGroupByDays", assessments.getValue());
+        model.addAttribute("assessments", assessments.getFirst());
+        model.addAttribute("assessmentsGroupByDays", assessments.getSecond());
         model.addAttribute("experience", experience);
-        model.addAttribute("medals", experienceService.getNewMedals(applicationForms, experience));
+        model.addAttribute("medals", medals);
         model.addAttribute("halls", experienceService.getHalls(year));
         return "results";
     }
@@ -614,7 +617,7 @@ public class AdminController {
         Map<Attendance, String> attendanceComments = getAttendanceMap();
         Map<Long, Pair<Double, String>> attendance = applicationForm.getUserDays().stream().collect(Collectors.toMap(
                 UserDay::getId,
-                d -> new Pair<>(d.calcAttendanceScore(), attendanceComments.get(d.getAttendance()))
+                d -> Pair.of(d.calcAttendanceScore(), attendanceComments.get(d.getAttendance()))
         ));
 
         utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
@@ -728,7 +731,7 @@ public class AdminController {
         writer.write("Team,TeamCur,Role,RoleCur,Name,NameCyr,Medal,Stars\n");
         Day day = dayRepository.findOne(id);
         Map<ApplicationForm, Double> exp = experienceService.getExperienceExceptCurrentYear(day.getYear());
-        Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(experienceService.getApplicationForms(exp), exp);
+        Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(exp);
         day.getUsers().forEach(u -> {
             User user = u.getUserYear().getUser();
             String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '٭');

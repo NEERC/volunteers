@@ -26,8 +26,8 @@
                 </tr>
                 <tr>
                     <td class="text-right" th:text="#{volunteers.result.details.attendance}">Attendance</td>
-                    <td class="text-center" th:text="${assessmentattendance.get(day.id).key}"></td>
-                    <td th:text="${assessmentattendance.get(day.id).value}"></td>
+                    <td class="text-center" th:text="${assessmentattendance.get(day.id).first}"></td>
+                    <td th:text="${assessmentattendance.get(day.id).second}"></td>
                 </tr>
                 <th:block th:each="ass,assi:${day.assessments}">
                 <tr>

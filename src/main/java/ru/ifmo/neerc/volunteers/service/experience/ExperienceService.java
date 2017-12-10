@@ -1,6 +1,6 @@
 package ru.ifmo.neerc.volunteers.service.experience;
 
-import ru.ifmo.neerc.dev.Pair;
+import org.springframework.data.util.Pair;
 import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
 import ru.ifmo.neerc.volunteers.entity.Hall;
 import ru.ifmo.neerc.volunteers.entity.Medal;
@@ -22,9 +22,7 @@ public interface ExperienceService {
 
     Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> getAssessments(Year year);
 
-    List<ApplicationForm> getApplicationForms(Map<ApplicationForm, Double> experience, Map<ApplicationForm, Double> assessments);
+    List<ApplicationForm> getSortedApplicationForms(Map<ApplicationForm, Double> assessments, Map<ApplicationForm, Medal> medals);
 
-    List<ApplicationForm> getApplicationForms(Map<ApplicationForm, Double> experience);
-
-    Map<ApplicationForm, Medal> getNewMedals(List<ApplicationForm> applicationForms, Map<ApplicationForm, Double> experience);
+    Map<ApplicationForm, Medal> getNewMedals(Map<ApplicationForm, Double> experience);
 }

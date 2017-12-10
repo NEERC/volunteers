@@ -53,6 +53,7 @@ public class User implements UserDetails {
     private String phone;
 
     private boolean confirmed;
+    private boolean hq;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     //@Column(firstName = "role_id", nullable = false)
