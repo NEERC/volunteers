@@ -41,6 +41,8 @@
                 <td class="text-center">
                     <a th:href="@{'/admin/results/user/'+${applicationForm.id}}"
                        th:text="${applicationForm.user.badgeName}"></a>
+                    <br/><span th:text="'('+${applicationForm.user.itmoId}+')'"
+                               th:if="${applicationForm.user.itmoId!=null} and ${applicationForm.user.itmoId!=''}"></span>
                 </td>
                 <td>
                     <h5><label th:text="${medals.get(applicationForm).name}"></label>
