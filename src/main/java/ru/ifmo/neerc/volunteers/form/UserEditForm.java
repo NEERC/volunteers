@@ -1,12 +1,10 @@
 package ru.ifmo.neerc.volunteers.form;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
+import ru.ifmo.neerc.volunteers.entity.User;
 
 import javax.validation.constraints.Pattern;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
-import ru.ifmo.neerc.volunteers.entity.User;
 
 @Data
 public class UserEditForm {
@@ -44,6 +42,9 @@ public class UserEditForm {
 
     @Pattern(regexp = "[a-zA-Z0-9-_]*")
     private String chatAlias;
+
+    @Pattern(regexp = "(\\d{6})?")
+    private String itmoId;
 
     public UserEditForm() {
     }
