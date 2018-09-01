@@ -10,7 +10,7 @@
           th:if="${isUser} and ${year.openForRegistration} and ${isConfirmed}"
           class="form-horizontal col-sm-offset-2 col-sm-8" id="signUpForm">
         <link rel="stylesheet" type="text/css" media="screen"
-              href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css"/>
+              th:href="@{/components/bootstrap-select.min.css}"/>
         <script src="../../components/bootstrap-select.min.js" th:src="@{/components/bootstrap-select.min.js}"></script>
         <h2 class="col-sm-offset-4" th:text="#{volunteers.form.yearSignUp.header(${year.name})}" th:unless="${isSaved}">
             Sign up</h2>

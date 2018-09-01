@@ -47,5 +47,6 @@ public class UserProfileForm {
         badgeName = user.getBadgeName();
         badgeNameCyr = user.getBadgeNameCyr();
         phone = user.getPhone();
+        itmoId = user.getItmoId();
     }
 }
