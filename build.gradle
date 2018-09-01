@@ -9,7 +9,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath "com.moowork.gradle:gradle-node-plugin:1.0.0"
+		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 	}
 }
 
@@ -102,8 +102,8 @@ task copyfonts(type:Sync) {
 	def nodeExt = project.extensions.findByName("node")
 
 	nodeExt.with {
-		version = '0.12.2'
-		npmVersion = '2.7.5'
+		version = '9.9.0'
+		npmVersion = '4.0.0'
 		download = true
 	}
 
