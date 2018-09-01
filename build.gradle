@@ -75,6 +75,7 @@ task copyjs(type:Sync) {
 	into "src/main/webapp/components"
 	include '**/*.min.js'
 	include '**/jquery.dataTables.js'
+	include '**/bootstrap-select.min.css'
 	eachFile {
 		details -> details.setRelativePath new RelativePath(true, details.name)
 	}
