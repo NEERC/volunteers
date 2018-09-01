@@ -61,6 +61,7 @@ public class UserYearForm {
         lastNameCyr = user.getLastNameCyr();
         phone = user.getPhone();
         email = user.getEmail();
+        itmoId = user.getItmoId();
     }
 
     public UserYearForm() {
