@@ -57,6 +57,7 @@ public class UserEditForm {
         badgeName = user.getBadgeName();
         badgeNameCyr = user.getBadgeNameCyr();
         phone = user.getPhone();
+        itmoId = user.getItmoId();
 
         administrator = user.getRole().getName().equals("ROLE_ADMIN");
 
