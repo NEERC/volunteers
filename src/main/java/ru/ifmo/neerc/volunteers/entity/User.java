@@ -52,7 +52,10 @@ public class User implements UserDetails {
 
     private String phone;
 
+    private String itmoId = "";
+
     private boolean confirmed;
+    private boolean hq;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     //@Column(firstName = "role_id", nullable = false)
@@ -82,6 +85,7 @@ public class User implements UserDetails {
         email = userForm.getEmail();
         phone = userForm.getPhone();
         confirmed = false;
+        itmoId = userForm.getItmoId();
     }
 
     public boolean changeUserInformation(UserYearForm form) {
@@ -116,6 +120,11 @@ public class User implements UserDetails {
             phone = form.getPhone();
             result = true;
         }
+
+        if (itmoId == null || !itmoId.equals(form.getItmoId())) {
+            itmoId = form.getItmoId();
+            result = true;
+        }
         return result;
     }
 
@@ -127,6 +136,7 @@ public class User implements UserDetails {
         badgeName = profile.getBadgeName();
         badgeNameCyr = profile.getBadgeNameCyr();
         phone = profile.getPhone();
+        itmoId = profile.getItmoId();
     }
 
     @Override

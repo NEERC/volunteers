@@ -19,15 +19,15 @@
         <th:block th:each="applicationForm:${medals}">
             <tr>
                 <td class="text-center">
-                    <label th:text="${applicationForm.key.user.badgeName}"></label>
+                    <label th:text="${applicationForm.first.user.badgeName}"></label>
                 </td>
                 <td>
                     <h5><label
-                            th:text="${applicationForm.value.name} + ' ('+${exp.get(applicationForm.key)}+')'"></label>
+                            th:text="${applicationForm.second.name} + ' ('+${exp.get(applicationForm.first)}+')'"></label>
                     </h5>
-                    <h5><label th:if="${applicationForm.value.stars > 0}">
+                    <h5><label th:if="${applicationForm.second.stars > 0}">
                         <th:block th:utext="#{volunteers.medals.star}"
-                                  th:each="i:${#numbers.sequence(1,applicationForm.value.stars)}">
+                                  th:each="i:${#numbers.sequence(1,applicationForm.second.stars)}">
 
                         </th:block>
                     </label></h5>

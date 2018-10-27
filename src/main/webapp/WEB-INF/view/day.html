@@ -101,7 +101,7 @@
                                 <label th:text="${year.name}"></label>
                                 <ul class="list-group">
                                     <li th:each="pair:${exp.get(user).get(year)}" class="list-group-item">
-                                        <label th:text="${pair.getKey().name}+': '+${pair.getValue().name}"></label>
+                                        <label th:text="${pair.getFirst().name}+': '+${pair.getSecond().name}"></label>
                                     </li>
                                 </ul>
                             </li>

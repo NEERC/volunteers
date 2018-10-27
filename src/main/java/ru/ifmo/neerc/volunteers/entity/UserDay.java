@@ -53,9 +53,9 @@ public class UserDay {
         return String.format("Total Score in %s", hall.getName());
     }
 
-    public Assessment createFakeAssessmentByAttendace(String attendanceComment) {
+    public Assessment createFakeAssessmentByAttendace(Map<Attendance, String> attendanceComments) {
         Assessment back = new Assessment();
-        back.setComment(String.format("%s (%s)",day.getName(), attendanceComment));
+        back.setComment(String.format("%s (%s)",day.getName(), attendanceComments.get(attendance)));
         back.setValue(calcAttendanceScore());
         return back;
     }

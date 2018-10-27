@@ -1,12 +1,10 @@
 package ru.ifmo.neerc.volunteers.form;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
+import ru.ifmo.neerc.volunteers.entity.User;
 
 import javax.validation.constraints.Pattern;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
-import ru.ifmo.neerc.volunteers.entity.User;
 
 @Data
 public class UserProfileForm {
@@ -35,6 +33,9 @@ public class UserProfileForm {
     @Pattern(regexp = "\\+7[\\(]\\d{3}[\\)]\\d{3}[\\-]\\d{2}[\\-]\\d{2}")
     private String phone;
 
+    @Pattern(regexp = "(\\d{6})?")
+    private String itmoId;
+
     public UserProfileForm() {
     }
 
@@ -46,5 +47,6 @@ public class UserProfileForm {
         badgeName = user.getBadgeName();
         badgeNameCyr = user.getBadgeNameCyr();
         phone = user.getPhone();
+        itmoId = user.getItmoId();
     }
 }

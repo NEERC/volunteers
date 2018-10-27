@@ -3,16 +3,18 @@ package ru.ifmo.neerc.volunteers.service.experience;
 import lombok.AllArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
-import ru.ifmo.neerc.dev.Pair;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.repository.ApplicationFormRepository;
+import ru.ifmo.neerc.volunteers.repository.AssBoundaryRepository;
 import ru.ifmo.neerc.volunteers.repository.MedalRepository;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -21,6 +23,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     final ApplicationFormRepository applicationFormRepository;
     final MedalRepository medalRepository;
     final MessageSource messageSource;
+    final AssBoundaryRepository assBoundaryRepository;
     private final Locale locale = LocaleContextHolder.getLocale();
 
 
@@ -48,31 +51,25 @@ public class ExperienceServiceImpl implements ExperienceService {
             while (medals.get(j[0]).getValue() > exps.get(u)) {
                 j[0]++;
             }
-            return new Pair<>(u, medals.get(j[0]));
+            return Pair.of(u, medals.get(j[0]));
         }).collect(Collectors.toList());
     }
 
-    public List<ApplicationForm> getApplicationForms(Map<ApplicationForm, Double> experience, Map<ApplicationForm, Double> assessments) {
-        final List<ApplicationForm> applicationForms = new ArrayList<>(experience.keySet());
-        applicationForms.sort(
-                (user1, user2) -> {
-                    if (experience.get(user1).equals(experience.get(user2))) {
-                        return Double.compare(assessments.get(user2), assessments.get(user1));
-                    } else {
-                        return Double.compare(experience.get(user2), experience.get(user1));
-                    }
-                }
-        );
-        return applicationForms;
-    }
-
     @Override
-    public List<ApplicationForm> getApplicationForms(Map<ApplicationForm, Double> experience) {
-        final List<ApplicationForm> applicationForms = new ArrayList<>(experience.keySet());
-        applicationForms.sort(
-                (user1, user2) -> Double.compare(experience.get(user2), experience.get(user1))
-        );
-        return applicationForms;
+    public List<ApplicationForm> getSortedApplicationForms(Map<ApplicationForm, Double> assessments,
+                                                           Map<ApplicationForm, Medal> medals) {
+
+        NavigableSet<Double> borders = assessments.keySet().stream().findAny()
+                .map(f -> assBoundaryRepository.findByYear(f.getYear())).orElseGet(Collections::emptyList).stream().map(AssBoundary::getValue)
+                .collect(Collectors.toCollection(TreeSet::new));
+        borders.add(Double.NEGATIVE_INFINITY);
+
+        return assessments.entrySet().stream().filter(e -> !e.getKey().getUser().isHq())
+                .sorted(Comparator.<Map.Entry<ApplicationForm, Double>>comparingLong(e -> medals.get(e.getKey()).getValue())
+                        .thenComparing(e -> borders.floor(e.getValue()))
+                        .thenComparing(e -> e.getKey().getUser().getLastNameCyr())
+                )
+                .map(Map.Entry::getKey).collect(Collectors.toList());
     }
 
     public Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> getAssessments(Year year) {
@@ -80,22 +77,24 @@ public class ExperienceServiceImpl implements ExperienceService {
         final Map<ApplicationForm, List<String>> assessmentsGroupByDays = new HashMap<>();
         Map<Attendance, String> attendanceComments = getAttendanceMap();
         for (ApplicationForm user : year.getUsers()) {
-            final double[] assessment = {0.0};
+            if (user.getUser().isHq()) {
+                continue;
+            }
+            double assessment = 0.0;
             assessmentsGroupByDays.put(user, new ArrayList<>());
             for (UserDay userDay : user.getUserDays()) {
                 Set<Assessment> allAssessments = new HashSet<>(userDay.getAssessments());
-                allAssessments.add(userDay.createFakeAssessmentByAttendace(attendanceComments.get(userDay.getAttendance())));
+                allAssessments.add(userDay.createFakeAssessmentByAttendace(attendanceComments));
 
-                allAssessments.forEach(
-                        userEventAssessment -> assessment[0] += userEventAssessment.getValue());
+                assessment += allAssessments.stream().mapToDouble(Assessment::getValue).sum();
 
                 String str = StringUtils.join(allAssessments.stream().map(Assessment::getValue).collect(Collectors.toList()), ", ");
                 assessmentsGroupByDays.get(user).add("(" + str + ")");
 
             }
-            assessments.put(user, assessment[0]);
+            assessments.put(user, assessment);
         }
-        return new Pair<>(assessments, assessmentsGroupByDays);
+        return Pair.of(assessments, assessmentsGroupByDays);
     }
 
     @Override
@@ -109,7 +108,7 @@ public class ExperienceServiceImpl implements ExperienceService {
             double exp = 0;
             for (final UserDay userDay : user.getUserDays()) {
                 if (userDay.getAttendance() == Attendance.YES || userDay.getAttendance() == Attendance.LATE) {
-                    exp += userDay.getPosition().getValue() / countEvents;
+                    exp += userDay.getPosition().getValue() * userDay.getDay().getAttendanceValue() / countEvents;
                 }
             }
             totalExp += exp;
@@ -132,20 +131,15 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     @Override
-    public Map<ApplicationForm, Medal> getNewMedals(List<ApplicationForm> applicationForms, Map<ApplicationForm, Double> experience) {
-        final Map<ApplicationForm, Medal> userMedals = new HashMap<>();
-        final List<Medal> medals = new ArrayList<>(medalRepository.findAll());
-        medals.sort(Comparator.comparing(Medal::getValue).reversed());
-        medals.add(new Medal(messageSource.getMessage("volunteers.results.noMedal", null, "No medal", locale),
-                messageSource.getMessage("volunteers.results.noMedal.cur", null, "No medals", locale),
-                -1, 0));
-        for (int i = 0, j = 0; i < applicationForms.size(); i++) {
-            while (medals.get(j).getValue() > experience.get(applicationForms.get(i))) {
-                j++;
-            }
-            userMedals.put(applicationForms.get(i), medals.get(j));
-        }
-        return userMedals;
+    public Map<ApplicationForm, Medal> getNewMedals(Map<ApplicationForm, Double> experience) {
+        String noMedalEng = messageSource.getMessage("volunteers.results.noMedal", null, "No medal", locale);
+        String noMedalCyr = messageSource.getMessage("volunteers.results.noMedal.cur", null, "Без медали", locale);
+        Medal noMedal = new Medal(noMedalEng, noMedalCyr, -1, 0);
+
+        TreeMap<Long, Medal> medals = Stream.concat(medalRepository.findAll().stream(), Stream.of(noMedal))
+                .collect(Collectors.toMap(Medal::getValue, Function.identity(), (a, b) -> a, TreeMap::new));
+        return experience.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                v -> medals.floorEntry(v.getValue().longValue()).getValue()));
     }
 
 

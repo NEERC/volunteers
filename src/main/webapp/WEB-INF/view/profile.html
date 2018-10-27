@@ -111,6 +111,18 @@
                     </div>
                 </div>
 
+                <div class="form-group"
+                     th:class="${#fields.hasErrors('itmoId')}? 'has-error form-group' : 'form-group'">
+                    <label for="itmoId" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.signUp.itmoId}">Itmo id</label>
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{itmoId}" class="form-control" id="itmoId"
+                               placeholder="Confirm password" th:placeholder="#{volunteers.form.signUp.itmoId}"/>
+                        <span class="help-block" th:if="${#fields.hasErrors('itmoId')}"
+                              th:text="#{volunteers.form.signUp.itmoId.error.invalid}">Itmo id is not valid</span>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <div class="col-sm-offset-4 col-sm-8">
                         <button type="submit" class="btn btn-primary" th:text="#{volunteers.form.button.update}">Update</button>
@@ -192,23 +204,26 @@
                     rules: {
                         firstName: {
                             required: true,
-                            regex: /[a-zA-Z ,.'-]+/
+                            regex: /^[a-zA-Z ,.'-]+$/
                         },
                         lastName: {
                             required: true,
-                            regex: /[a-zA-Z ,.'-]+/
+                            regex: /^[a-zA-Z ,.'-]+$/
                         },
                         firstNameCyr: {
                             required: true,
-                            regex: /[а-яА-ЯёЁ ,.'-]+/
+                            regex: /^[а-яА-ЯёЁ ,.'-]+$/
                         },
                         lastNameCyr: {
                             required: true,
-                            regex: /[а-яА-ЯёЁ ,.'-]+/
+                            regex: /^[а-яА-ЯёЁ ,.'-]+$/
                         },
                         phone: {
                             required: true,
                             regex: /^\+7[\(]\d{3}[\)]\d{3}[\-]\d{2}[\-]\d{2}$/
+                        },
+                        itmoId: {
+                            regex: /^(\d{6})?$/
                         }
                     },
                     messages: {
@@ -231,6 +246,9 @@
                         phone: {
                             required: /*[[#{volunteers.form.signUp.phone.error.empty}]]*/"",
                             regex: /*[[#{volunteers.form.signUp.phone.error.invalid}]]*/""
+                        },
+                        itmoId: {
+                            regex: /*[[#{volunteers.form.signUp.itmoId.error.invalid}]]*/""
                         }
                     },
                     errorElement: 'span',

@@ -51,6 +51,9 @@ public class UserYearForm {
     @AssertTrue
     private boolean agree;
 
+    @Pattern(regexp = "(\\d{6})?")
+    private String itmoId;
+
     public UserYearForm(User user) {
         firstName = user.getFirstName();
         lastName = user.getLastName();
@@ -58,6 +61,7 @@ public class UserYearForm {
         lastNameCyr = user.getLastNameCyr();
         phone = user.getPhone();
         email = user.getEmail();
+        itmoId = user.getItmoId();
     }
 
     public UserYearForm() {

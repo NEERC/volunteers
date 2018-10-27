@@ -14,6 +14,7 @@
     </div>
     <table class="table table-hover table-fixed" id="results">
         <thead>
+        <th></th>
         <th th:text="#{volunteers.results.hall}"></th>
         <th th:text="#{volunteers.results.users}">
             User
@@ -26,8 +27,9 @@
         </th>
         </thead>
         <tbody>
-        <th:block th:each="applicationForm:${applicationForms}">
+        <th:block th:each="applicationForm,status :${applicationForms}">
             <tr>
+                <td th:text="${status.index}+1"></td>
                 <td>
                     <div class="list-group">
                         <th:block th:each="hall: ${halls.get(applicationForm)}">
@@ -39,6 +41,8 @@
                 <td class="text-center">
                     <a th:href="@{'/admin/results/user/'+${applicationForm.id}}"
                        th:text="${applicationForm.user.badgeName}"></a>
+                    <br/><span th:text="'('+${applicationForm.user.itmoId}+')'"
+                               th:if="${applicationForm.user.itmoId!=null} and ${applicationForm.user.itmoId!=''}"></span>
                 </td>
                 <td>
                     <h5><label th:text="${medals.get(applicationForm).name}"></label>
@@ -66,7 +70,7 @@
         function search(value) {
             $("#results > tbody > tr").each(function () {
                 var flage = false;
-                $(this).find("td:first-child > div > a > label").each(function () {
+                $(this).find("td:nth-child(2) > div > a > label").each(function () {
                     flage |= $(this).text().toUpperCase().indexOf(value) > -1;
                     console.log($(this).text());
                 });
