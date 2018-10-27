@@ -52,6 +52,8 @@ public class PositionValue {
     @NonNull
     private boolean inForm;
 
+    private boolean manager;
+
     public PositionValue(PositionForm positionForm, Year year) {
         this(positionForm.getName(), positionForm.getEngName(), positionForm.getCurName(), false, positionForm.getValue(), year, positionForm.getOrder(), positionForm.isForUser());
     }
@@ -63,6 +65,7 @@ public class PositionValue {
         setValue(positionForm.getValue());
         setOrd(positionForm.getOrder());
         setInForm(positionForm.isForUser());
+        setManager(positionForm.isManager());
     }
 
 }
