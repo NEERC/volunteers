@@ -114,7 +114,7 @@
                                                     <button type="button" class="btn btn-default btn-xs" data-toggle="tooltip"
                                                             th:title="${a.value}"
                                                             th:text="${a.comment}" th:id="${a.id}"
-                                                            th:onclick="'showForm('+${user.id}+', '+${a.id}+', '+${a.value}+', \''+${a.comment}+'\');'"></button>
+                                                            th:onclick="'showForm('+${user.id}+', '+${a.id}+', '+${a.value}+', \''+${a.comment}+'\', \''+${a.author==null?null:a.author.badgeName}+'\');'"></button>
                                                 </li>
                                             </th:block>
                                             <li class="flat-list-item">
@@ -187,6 +187,12 @@
                                     <input type="number" class="form-control" id="assessmentValue" th:field="*{value}"/>
                                     <span class="help-block" th:if="${#fields.hasErrors('value')}"
                                           th:text="#{volunteers.form.assessment.value.error}"></span>
+                                </div>
+                                <div class="form-group"
+                                     th:class="${#fields.hasErrors('value')}? 'has-error form-group' : 'form-group'">
+                                    <label for="authorName"
+                                           th:text="author">Author</label>
+                                    <input type="text" class="form-control" id="authorName" th:disabled="true"/>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -286,7 +292,7 @@
                             success: function (data) {
                                 if (data.status === "OK") {
                                     //update or add assessment
-                                    var btn = '<button type="button" class="btn btn-default btn-xs" data-toggle="tooltip" title="' + data.result.value + '" id="' + data.result.id + '" onclick="showForm(' + userId + ', ' + data.result.id + ',' + data.result.value + ', \'' + data.result.comment + '\');">' + data.result.comment + '</button>';
+                                    var btn = '<button type="button" class="btn btn-default btn-xs" data-toggle="tooltip" title="' + data.result.value + '" id="' + data.result.id + '" onclick="showForm(' + userId + ', ' + data.result.id + ',' + data.result.value + ', \'' + data.result.comment + '\', \'' + data.result.authorName + '\');">' + data.result.comment + '</button>';
                                     if (isNew) {
                                         var str = '<li class="list-group-item">' + btn + '</li>';
                                         $("#user" + userId + " ul").find("li:last").before(str);
@@ -307,12 +313,13 @@
                 });
             });
 
-            function showForm(userId, assessmentId, value, comment) {
+            function showForm(userId, assessmentId, value, comment, author) {
                 $("#assessmentForm").modal("show");
                 $("#assessmentId").val(assessmentId);
                 $("#userIdAssessment").val(userId);
                 $("#assessmentComment").val(comment);
                 $("#assessmentValue").val(value);
+                $("#authorName").val(author);
                 var lblBtn = "";
                 if (assessmentId === 0)
                     lblBtn = /*[[#{volunteers.form.button.add}]]*/"Add";

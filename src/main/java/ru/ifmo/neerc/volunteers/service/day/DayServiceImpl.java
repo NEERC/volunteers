@@ -72,10 +72,8 @@ public class DayServiceImpl implements DayService {
             .filter(u -> u.getUserYear().getUser().equals(user))
             .findFirst();
 
-        if (!userDay.isPresent())
-            return false;
+        return userDay.map(userDay1 -> userDay1.getPosition().isManager()).orElse(false);
 
-        return userDay.get().getPosition().isManager();
     }
 
     @Override
