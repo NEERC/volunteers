@@ -14,11 +14,11 @@
                 </span>
                 <div class="material-switch pull-right collapsed">
                     <input type="checkbox" id="registration" name="registration"
-                           th:checked="${year.openForRegistration}" th:disabled="${isUser}"/>
+                           th:checked="${year.openForRegistration}" th:disabled="not ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"/>
                     <label for="registration" class="label-success"></label>
                 </div>
             </li>
-            <li th:unless="${isUser}"><a th:href="@{ (${isUser} ? '/' : '/admin/year/'+${year.id}+'/')}"
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{('/admin/year/'+${year.id}+'/')}"
                                          th:text="#{volunteers.admin.menu.volunteers}">Volunteers</a></li>
             <li>
                 <a href="#eventsList" data-toggle="collapse" aria-expanded="true" aria-controls="eventsList">
@@ -27,37 +27,39 @@
                     <span th:text="#{volunteers.admin.menu.days}">Days</span>
                 </a>
                 <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#eventForm"
-                        th:unless="${isUser}">
+                        sec:authorize="hasRole('ADMIN')">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                 </button>
                 <ul class="collapse in" id="eventsList">
                     <th:block th:each="day : ${days}">
                         <li>
-                            <a th:href="@{(${isUser}? '/':'/admin/')+'day/'+${day.id}+'/'}" th:text="${day.name}"
+                            <a th:href="@{((${#authorization.expression('hasRole(''ROLE_ADMIN'')')}
+                                         or ${@dayService.isManagerForDay(currentUser, day)})
+                                         ? '/admin/' : '/') + 'day/' + ${day.id} + '/'}" th:text="${day.name}"
                                th:id="'day'+${day.id}+'name'"></a>
                             <span class="glyphicon glyphicon-pencil" th:onclick="'editDay('+${day.id}+');'"
-                                  th:unless="${isUser}"></span>
+                                  sec:authorize="hasRole('ADMIN')"></span>
                             <input type="hidden" th:value="${day.information}" th:id="'day'+${day.id}+'information'"
-                                   th:unless="${isUser}"/>
+                                   sec:authorize="hasRole('ADMIN')"/>
                             <input type="hidden" th:value="${day.attendanceValue}" th:id="'day'+${day.id}+'value'"
-                                   th:unless="${isUser}"/>
+                                   sec:authorize="hasRole('ADMIN')"/>
                         </li>
                     </th:block>
                 </ul>
             </li>
-            <li th:unless="${isUser}">
+            <li sec:authorize="hasRole('ADMIN')">
                 <a th:href="@{/admin/email}" class="collapsed" th:text="#{volunteers.admin.menu.email}">Send email</a>
             </li>
-            <li th:unless="${isUser}">
+            <li sec:authorize="hasAnyRole('ADMIN')">
                 <a th:href="@{/admin/results/}" class="collapsed"
                    th:text="#{volunteers.admin.menu.results}">Show results</a>
             </li>
-            <li th:unless="${isUser}">
+            <li sec:authorize="hasRole('ADMIN')">
                 <a th:href="@{/admin/stars/}" class="collapsed"
                    th:text="#{volunteers.admin.menu.users_medals}">Medals</a>
             </li>
 
-            <li th:unless="${isUser}">
+            <li sec:authorize="hasRole('ADMIN')">
                 <a href="#baseData" th:classappend="${
                     #httpServletRequest.requestURI.contains('position') ||
                     #httpServletRequest.requestURI.contains('hall') ||
@@ -101,7 +103,7 @@
                     </li>
                 </ul>
             </li>
-            <th:block th:if="${isUser}">
+            <th:block sec:authorize="hasAnyRole('USER')">
                 <li>
                     <a th:href="@{'/position/'}" class="collapsed"
                        th:text="#{volunteers.admin.menu.positions}">Positions</a>
@@ -112,10 +114,10 @@
                 </li>
             </th:block>
 
-            <li th:unless="${isUser}">
+            <li sec:authorize="hasRole('ADMIN')">
                 <a th:href="@{/admin/users}" th:text="#{volunteers.admin.menu.users}">Users</a>
             </li>
-            <li th:unless="${isUser}">
+            <li sec:authorize="hasRole('ADMIN')">
                 <a th:href="@{/admin/tokens}" th:text="#{volunteers.admin.menu.tokens}">API Tokens</a>
             </li>
         </ul>
@@ -232,7 +234,7 @@
             </div>
         </div>
 
-        <script th:inline="javascript" th:unless="${isUser}">
+        <script th:inline="javascript" sec:authorize="hasRole('ADMIN')">
             function editDay(id) {
                 $("#idDay").val(id);
                 $("#dayName").val($("#day" + id + "name").text());

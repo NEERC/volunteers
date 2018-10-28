@@ -1,10 +1,12 @@
 package ru.ifmo.neerc.volunteers.service.day;
 
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.repository.DayRepository;
 import ru.ifmo.neerc.volunteers.repository.UserEventRepository;
+import ru.ifmo.neerc.volunteers.service.user.UserService;
 import ru.ifmo.neerc.volunteers.service.year.YearService;
 
 import java.util.*;
@@ -14,10 +16,11 @@ import java.util.stream.Collectors;
 /**
  * Created by Lapenok Akesej on 25.09.2017.
  */
-@Service
+@Service("dayService")
 @AllArgsConstructor
 public class DayServiceImpl implements DayService {
 
+    final UserService userService;
     final YearService yearService;
 
     final UserEventRepository userEventRepository;
@@ -57,5 +60,35 @@ public class DayServiceImpl implements DayService {
                 .collect(Collectors.toMap(Function.identity(), hall -> new ArrayList<>())));
 
         return hallUser;
+    }
+
+    @Override
+    public boolean isManagerForDay(final User user, final Day day) {
+        if (user == null || day == null)
+            return false;
+
+        final Optional<UserDay> userDay = day.getUsers()
+            .stream()
+            .filter(u -> u.getUserYear().getUser().equals(user))
+            .findFirst();
+
+        if (!userDay.isPresent())
+            return false;
+
+        return userDay.get().getPosition().isManager();
+    }
+
+    @Override
+    public boolean isManagerForDay(final Authentication authentication, final long dayId) {
+        final User user = userService.getUserByAuthentication(authentication);
+        final Day day = dayRepository.findOne(dayId);
+        return isManagerForDay(user, day);
+    }
+
+    @Override
+    public boolean isManagerForUserDay(final Authentication authentication, final long userDayId) {
+        final User user = userService.getUserByAuthentication(authentication);
+        final UserDay userDay = userEventRepository.findOne(userDayId);
+        return isManagerForDay(user, userDay.getDay());
     }
 }
