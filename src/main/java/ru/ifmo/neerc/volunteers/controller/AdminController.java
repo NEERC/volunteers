@@ -4,9 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.data.util.Pair;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -20,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.*;
+import ru.ifmo.neerc.volunteers.modal.AssessmentsJson;
 import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
 import ru.ifmo.neerc.volunteers.repository.*;
@@ -487,7 +487,8 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForUserDay(authentication, #userId)")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
-    JsonResponse setAssessments(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, @RequestParam final long userId) {
+    JsonResponse setAssessments(@Valid @ModelAttribute("newAssessment") final Assessment assessment,
+                                final BindingResult result, @RequestParam final long userId, final Authentication authentication) {
 
         try {
             if (result.hasErrors()) {
@@ -498,10 +499,13 @@ public class AdminController {
             }
             UserDay user = userEventRepository.findOne(userId);
             assessment.setUser(user);
+            if (assessment.getAuthor() == null)
+                assessment.setAuthor(userService.getUserByAuthentication(authentication));
             userEventAssessmentRepository.save(assessment);
-            JsonResponse<Assessment> response = new JsonResponse<>();
+            JsonResponse<AssessmentsJson> response = new JsonResponse<>();
             response.setStatus(Status.OK);
-            response.setResult(assessment);
+
+            response.setResult(new AssessmentsJson(assessment));
             return response;
         } catch (Exception e) {
             JsonResponse<String> response = new JsonResponse<>();
@@ -747,7 +751,7 @@ public class AdminController {
         Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(exp);
         day.getUsers().forEach(u -> {
             User user = u.getUserYear().getUser();
-            String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '٭');
+            String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '★');
             writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," +
                     u.getPosition().getEngName() + "," + u.getPosition().getCurName() + ",\""
                     + user.getFirstName() + "\n" + user.getLastName() + "\",\"" +

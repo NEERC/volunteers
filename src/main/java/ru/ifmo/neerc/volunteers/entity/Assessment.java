@@ -28,4 +28,7 @@ public class Assessment {
 
     @ManyToOne
     UserDay user;
+
+    @ManyToOne
+    User author;
 }
