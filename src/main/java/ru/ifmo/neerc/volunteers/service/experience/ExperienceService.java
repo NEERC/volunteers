@@ -20,6 +20,8 @@ public interface ExperienceService {
 
     Map<ApplicationForm, Double> getExperience(Year year);
 
+    Double getExperience(Year year, ApplicationForm user);
+
     Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> getAssessments(Year year);
 
     List<ApplicationForm> getSortedApplicationForms(Map<ApplicationForm, Double> assessments, Map<ApplicationForm, Medal> medals);

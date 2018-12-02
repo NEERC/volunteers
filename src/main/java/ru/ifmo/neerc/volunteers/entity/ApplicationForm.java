@@ -49,6 +49,8 @@ public class ApplicationForm {
 
     private Date registrationDate = new Date();
 
+    private double extraExperience = 0.0;
+
     public ApplicationForm(User user, Year year) {
         setUser(user);
         setYear(year);
