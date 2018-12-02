@@ -626,6 +626,21 @@ public class AdminController {
         return "results";
     }
 
+    @PostMapping("/results")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    @ResponseBody
+    public JsonResponse addExp(@RequestParam("id") final long id, @RequestParam("exp") final double exp, final Authentication authentication) {
+        final Year year = userService.getUserByAuthentication(authentication).getYear();
+        ApplicationForm user = applicationFormRepository.findOne(id);
+        user.setExtraExperience(exp);
+        final double newExp = experienceService.getExperience(year, user);
+
+        JsonResponse<Double> result = new JsonResponse<>();
+        result.setStatus(Status.OK);
+        result.setResult(newExp);
+        return result;
+    }
+
 
     @GetMapping("/results/user/{id}")
     public String detailedResultUser(@PathVariable final long id, final Model model, final Authentication authentication) {

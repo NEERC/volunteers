@@ -25,6 +25,9 @@
         <th th:text="#{volunteers.results.assessment}">
             Assessment
         </th>
+        <th th:text="#{volunteers.result.extra}">
+            Extra Experience
+        </th>
         </thead>
         <tbody>
         <th:block th:each="applicationForm,status :${applicationForms}">
@@ -46,7 +49,8 @@
                 </td>
                 <td>
                     <h5><label th:text="${medals.get(applicationForm).name}"></label>
-                        <span th:text="'('+${experience.get(applicationForm)}+')'"></span></h5>
+                        <span th:id="exp+${applicationForm.id}"
+                              th:text="'('+${experience.get(applicationForm)}+')'"></span></h5>
                     <h5><label th:if="${medals.get(applicationForm).stars > 0}">
                         <th:block th:utext="#{volunteers.medals.star}"
                                   th:each="i:${#numbers.sequence(1,medals.get(applicationForm).stars)}">
@@ -60,6 +64,14 @@
                     <th:block th:each="day: ${assessmentsGroupByDays.get(applicationForm)}">
                         <span th:text="${day}"></span>
                     </th:block>
+                </td>
+                <td>
+                    <input class="form-control" step="any" th:id="user+${applicationForm.id}"
+                           th:onblur="'extraExp('+${applicationForm.id}+');'"
+                           th:value="${applicationForm.extraExperience}" type="number"
+                    />
+                    <input th:id="oldValue+${applicationForm.id}" th:value="${applicationForm.extraExperience}"
+                           type="hidden"/>
                 </td>
             </tr>
         </th:block>
@@ -87,10 +99,36 @@
             search(value.toUpperCase());
         }
 
+        function extraExp(id) {
+            var data = {
+                'id': id,
+                'exp': $('#user' + id).val()
+            };
+            data[_csrf_param_name] = _csrf_token;
+            $.ajax({
+                type: "post",
+                data: data,
+                url: /*[[@{/admin/results}]]*/"",
+                success: function (data) {
+                    if (data.status === "OK") {
+                        $("#exp" + id).text('(' + data.result + ')');
+                        $("oldValue" + id).val(data["value"]);
+                    } else {
+                        $("#user" + id).val($("oldValue" + id));
+                    }
+                },
+                fail: function () {
+                    $("#user" + id).val($("oldValue" + id));
+                }
+            });
+        }
+
         $("#clear").click(function () {
             $("#seachInput").val("");
             search("");
-        })
+        });
+
+
     </script>
 </div>
 </body>

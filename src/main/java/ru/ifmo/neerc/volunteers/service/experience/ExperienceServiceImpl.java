@@ -31,9 +31,13 @@ public class ExperienceServiceImpl implements ExperienceService {
     public Map<ApplicationForm, Double> getExperienceExceptCurrentYear(Year year) {
         return year.getUsers().stream().collect(
                 Collectors.toMap(Function.identity(),
-                        u -> u.getUser().getApplicationForms().stream()
-                                .mapToDouble(ApplicationForm::getExperience).sum() - u.getExperience())
+                        u -> getExperienceExceptCurrentYear(u))
         );
+    }
+
+    private Double getExperienceExceptCurrentYear(ApplicationForm user) {
+        return user.getUser().getApplicationForms().stream()
+                .mapToDouble(ApplicationForm::getExperience).sum() - user.getExperience();
     }
 
     @Override
@@ -101,25 +105,35 @@ public class ExperienceServiceImpl implements ExperienceService {
     public Map<ApplicationForm, Double> getExperience(Year year) {
         final Map<ApplicationForm, Double> experience = new HashMap<>();
         final Set<ApplicationForm> needToSave = new HashSet<>();
-        final Map<ApplicationForm, Double> baseExp = getExperienceExceptCurrentYear(year);
         final double countEvents = year.getDays().stream().mapToDouble(Day::getAttendanceValue).sum();
         for (ApplicationForm user : year.getUsers()) {
-            double totalExp = baseExp.get(user);
-            double exp = 0;
-            for (final UserDay userDay : user.getUserDays()) {
-                if (userDay.getAttendance() == Attendance.YES || userDay.getAttendance() == Attendance.LATE) {
-                    exp += userDay.getPosition().getValue() * userDay.getDay().getAttendanceValue() / countEvents;
-                }
-            }
-            totalExp += exp;
-            experience.put(user, totalExp);
-            if (exp != user.getExperience()) {
-                user.setExperience(exp);
-                needToSave.add(user);
-            }
+            experience.put(user, getExperience(year, user, countEvents));
         }
         applicationFormRepository.save(needToSave);
         return experience;
+    }
+
+    @Override
+    public Double getExperience(Year year, ApplicationForm user) {
+        return getExperience(year, user, year.getDays().stream().mapToDouble(Day::getAttendanceValue).sum());
+    }
+
+    private Double getExperience(Year year, ApplicationForm user, final double countEvents) {
+        double totalExp = getExperienceExceptCurrentYear(user);
+        double exp = 0;
+        for (final UserDay userDay : user.getUserDays()) {
+            if (userDay.getAttendance() == Attendance.YES || userDay.getAttendance() == Attendance.LATE) {
+                exp += userDay.getPosition().getValue() * userDay.getDay().getAttendanceValue() / countEvents;
+            }
+        }
+        exp += user.getExtraExperience();
+        totalExp += exp;
+
+        if (exp != user.getExperience()) {
+            user.setExperience(exp);
+            applicationFormRepository.save(user);
+        }
+        return totalExp;
     }
 
     @Override
