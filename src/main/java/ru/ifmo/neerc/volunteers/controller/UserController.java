@@ -76,10 +76,6 @@ public class UserController {
     @GetMapping("/year/{id}")
     public String years(@PathVariable final long id, final Model model, final Authentication authentication) {
         User user = userService.getUserByAuthentication(authentication);
-        Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
-        if (roles.contains("ROLE_ADMIN")) {
-            return "redirect:/admin/year/" + id;
-        }
         Year year = yearRepository.findOne(id);
         userService.setUserYear(user, year);
         utils.setModelForUser(model, year);
