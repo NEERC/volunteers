@@ -90,7 +90,7 @@ public class AdminController {
 
     @GetMapping("/position")
     public String positions(final Model model, final Authentication authentication) {
-        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication).getYear());
         model.addAttribute("title", "Positions");
         return "position";
     }
@@ -184,7 +184,7 @@ public class AdminController {
 
     @GetMapping("/hall")
     public String hall(final Model model, final Authentication authentication) {
-        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication).getYear());
         model.addAttribute("title", "Halls");
         return "hall";
     }
@@ -271,7 +271,7 @@ public class AdminController {
 
         final Year year = yearRepository.findOne(id);
         userService.setUserYear(user, year);
-        utils.setModelForAdmin(model, user);
+        utils.setModelForAdmin(model, year);
         final Set<ApplicationForm> users = year.getUsers();
         model.addAttribute("users", users);
         /*if (!model.containsAttribute("day")) {
@@ -348,9 +348,10 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public String event(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final User user = userService.getUserByAuthentication(authentication);
-        final Year year = user.getYear();
+
         final Day currentDay = dayRepository.findOne(id);
-        utils.setModelForAdmin(model, user);
+        final Year year = currentDay.getYear();
+        utils.setModelForAdmin(model, year);
 
         final HashMap<Hall, List<UserDay>> hallUser = dayService.getHallUser(currentDay, locale);
 
@@ -376,7 +377,8 @@ public class AdminController {
     public String editEvent(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
         final User user = userService.getUserByAuthentication(authentication);
         final Day day = dayRepository.findOne(id);
-        utils.setModelForAdmin(model, user);
+        final Year year = day.getYear();
+        utils.setModelForAdmin(model, year);
         model.addAttribute("day", day);
         model.addAttribute("users", day.getUsers());
         final Map<UserDay, Map<Year, Set<Pair<Hall, PositionValue>>>> exp = day.getUsers().stream().collect(Collectors.toMap(Function.identity(),
@@ -535,7 +537,7 @@ public class AdminController {
 
     @GetMapping(value = "/medals")
     public String medals(final Model model, final Authentication authentication) {
-        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication).getYear());
         model.addAttribute("medals", medalRepository.findAll());
         if (!model.containsAttribute("newMedal")) {
             model.addAttribute("newMedal", new MedalForm());
@@ -608,7 +610,7 @@ public class AdminController {
     public String showResults(final Model model, final Authentication authentication, final Locale locale) {
         final Year year = userService.getUserByAuthentication(authentication).getYear();
 
-        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication).getYear());
 
         Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> assessments =
                 experienceService.getAssessments(year);
@@ -651,7 +653,7 @@ public class AdminController {
                 d -> Pair.of(d.calcAttendanceScore(), attendanceComments.get(d.getAttendance()))
         ));
 
-        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication).getYear());
         model.addAttribute("assessmentattendance", attendance);
         model.addAttribute("assessmentuser", applicationForm);
         return "detailedResult";
@@ -661,7 +663,7 @@ public class AdminController {
     public String getEvents(final Model model, final Authentication authentication, final HttpServletRequest request) throws IOException {
         User user = userService.getUserByAuthentication(authentication);
         Year year = user.getYear();
-        utils.setModelForAdmin(model, user);
+        utils.setModelForAdmin(model, year);
         String file = year.getCalendar();
         model.addAttribute("file", file);
         URL url = new URL(request.getRequestURL().toString());
@@ -684,7 +686,7 @@ public class AdminController {
     @GetMapping("/email")
     public String sendEmail(final Model model, final Authentication authentication) {
         User user = userService.getUserByAuthentication(authentication);
-        utils.setModelForAdmin(model, user);
+        utils.setModelForAdmin(model, user.getYear());
         model.addAttribute("mailform", new MailForm());
         return "email";
     }
@@ -693,7 +695,7 @@ public class AdminController {
     public String sendEmail(@Valid @ModelAttribute("mailform") final MailForm mailForm, final BindingResult result, Authentication authentication, final Model model) throws MessagingException {
         User user = userService.getUserByAuthentication(authentication);
         if (result.hasErrors()) {
-            utils.setModelForAdmin(model, user);
+            utils.setModelForAdmin(model, user.getYear());
             model.addAttribute("mailform", mailForm);
             return "email";
         }
@@ -706,7 +708,7 @@ public class AdminController {
     @GetMapping("/tokens")
     public String getTokens(final Model model, final Authentication authentication) {
         User user = userService.getUserByAuthentication(authentication);
-        utils.setModelForAdmin(model, user);
+        utils.setModelForAdmin(model, user.getYear());
         model.addAttribute("token", tokenService.getToken());
         return "tokens";
     }
@@ -722,14 +724,14 @@ public class AdminController {
     @GetMapping("/users")
     public String getUsers(final Model model, final Authentication authentication) {
         User user = userService.getUserByAuthentication(authentication);
-        utils.setModelForAdmin(model, user);
+        utils.setModelForAdmin(model, user.getYear());
         model.addAttribute("users", userRepository.findAll());
         return "users";
     }
 
     @GetMapping("/users/{id}")
     public String getUser(@PathVariable final long id, final Model model, final Authentication authentication) {
-        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication).getYear());
 
         if (!model.containsAttribute("editForm")) {
             User user = userRepository.findOne(id);
@@ -780,7 +782,7 @@ public class AdminController {
     @GetMapping("/stars")
     public String stars(Model model, Authentication authentication) {
         Year year = userService.getUserByAuthentication(authentication).getYear();
-        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication));
+        utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication).getYear());
         model.addAttribute("medals", experienceService.getMedals(year));
         model.addAttribute("exp", experienceService.getExperienceExceptCurrentYear(year));
         return "star";

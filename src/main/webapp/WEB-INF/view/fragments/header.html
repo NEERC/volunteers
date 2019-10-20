@@ -11,13 +11,13 @@
                     class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#" th:href="@{ (${isUser} ? '/' : '/admin/year/'+${year.id}+'/')}"
+            <a class="navbar-brand" href="#" th:href="@{ '/year/' + ${year.id} + '/'}"
                th:text="#{volunteers.header}">Volunteers</a>
         </div>
         <div class="navbar-collapse collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li class="dropdown" th:inline="text">
-                    <a th:href="@{${isUser} ? '/year/'+${year.id} : '/admin/year/'+${year.id}}" class="dropdown-toggle"
+                    <a th:href="@{'/year/'+${year.id}}" class="dropdown-toggle"
                        data-toggle="dropdown"
                        aria-haspopup="true" aria-expanded="false" role="button">
                         <span th:text="${year.name}"></span>
@@ -31,7 +31,7 @@
                                    th:text="${y.name}"></a>
                             </li>
                         </th:block>
-                        <li th:unless="${isUser}">
+                        <li sec:authorize="hasRole('ADMIN')">
                             <a href="#" data-toggle="modal" data-target="#yearForm"
                                th:text="#{volunteers.form.button.add}">
                                 Add
@@ -39,7 +39,7 @@
                         </li>
                     </ul>
                     <div class="modal fade" id="yearForm" tabindex="-1" role="dialog" aria-labelledby="yearLabel"
-                         th:unless="${isUser}">
+                         sec:authorize="hasRole('ADMIN')" th:unless="${isUser}">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <form method="post" th:action="@{/admin/year/add}" th:object="${newYear}">
@@ -73,7 +73,7 @@
                         </div>
                     </div>
                 </li>
-                <li th:unless="${isUser}">
+                <li sec:authorize="hasRole('ADMIN')">
                     <a th:href="@{'/year/'+${year.id}+'/'}" th:text="#{volunteers.header.touser}">Go to user
                         interface</a>
                 </li>

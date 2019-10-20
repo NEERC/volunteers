@@ -55,9 +55,9 @@ public class DayServiceImpl implements DayService {
                 )
         );
 
-        hallUser.putAll(year.getHalls().stream()
-                .filter(h -> !hallUser.containsKey(h))
-                .collect(Collectors.toMap(Function.identity(), hall -> new ArrayList<>())));
+//        hallUser.putAll(year.getHalls().stream()
+//                .filter(h -> !hallUser.containsKey(h))
+//                .collect(Collectors.toMap(Function.identity(), hall -> new ArrayList<>())));
 
         return hallUser;
     }

@@ -27,14 +27,13 @@ public class Utils {
     final RoleRepository roleRepository;
     final YearService yearService;
 
-    public void setModelForUser(Model model, User user) {
-        setModel(model, user);
+    public void setModelForUser(Model model, Year year) {
+        setModel(model, year);
         model.addAttribute("isUser", true);
     }
 
 
-    private void setModel(Model model, User user) {
-        Year year = yearService.getYear(user);
+    private void setModel(Model model, Year year) {
         model.addAttribute("year", year);
         model.addAttribute("years", yearRepository.findAll());
 
@@ -49,14 +48,14 @@ public class Utils {
         }
     }
 
-    public void setModelForAdmin(Model model, User user) {
-        setModel(model, user);
+    public void setModelForAdmin(Model model,Year year) {
+        setModel(model, year);
         if (!model.containsAttribute("newYear")) {
             model.addAttribute("newYear", new Year());
         }
         if (!model.containsAttribute("newDay")) {
             final Day newDay = new Day();
-            newDay.setYear(yearService.getYear(user));
+            newDay.setYear(year);
             model.addAttribute("newDay", newDay);
         }
         if (!model.containsAttribute("newPosition")) {
