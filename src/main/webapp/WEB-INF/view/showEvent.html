@@ -73,7 +73,7 @@
                         </td>
                     </tr>
                     <th:block th:each="hall:${halls}">
-                        <tr>
+                        <tr th:if="${hallUser.containsKey(hall)}">
                             <td th:text="${hall.name}" th:rowspan="${hallUser.get(hall).size()+1}"></td>
                             <td colspan="4" th:if="${attendance}"></td>
                             <td th:if="${attendance}">

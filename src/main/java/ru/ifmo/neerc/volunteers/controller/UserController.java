@@ -76,9 +76,13 @@ public class UserController {
     @GetMapping("/year/{id}")
     public String years(@PathVariable final long id, final Model model, final Authentication authentication) {
         User user = userService.getUserByAuthentication(authentication);
+        Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
+        if (roles.contains("ROLE_ADMIN")) {
+            return "redirect:/admin/year/" + id;
+        }
         Year year = yearRepository.findOne(id);
         userService.setUserYear(user, year);
-        utils.setModelForUser(model, user);
+        utils.setModelForUser(model, year);
         model.addAttribute("positions", year.getPositionValues().stream().filter(PositionValue::isInForm).collect(Collectors.toSet()));
         if (!model.containsAttribute("applicationForm")) {
             ApplicationForm form = yearService.getApplicationForm(user, year);
@@ -104,14 +108,14 @@ public class UserController {
 
     @GetMapping("/position")
     public String positions(final Model model, final Authentication authentication) {
-        utils.setModelForUser(model, userService.getUserByAuthentication(authentication));
+        utils.setModelForUser(model, userService.getUserByAuthentication(authentication).getYear());
         model.addAttribute("title", "Positions");
         return "position";
     }
 
     @GetMapping("/hall")
     public String hall(final Model model, final Authentication authentication) {
-        utils.setModelForUser(model, userService.getUserByAuthentication(authentication));
+        utils.setModelForUser(model, userService.getUserByAuthentication(authentication).getYear());
         model.addAttribute("title", "Halls");
         return "hall";
     }
@@ -150,8 +154,9 @@ public class UserController {
     public String getDay(@PathVariable("id") final long id, final Model model, final Authentication authentication) {
         User user = userService.getUserByAuthentication(authentication);
         final Day day = dayRepository.findOne(id);
+        final Year year = day.getYear();
 
-        utils.setModelForUser(model, userService.getUserByAuthentication(authentication));
+        utils.setModelForUser(model, year);
         model.addAttribute("hallUser", dayService.getHallUser(day, locale));
         model.addAttribute("day", day);
         model.addAttribute("halls", user.getYear().getHalls());
@@ -163,9 +168,9 @@ public class UserController {
     public String profile(Model model, Authentication authentication) {
         User user = userService.getUserByAuthentication(authentication);
         if (AuthorityUtils.authorityListToSet(user.getAuthorities()).contains("ROLE_ADMIN")) {
-            utils.setModelForAdmin(model, user);
+            utils.setModelForAdmin(model, user.getYear());
         } else {
-            utils.setModelForUser(model, user);
+            utils.setModelForUser(model, user.getYear());
         }
         if (!model.containsAttribute("profile")) {
             model.addAttribute("profile", new UserProfileForm(user));
