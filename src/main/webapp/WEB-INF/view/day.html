@@ -7,9 +7,11 @@
 <body>
 <div th:fragment="content" class="col-md-10">
 
-
     <script type="text/javascript" src="../../components/jquery.dataTables.js"
             th:src="@{/components/jquery.dataTables.js}"></script>
+    <link rel="stylesheet" type="text/css" media="screen"
+          th:href="@{/components/bootstrap-select.min.css}"/>
+    <script src="../../components/bootstrap-select.min.js" th:src="@{/components/bootstrap-select.min.js}"></script>
 
     <div class="row">
 
@@ -17,8 +19,8 @@
             <!--<form th:action="@{/admin/day/copy}" method="post">-->
             <!--<input type="hidden" name="eventId" th:value="${day.id}"/>-->
             <div class="col-md-8">
-                <select name="baseEventId" class="form-control"
-                        onchange="copyEvent(this.value);">
+                <select name="baseEventId" class="form-control" id="baseEventId"
+                        onchange="confirmCopy(this.value);">
                     <option selected="true" value="-1" th:text="#{volunteers.day.form.copy.header}"
                             disabled="true">Choose day
                         to copy arrangement
@@ -144,6 +146,41 @@
         </table>
     </div>
 
+    <div class="modal fade" id="confirmCopy" tabindex="-1" role="dialog" aria-labelledby="confirmCopy">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="medalLabel" th:text="#{volunteers.day.form.copy.header}">Choose day
+                        to copy arrangement</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label th:text="#{volunteers.event.copy.choice}" for="baseEventSelected">Copy from:</label>
+                        <input type="text" id="baseEventSelected" class="form-control" disabled="disabled" />
+                        <input type="hidden" id="baseEventIdSelected"/>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <label th:text="#{volunteers.event.copy.halls}">Copy halls:</label>
+                    <select class="selectpicker" multiple="multiple" id="chosenHalls">
+                        <th:block th:each="hall: ${halls}">
+                            <option th:value="${hall.id}" th:text="${hall.name}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"
+                            th:text="#{volunteers.form.button.close}">Close
+                    </button>
+                    <button type="submit" class="btn btn-primary" th:text="#{volunteers.hall.button.copy}" onclick="copyEvent()">Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script th:inline="javascript">
         function savePosition(id, value) {
             console.log(id + " " + value);
@@ -191,11 +228,16 @@
             })
         }
 
-        function copyEvent(id) {
+        function copyEvent() {
             var eventId = /*[[${day.id}]]*/-1;
+            var id = $("#baseEventIdSelected").val();
+            var halls = $("#chosenHalls").val();
+            console.log("halls: " + halls);
+            console.log("id: " + id);
             var data = {
                 "eventId": eventId,
-                "baseEventId": id
+                "baseEventId": id,
+                "halls": halls
             };
             data[_csrf_param_name] = _csrf_token;
             $.ajax({
@@ -213,11 +255,26 @@
                             $("#position" + user.id).val(user.position.id);
                         }
                         /*]]>*/
+                        $("#confirmCopy").modal('hide');
                     } else {
                         alert(data.result);
                     }
                 }
             })
+        }
+
+        function confirmCopy(id) {
+            console.log("id: " + id);
+            var label = $("#baseEventId option:selected").text()
+            console.log("label: " + label);
+
+            $("#baseEventIdSelected").val(id);
+            $("#baseEventSelected").val(label);
+            $("#chosenHalls").val('default');
+            $("#chosenHalls").selectpicker("refresh");
+
+            $("#baseEventId").val(-1);
+            $("#confirmCopy").modal('show');
         }
 
         $.fn.dataTable.ext.order['dom-select'] = function  ( settings, col )
