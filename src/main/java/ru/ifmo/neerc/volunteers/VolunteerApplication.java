@@ -13,6 +13,5 @@ public class VolunteerApplication {
 
     public static void main(final String[] args) {
         final ConfigurableApplicationContext run = SpringApplication.run(VolunteerApplication.class, args);
-//        run.getBean(DBTestDataGenerator.class).generateTestYear();
     }
 }

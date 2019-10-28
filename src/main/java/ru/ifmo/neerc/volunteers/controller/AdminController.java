@@ -423,7 +423,7 @@ public class AdminController {
     @PostMapping("/day/copy")
     @PreAuthorize("hasRole('ADMIN')")
     public @ResponseBody
-    JsonResponse copy(@RequestParam final long eventId, @RequestParam final long baseEventId) {
+    JsonResponse copy(@RequestParam final long eventId, @RequestParam final long baseEventId, @RequestParam(required = false, name = "halls[]") final List<Long> halls) {
         try {
             final Day day = dayRepository.findOne(eventId);
             final Day baseDay = dayRepository.findOne(baseEventId);
@@ -437,6 +437,9 @@ public class AdminController {
                 final Long form = user.getUserYear().getId();
                 if (userEventBase.get(form) != null) {
                     boolean needToSave = false;
+                    if (halls != null && !halls.isEmpty() && halls.contains(userEventBase.get(form).getHall().getId())) {
+                        continue;
+                    }
                     if (userEventBase.get(form).getHall() != null && !user.getHall().equals(userEventBase.get(form).getHall())) {
                         user.setHall(userEventBase.get(form).getHall());
                         needToSave = true;
