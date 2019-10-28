@@ -437,7 +437,7 @@ public class AdminController {
                 final Long form = user.getUserYear().getId();
                 if (userEventBase.get(form) != null) {
                     boolean needToSave = false;
-                    if (halls != null && !halls.isEmpty() && halls.contains(userEventBase.get(form).getHall().getId())) {
+                    if (halls != null && !halls.isEmpty() && !halls.contains(userEventBase.get(form).getHall().getId())) {
                         continue;
                     }
                     if (userEventBase.get(form).getHall() != null && !user.getHall().equals(userEventBase.get(form).getHall())) {
