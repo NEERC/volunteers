@@ -1,6 +1,7 @@
 package ru.ifmo.neerc.volunteers.service.experience;
 
 import lombok.AllArgsConstructor;
+import org.decimal4j.util.DoubleRounder;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.util.Pair;
@@ -123,9 +124,11 @@ public class ExperienceServiceImpl implements ExperienceService {
         double exp = 0;
         for (final UserDay userDay : user.getUserDays()) {
             if (userDay.getAttendance() == Attendance.YES || userDay.getAttendance() == Attendance.LATE) {
-                exp += userDay.getPosition().getValue() * userDay.getDay().getAttendanceValue() / countEvents;
+                exp += userDay.getPosition().getValue() * userDay.getDay().getAttendanceValue();
             }
         }
+        exp /= countEvents;
+        exp = DoubleRounder.round(exp, 2);
         exp += user.getExtraExperience();
         totalExp += exp;
 
