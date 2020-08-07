@@ -245,6 +245,18 @@ public class AdminController {
         }
         year.setOpenForRegistration(false);
         yearRepository.save(year);
+
+        final Set<Hall> oldHalls = yearOld.getHalls();
+        final Set<Hall> newHalls = oldHalls.stream()
+                .filter(it -> !it.isDef())
+                .map(it -> Hall.createNewHall(it, year)).collect(Collectors.toSet());
+        hallRepository.save(newHalls);
+
+        final Set<PositionValue> oldPositions = yearOld.getPositionValues();
+        final Set<PositionValue> newPositions = oldPositions.stream()
+                .filter(it -> !it.isDef())
+                .map(it -> PositionValue.copyPosition(it, year)).collect(Collectors.toSet());
+        positionValueRepository.save(newPositions);
         return "redirect:/admin/year/" + year.getId();
     }
 

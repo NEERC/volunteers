@@ -55,7 +55,9 @@ public class PositionValue {
     private boolean manager;
 
     public PositionValue(PositionForm positionForm, Year year) {
-        this(positionForm.getName(), positionForm.getEngName(), positionForm.getCurName(), false, positionForm.getValue(), year, positionForm.getOrder(), positionForm.isForUser());
+        this(positionForm.getName(), positionForm.getEngName(),
+                positionForm.getCurName(), false, positionForm.getValue(), year,
+                positionForm.getOrder(), positionForm.isForUser());
     }
 
     public void setFields(PositionForm positionForm) {
@@ -66,6 +68,12 @@ public class PositionValue {
         setOrd(positionForm.getOrder());
         setInForm(positionForm.isForUser());
         setManager(positionForm.isManager());
+    }
+
+    public static PositionValue copyPosition(final PositionValue position, final Year year) {
+        return new PositionValue(position.getName(), position.getEngName(),
+                position.getCurName(), position.isDef(), position.getValue(), year,
+                position.getOrd(), position.isInForm());
     }
 
 }

@@ -51,4 +51,7 @@ public class Hall {
         setChatAlias(form.getChatAlias());
     }
 
+    public static Hall createNewHall(final Hall hall, Year year) {
+        return new Hall(hall.getName(), hall.getCurName(), hall.isDef(), hall.getDescription(), year);
+    }
 }
