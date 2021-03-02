@@ -43,6 +43,8 @@ public class ApplicationForm {
 
     private double experience;
 
+    private String covidStatus;
+
     @OneToMany(mappedBy = "userYear")
     @OrderBy("day ASC")
     private List<UserDay> userDays;
@@ -65,6 +67,7 @@ public class ApplicationForm {
         this.positions = form.getPositions();
         this.group = form.getGroup();
         this.suggestions = form.getSuggestions();
+        this.covidStatus = form.getCovidStatus();
     }
 
     public String positionsStr() {

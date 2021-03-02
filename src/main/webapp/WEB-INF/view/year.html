@@ -141,6 +141,25 @@
                   th:text="#{volunteers.form.yearSignUp.positions.error.empty}">Choose at least one position</span>
         </div>
 
+        <div class="form-group" th:classappend="${#fields.hasErrors('covidStatus')} ? 'has-error'">
+            <label class="control-label col-sm-4" th:utext="#{volunteers.form.yearSignUp.covid}">Positions
+                desired</label>
+
+            <div class="col-sm-8">
+                <select class="selectpicker" th:field="*{covidStatus}">
+                    <option value="" hidden="hidden">Nothing selected</option>
+                    <option value="I've already been ill">I've already been ill</option>
+                    <option value="I took two doses">I took two doses</option>
+                    <option value="I will make two doses by April 1">I will make two doses by April 1</option>
+                    <option value="I will make the first dose by April 1">I will make the first dose by April 1</option>
+                    <option value="I don't plan to do it">I don't plan to do it</option>
+                </select>
+            </div>
+
+            <span class="help-block" th:if="${#fields.hasErrors('covidStatus')}"
+                  th:text="#{volunteers.form.yearSignUp.covid.error}">Choose status of vaccination</span>
+        </div>
+
         <div class="form-group">
             <label for="suggestionsTextArea" th:utext="#{volunteers.form.yearSignUp.comments}">Comments, additional wishes</label>
 

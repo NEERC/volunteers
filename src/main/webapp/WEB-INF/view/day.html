@@ -64,6 +64,11 @@
                         <input type="text" class="form-control"
                                th:placeholder="#{volunteers.day.search}"/>
                     </th>
+                    <th class="col-md-1">
+                        <label th:text="#{volunteers.day.covid}">Covid status</label>
+                        <input type="text" class="form-control"
+                               th:placeholder="#{volunteers.day.search}"/>
+                    </th>
                     <th class="col-md-2">
                         <label th:text="#{volunteers.day.experience}">Experience</label>
                         <input type="text" class="form-control"
@@ -97,6 +102,7 @@
 
                     </td>
                     <td th:text="${user.userYear.suggestions}"></td>
+                    <td th:text="${user.userYear.covidStatus}"></td>
                     <td>
                         <ul th:if="${exp.get(user).keySet().size() > 0}" class="list-group">
                             <li th:each="year:${exp.get(user).keySet()}" class="list-group-item">

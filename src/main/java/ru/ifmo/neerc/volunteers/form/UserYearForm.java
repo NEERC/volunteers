@@ -54,6 +54,9 @@ public class UserYearForm {
     @Pattern(regexp = "(\\d{6})?")
     private String itmoId;
 
+    @NotEmpty
+    private String covidStatus;
+
     public UserYearForm(User user) {
         firstName = user.getFirstName();
         lastName = user.getLastName();
@@ -73,5 +76,6 @@ public class UserYearForm {
         positions = applicationForm.getPositions();
         group = applicationForm.getGroup();
         suggestions = applicationForm.getSuggestions();
+        covidStatus = applicationForm.getCovidStatus();
     }
 }
