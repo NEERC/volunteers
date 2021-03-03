@@ -54,9 +54,6 @@ public class UserForm {
     @Email
     private String email;
 
-    @NotEmpty
-    private String covidStatus;
-
     transient private boolean emailExist = false;
 
     transient private boolean passwordEquals;
