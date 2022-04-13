@@ -11,6 +11,10 @@
         <input class="form-control" type="text" th:placeholder="#{volunteers.result.searchHalls}"
                onkeyup="search(this.value.toUpperCase())" id="seachInput"/>
         <span class="input-group-addon glyphicon glyphicon-remove" id="clear" style="cursor: pointer"></span>
+        <form onsubmit="saveBounds(); return false;">
+            <input class="form-control" type="text" th:placeholder="#{volunteers.result.bounds}"
+                   th:value="${bounds}" id="boundsInput"/>
+        </form>
     </div>
     <table class="table table-hover table-fixed" id="results">
         <thead>
@@ -129,6 +133,30 @@
         });
 
 
+    </script>
+
+    <script th:inline="javascript">
+        function saveBounds(value) {
+            var data = {
+                'bounds': $("#boundsInput").val()
+            };
+            data[_csrf_param_name] = _csrf_token;
+            $.ajax({
+                type: 'post',
+                data: data,
+                url: /*[[@{/admin/results/bounds}]]*/"",
+                success: function (data) {
+                    if (data.status === 'OK') {
+                        $("#boundsInput").val(data.result);
+                    } else {
+                        $("#boundsInput").val("error")
+                    }
+                },
+                fail: function () {
+                    $("#boundsInput").val("error")
+                }
+            })
+        }
     </script>
 </div>
 </body>

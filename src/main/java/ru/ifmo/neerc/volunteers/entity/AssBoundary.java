@@ -1,7 +1,10 @@
 package ru.ifmo.neerc.volunteers.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.type.YesNoType;
 
 import javax.persistence.*;
 
@@ -11,6 +14,7 @@ import javax.persistence.*;
 @Entity
 @Data
 @ToString(exclude = "year")
+@NoArgsConstructor
 public class AssBoundary {
     @Id @GeneratedValue
     private long id;
@@ -18,5 +22,10 @@ public class AssBoundary {
 
     @ManyToOne (fetch = FetchType.LAZY)
     private Year year;
+
+    public AssBoundary(final double value, final Year year) {
+        this.value = value;
+        this.year = year;
+    }
 
 }

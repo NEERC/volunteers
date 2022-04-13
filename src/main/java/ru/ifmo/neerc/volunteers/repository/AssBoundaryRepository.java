@@ -12,4 +12,6 @@ import java.util.List;
 public interface AssBoundaryRepository extends JpaRepository<AssBoundary, Long> {
 
     List<AssBoundary> findByYear(Year year);
+
+
 }

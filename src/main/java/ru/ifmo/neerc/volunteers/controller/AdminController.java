@@ -2,6 +2,7 @@ package ru.ifmo.neerc.volunteers.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.util.Pair;
@@ -16,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.expression.Strings;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.*;
 import ru.ifmo.neerc.volunteers.form.*;
@@ -63,6 +65,7 @@ public class AdminController {
     private final UserEventAssessmentRepository userEventAssessmentRepository;
     private final MedalRepository medalRepository;
     private final ApplicationFormRepository applicationFormRepository;
+    private final AssBoundaryRepository assBoundaryRepository;
     private final MessageSource messageSource;
     private final Locale locale = LocaleContextHolder.getLocale();
     private final EmailService emailService;
@@ -634,19 +637,58 @@ public class AdminController {
         List<ApplicationForm> applicationForms = experienceService.getSortedApplicationForms(
                 assessments.getFirst(), medals);
 
+        final Collection<AssBoundary> bounds = assBoundaryRepository.findByYear(year);
+
         model.addAttribute("applicationForms", applicationForms);
         model.addAttribute("assessments", assessments.getFirst());
         model.addAttribute("assessmentsGroupByDays", assessments.getSecond());
         model.addAttribute("experience", experience);
         model.addAttribute("medals", medals);
         model.addAttribute("halls", experienceService.getHalls(year));
+        model.addAttribute("bounds", bounds.stream().map(it -> Double.toString(it.getValue()))
+                .collect(Collectors.joining(";")));
+
         return "results";
+    }
+
+    @PostMapping("/results/bounds")
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    @ResponseBody
+    public JsonResponse updateBounds(@RequestParam("bounds") final String bounds, final Authentication authentication) {
+        final Year year = userService.getUserByAuthentication(authentication).getYear();
+        assBoundaryRepository.delete(assBoundaryRepository.findByYear(year));
+
+        final Collection<AssBoundary> parsedBounds = Arrays.stream(bounds.split(";"))
+                .map(StringUtils::deleteWhitespace)
+                .filter(this::isNumber)
+                .map(value -> new AssBoundary(Double.parseDouble(value), year)).collect(Collectors.toList());
+
+        assBoundaryRepository.save(parsedBounds);
+
+        final JsonResponse<String> result = new JsonResponse<>();
+        result.setStatus(Status.OK);
+        result.setResult(
+                parsedBounds.stream().map(it -> Double.toString(it.getValue()))
+                        .collect(Collectors.joining(";"))
+        );
+
+        return result;
+    }
+
+    private boolean isNumber(final String value) {
+        try {
+            Double.parseDouble(value);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
     }
 
     @PostMapping("/results")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @ResponseBody
-    public JsonResponse addExp(@RequestParam("id") final long id, @RequestParam("exp") final double exp, final Authentication authentication) {
+    public JsonResponse addExp(@RequestParam("id") final long id, @RequestParam("exp") final double exp,
+                               final Authentication authentication) {
         final Year year = userService.getUserByAuthentication(authentication).getYear();
         ApplicationForm user = applicationFormRepository.findOne(id);
         user.setExtraExperience(exp);
