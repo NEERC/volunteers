@@ -72,6 +72,7 @@ public class ExperienceServiceImpl implements ExperienceService {
         return assessments.entrySet().stream().filter(e -> !e.getKey().getUser().isHq())
                 .sorted(Comparator.<Map.Entry<ApplicationForm, Double>>comparingLong(e -> medals.get(e.getKey()).getValue())
                         .thenComparing(e -> borders.floor(e.getValue()))
+                        .thenComparing(Map.Entry::getValue)
                         .thenComparing(e -> e.getKey().getUser().getLastNameCyr())
                 )
                 .map(Map.Entry::getKey).collect(Collectors.toList());
@@ -108,6 +109,11 @@ public class ExperienceServiceImpl implements ExperienceService {
         final Set<ApplicationForm> needToSave = new HashSet<>();
         final double countEvents = year.getDays().stream().mapToDouble(Day::getAttendanceValue).sum();
         for (ApplicationForm user : year.getUsers()) {
+            final double expValue = getExperience(year, user, countEvents);
+            if (expValue != user.getExperience()) {
+                user.setExperience(expValue);
+                needToSave.add(user);
+            }
             experience.put(user, getExperience(year, user, countEvents));
         }
         applicationFormRepository.save(needToSave);
@@ -132,10 +138,10 @@ public class ExperienceServiceImpl implements ExperienceService {
         exp += user.getExtraExperience();
         totalExp += exp;
 
-        if (exp != user.getExperience()) {
-            user.setExperience(exp);
-            applicationFormRepository.save(user);
+        if (Math.ceil(totalExp) - totalExp < 0.2) {
+            totalExp = Math.ceil(totalExp);
         }
+
         return totalExp;
     }
 
