@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
@@ -651,6 +652,32 @@ public class AdminController {
         return "results";
     }
 
+    @GetMapping("/results/csv")
+    public void getResults(final HttpServletResponse response, final Authentication authentication) throws IOException {
+        response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"results.csv\"");
+        try (PrintWriter writer = response.getWriter()) {
+            writer.println("user,medal,experience");
+
+            final Year year = userService.getUserByAuthentication(authentication).getYear();
+            Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> assessments =
+                    experienceService.getAssessments(year);
+            final Map<ApplicationForm, Double> experience = experienceService.getExperience(year);
+            final Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(experience);
+            final List<ApplicationForm> applicationForms = experienceService.getSortedApplicationForms(
+                    assessments.getFirst(), medals);
+
+            for (ApplicationForm user : applicationForms) {
+                writer.print(user.getUser().getBadgeName());
+                writer.print(",");
+                writer.print(medals.get(user).getName());
+                writer.print(",");
+                writer.println(experience.get(user));
+            }
+        }
+    }
+
     @PostMapping("/results/bounds")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @ResponseBody
@@ -818,22 +845,22 @@ public class AdminController {
         response.setContentType("text/csv");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"file.csv\"");
-        PrintWriter writer = response.getWriter();
-        writer.write("Team,TeamCur,Role,RoleCur,Name,NameCyr,Medal,Stars\n");
-        Day day = dayRepository.findOne(id);
-        Map<ApplicationForm, Double> exp = experienceService.getExperienceExceptCurrentYear(day.getYear());
-        Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(exp);
-        day.getUsers().forEach(u -> {
-            User user = u.getUserYear().getUser();
-            String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '★');
-            writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," +
-                    u.getPosition().getEngName() + "," + u.getPosition().getCurName() + ",\""
-                    + user.getFirstName() + "\n" + user.getLastName() + "\",\"" +
-                    user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"," +
-                    medals.get(u.getUserYear()).getName() + "," + stars + "\n");
-        });
-        writer.flush();
-        writer.close();
+        try (PrintWriter writer = response.getWriter()) {
+            writer.write("Team,TeamCur,Role,RoleCur,Name,NameCyr,Medal,Stars\n");
+            Day day = dayRepository.findOne(id);
+            Map<ApplicationForm, Double> exp = experienceService.getExperienceExceptCurrentYear(day.getYear());
+            Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(exp);
+            day.getUsers().forEach(u -> {
+                User user = u.getUserYear().getUser();
+                String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '★');
+                writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," +
+                        u.getPosition().getEngName() + "," + u.getPosition().getCurName() + ",\""
+                        + user.getFirstName() + "\n" + user.getLastName() + "\",\"" +
+                        user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"," +
+                        medals.get(u.getUserYear()).getName() + "," + stars + "\n");
+            });
+            writer.flush();
+        }
     }
 
     @GetMapping("/stars")
