@@ -669,11 +669,40 @@ public class AdminController {
                     assessments.getFirst(), medals);
 
             for (ApplicationForm user : applicationForms) {
+                if (assessments.getFirst().get(user) <= 0.0) {
+                    continue;
+                }
                 writer.print(user.getUser().getBadgeName());
                 writer.print(",");
                 writer.print(medals.get(user).getName());
                 writer.print(",");
                 writer.println(experience.get(user));
+            }
+        }
+    }
+
+    @GetMapping("/ifmo/export")
+    public void exportIfmoVolunteers(final HttpServletResponse response, final Authentication authentication) throws IOException {
+        response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"itmo-volunteers.csv\"");
+
+        try (PrintWriter writer = response.getWriter()) {
+
+            writer.println("name,isu_number");
+            final Year year = userService.getUserByAuthentication(authentication).getYear();
+            Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> assessments =
+                    experienceService.getAssessments(year);
+
+            for (Map.Entry<ApplicationForm, Double> entry : assessments.getFirst().entrySet()) {
+                if (entry.getValue() <= 0.0) {
+                    continue;
+                }
+                if (StringUtils.isNotBlank(entry.getKey().getUser().getItmoId())) {
+                    writer.print(entry.getKey().getUser().getBadgeNameCyr());
+                    writer.print(",");
+                    writer.println(entry.getKey().getUser().getItmoId());
+                }
             }
         }
     }
