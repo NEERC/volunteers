@@ -114,7 +114,7 @@ public class ExperienceServiceImpl implements ExperienceService {
                 user.setExperience(expValue);
                 needToSave.add(user);
             }
-            experience.put(user, getExperience(year, user, countEvents));
+            experience.put(user, getExperience(year, user, countEvents) + getExperienceExceptCurrentYear(user));
         }
         applicationFormRepository.save(needToSave);
         return experience;
@@ -126,7 +126,6 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     private Double getExperience(Year year, ApplicationForm user, final double countEvents) {
-        double totalExp = getExperienceExceptCurrentYear(user);
         double exp = 0;
         for (final UserDay userDay : user.getUserDays()) {
             if (userDay.getAttendance() == Attendance.YES || userDay.getAttendance() == Attendance.LATE) {
@@ -136,13 +135,12 @@ public class ExperienceServiceImpl implements ExperienceService {
         exp /= countEvents;
         exp = DoubleRounder.round(exp, 2);
         exp += user.getExtraExperience();
-        totalExp += exp;
 
-        if (Math.ceil(totalExp) - totalExp < 0.2) {
-            totalExp = Math.ceil(totalExp);
+        if (Math.ceil(exp) - exp < 0.2) {
+            exp = Math.ceil(exp);
         }
 
-        return totalExp;
+        return exp;
     }
 
     @Override
