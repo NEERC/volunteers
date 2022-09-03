@@ -38,6 +38,9 @@ public class UserYearForm {
 
     private String email;
 
+    @NotEmpty
+    private String telegram;
+
     @AssertTrue
     private boolean emailCorrect;
 
@@ -63,6 +66,7 @@ public class UserYearForm {
         firstNameCyr = user.getFirstNameCyr();
         lastNameCyr = user.getLastNameCyr();
         phone = user.getPhone();
+        telegram = user.getTelegram();
         email = user.getEmail();
         itmoId = user.getItmoId();
     }

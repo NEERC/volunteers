@@ -111,6 +111,18 @@
                     </div>
                 </div>
 
+                <div class="form-group" th:class="form-group" th:classappend="${#fields.hasErrors('telegram')} ? 'has-error'">
+                    <label for="inputTelegram" class="col-sm-4 control-label"
+                           th:text="#{volunteers.form.signUp.telegram}">Telegram username</label>
+                    <div class="col-sm-8">
+                        <input type="text" th:field="*{telegram}" class="form-control" id="inputTelegram"
+                               placeholder="Telegram" th:placeholder="#{volunteers.form.signUp.telegram}"
+                        />
+                        <span class="help-block" th:if="${#fields.hasErrors('telegram')}"
+                              th:text="#{volunteers.form.signUp.telegram.error.empty}">Не может быть пустым</span>
+                    </div>
+                </div>
+
                 <div class="form-group"
                      th:class="${#fields.hasErrors('itmoId')}? 'has-error form-group' : 'form-group'">
                     <label for="itmoId" class="col-sm-4 control-label"
@@ -222,6 +234,9 @@
                             required: true,
                             regex: /^\+7[\(]\d{3}[\)]\d{3}[\-]\d{2}[\-]\d{2}$/
                         },
+                        telegram: {
+                            required: true
+                        },
                         itmoId: {
                             regex: /^(\d{6})?$/
                         }
@@ -246,6 +261,9 @@
                         phone: {
                             required: /*[[#{volunteers.form.signUp.phone.error.empty}]]*/"",
                             regex: /*[[#{volunteers.form.signUp.phone.error.invalid}]]*/""
+                        },
+                        telegram: {
+                            required: /*[[#{volunteers.form.signUp.telegram.error.empty}]]*/"",
                         },
                         itmoId: {
                             regex: /*[[#{volunteers.form.signUp.itmoId.error.invalid}]]*/""

@@ -52,6 +52,8 @@ public class User implements UserDetails {
 
     private String phone;
 
+    private String telegram;
+
     private String itmoId = "";
 
     private boolean confirmed;
@@ -84,6 +86,7 @@ public class User implements UserDetails {
         badgeNameCyr = userForm.getBadgeNameCyr();
         email = userForm.getEmail();
         phone = userForm.getPhone();
+        telegram = userForm.getTelegram();
         confirmed = false;
         itmoId = userForm.getItmoId();
     }
@@ -121,6 +124,11 @@ public class User implements UserDetails {
             result = true;
         }
 
+        if (telegram == null || !telegram.equals(form.getTelegram())) {
+            telegram = form.getTelegram();
+            result = true;
+        }
+
         if (itmoId == null || !itmoId.equals(form.getItmoId())) {
             itmoId = form.getItmoId();
             result = true;
@@ -136,6 +144,7 @@ public class User implements UserDetails {
         badgeName = profile.getBadgeName();
         badgeNameCyr = profile.getBadgeNameCyr();
         phone = profile.getPhone();
+        telegram = profile.getTelegram();
         itmoId = profile.getItmoId();
     }
 
