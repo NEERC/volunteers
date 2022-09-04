@@ -22,6 +22,7 @@
             <th th:text="${user.group}"></th>
             <td th:text="${user.user.confirmed}?${user.user.email}:${user.user.oldEmail}"></td>
             <td th:text="${user.user.phone}"></td>
+            <td th:text="${user.user.telegram}"></td>
         </tr>
         </tbody>
     </table>
