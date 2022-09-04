@@ -36,6 +36,9 @@ public class UserEditForm {
     @Pattern(regexp = "\\+7[\\(]\\d{3}[\\)]\\d{3}[\\-]\\d{2}[\\-]\\d{2}")
     private String phone;
 
+    @NotEmpty
+    private String telegram;
+
     private boolean administrator;
 
     private boolean chatLoginAllowed;
@@ -57,6 +60,7 @@ public class UserEditForm {
         badgeName = user.getBadgeName();
         badgeNameCyr = user.getBadgeNameCyr();
         phone = user.getPhone();
+        telegram = user.getTelegram();
         itmoId = user.getItmoId();
 
         administrator = user.getRole().getName().equals("ROLE_ADMIN");
