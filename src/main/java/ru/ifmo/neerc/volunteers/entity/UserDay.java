@@ -18,6 +18,7 @@ import java.util.Set;
 @ToString(exclude = {"day", "id", "assessments"})
 @EqualsAndHashCode(exclude = {"assessments"})
 @JsonIgnoreProperties(value = {"day", "userYear"})
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"userYear", "day"})})
 public class UserDay {
     @Id
     @GeneratedValue
