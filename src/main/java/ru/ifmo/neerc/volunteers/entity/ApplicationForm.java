@@ -7,9 +7,7 @@ import lombok.ToString;
 import ru.ifmo.neerc.volunteers.form.UserYearForm;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -61,6 +59,22 @@ public class ApplicationForm {
     public ApplicationForm(UserYearForm form, User user, Year year) {
         this(user, year);
         setValues(form);
+    }
+
+    public ApplicationForm(User user, Year year, Set<PositionValue> positions, String suggestions, String group, double experience, String covidStatus, List<UserDay> userDays, double extraExperience) {
+        this.user = user;
+        this.year = year;
+        this.positions = new HashSet<>(positions);
+        this.suggestions = suggestions;
+        this.group = group;
+        this.experience = experience;
+        this.covidStatus = covidStatus;
+        this.userDays = new ArrayList<>(userDays);
+        this.extraExperience = extraExperience;
+    }
+
+    public static ApplicationForm createNewUsers(final ApplicationForm form, Year year) {
+        return new ApplicationForm(form.getUser(), year, form.getPositions(), form.getSuggestions(), form.getGroup(), form.getExperience(), form.getCovidStatus(), form.getUserDays(), form.getExtraExperience());
     }
 
     public void setValues(UserYearForm form) {
