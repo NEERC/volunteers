@@ -73,8 +73,8 @@ public class ApplicationForm {
         this.extraExperience = extraExperience;
     }
 
-    public static ApplicationForm createNewUsers(final ApplicationForm form, Year year) {
-        return new ApplicationForm(form.getUser(), year, form.getPositions(), form.getSuggestions(), form.getGroup(), form.getExperience(), form.getCovidStatus(), form.getUserDays(), form.getExtraExperience());
+    public static ApplicationForm createNewUsers(final ApplicationForm form, Double exp, Year year) {
+        return new ApplicationForm(form.getUser(), year, form.getPositions(), form.getSuggestions(), form.getGroup(), exp, form.getCovidStatus(), form.getUserDays(), form.getExtraExperience());
     }
 
     public void setValues(UserYearForm form) {
