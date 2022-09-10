@@ -88,6 +88,9 @@ public class ExperienceServiceImpl implements ExperienceService {
             }
             double assessment = 0.0;
             assessmentsGroupByDays.put(user, new ArrayList<>());
+            if (user.getUserDays().stream().noneMatch(it -> it.getAttendance() == Attendance.LATE || it.getAttendance() == Attendance.YES)) {
+                continue;
+            }
             for (UserDay userDay : user.getUserDays()) {
                 Set<Assessment> allAssessments = new HashSet<>(userDay.getAssessments());
                 allAssessments.add(userDay.createFakeAssessmentByAttendace(attendanceComments));
@@ -132,7 +135,7 @@ public class ExperienceServiceImpl implements ExperienceService {
                 exp += userDay.getPosition().getValue() * userDay.getDay().getAttendanceValue();
             }
         }
-        exp /= countEvents;
+        exp /= countEvents == 0 ? 1.0 : countEvents;
         exp = DoubleRounder.round(exp, 2);
         exp += user.getExtraExperience();
 
