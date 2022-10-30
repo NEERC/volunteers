@@ -13,10 +13,7 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @Data
-@RequiredArgsConstructor
 @JsonIgnoreProperties(value = {"year"})
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @Table(indexes = {@Index(columnList = "inForm")})
 public class PositionValue {
@@ -54,13 +51,49 @@ public class PositionValue {
 
     private boolean manager;
 
-    public PositionValue(PositionForm positionForm, Year year) {
-        this(positionForm.getName(), positionForm.getEngName(),
-                positionForm.getCurName(), false, positionForm.getValue(), year,
-                positionForm.getOrder(), positionForm.isForUser());
+    @ManyToOne
+    private Hall defaultHall;
+
+    public PositionValue(long id, @NonNull String name, @NonNull String engName, @NonNull String curName, boolean def,
+                         double value, @NonNull Year year, long ord, boolean inForm, boolean manager, Hall defaultHall) {
+        this.id = id;
+        this.name = name;
+        this.engName = engName;
+        this.curName = curName;
+        this.def = def;
+        this.value = value;
+        this.year = year;
+        this.ord = ord;
+        this.inForm = inForm;
+        this.manager = manager;
+        this.defaultHall = defaultHall;
     }
 
-    public void setFields(PositionForm positionForm) {
+    public PositionValue(@NonNull String name, @NonNull String engName, @NonNull String curName, boolean def,
+                         double value, @NonNull Year year, long ord, boolean inForm, boolean manager,
+                         Hall defaultHall) {
+        this.name = name;
+        this.engName = engName;
+        this.curName = curName;
+        this.def = def;
+        this.value = value;
+        this.year = year;
+        this.ord = ord;
+        this.inForm = inForm;
+        this.manager = manager;
+        this.defaultHall = defaultHall;
+    }
+
+    public PositionValue() {
+    }
+
+    public PositionValue(PositionForm positionForm, Year year, Hall defaultHall) {
+        this(positionForm.getName(), positionForm.getEngName(),
+                positionForm.getCurName(), false, positionForm.getValue(), year,
+                positionForm.getOrder(), positionForm.isForUser(), positionForm.isManager(), defaultHall);
+    }
+
+    public void setFields(PositionForm positionForm, Hall defaultHall) {
         setName(positionForm.getName());
         setEngName(positionForm.getEngName());
         setCurName(positionForm.getCurName());
@@ -68,12 +101,13 @@ public class PositionValue {
         setOrd(positionForm.getOrder());
         setInForm(positionForm.isForUser());
         setManager(positionForm.isManager());
+        setDefaultHall(defaultHall);
     }
 
     public static PositionValue copyPosition(final PositionValue position, final Year year) {
         return new PositionValue(position.getName(), position.getEngName(),
                 position.getCurName(), position.isDef(), position.getValue(), year,
-                position.getOrd(), position.isInForm());
+                position.getOrd(), position.isInForm(), position.isManager(), position.defaultHall);
     }
 
 }

@@ -32,4 +32,6 @@ public class PositionForm {
     private boolean forUser;
 
     private boolean manager;
+
+    private Long defaultHallId;
 }
