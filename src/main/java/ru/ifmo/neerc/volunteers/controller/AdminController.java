@@ -255,7 +255,7 @@ public class AdminController {
         final Set<ApplicationForm> oldUsers = yearOld.getUsers();
         final Set<ApplicationForm> newUsers = oldUsers.stream()
                 .filter(it -> admins.contains(it.getUser()))
-                .map(it -> ApplicationForm.createNewUsers(it, experienceService.getExperience(yearOld, it), year)).collect(Collectors.toSet());
+                .map(it -> ApplicationForm.createNewUsers(it, year)).collect(Collectors.toSet());
         applicationFormRepository.save(newUsers);
 
         final Set<Hall> oldHalls = yearOld.getHalls();
