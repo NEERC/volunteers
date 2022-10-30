@@ -40,7 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
@@ -252,6 +251,12 @@ public class AdminController {
         }
         year.setOpenForRegistration(false);
         yearRepository.save(year);
+        Set<User> admins = new HashSet<>(userRepository.findByRole(roleRepository.findByName("ROLE_ADMIN")));
+        final Set<ApplicationForm> oldUsers = yearOld.getUsers();
+        final Set<ApplicationForm> newUsers = oldUsers.stream()
+                .filter(it -> admins.contains(it.getUser()))
+                .map(it -> ApplicationForm.createNewUsers(it, experienceService.getExperience(yearOld, it), year)).collect(Collectors.toSet());
+        applicationFormRepository.save(newUsers);
 
         final Set<Hall> oldHalls = yearOld.getHalls();
         final Set<Hall> newHalls = oldHalls.stream()
