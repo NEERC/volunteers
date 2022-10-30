@@ -67,13 +67,19 @@
                     </td>
                     <td th:unless="${isUser}">
                         <input type="checkbox" th:checked="${position.inForm}" th:value="${position.id}"
-                               th:id="'inForm'+${position.id}" th:onblur="'updatePosition('+${position.id}+');'"/>
+                               th:id="'inForm'+${position.id}"
+                               th:onblur="'updatePosition('+${position.id}+');'"
+                               th:onclick="'updatePosition('+${position.id}+');'"
+                        />
                         <input type="hidden" th:checked="${position.inForm}" th:id="originInForm+${position.id}"
                                th:unless="${isUser}"/>
                     </td>
                     <td th:unless="${isUser}">
                         <input type="checkbox" th:checked="${position.manager}" th:value="${position.id}"
-                               th:id="'manager'+${position.id}" th:onblur="'updatePosition('+${position.id}+');'"/>
+                               th:id="'manager'+${position.id}"
+                               th:onblur="'updatePosition('+${position.id}+');'"
+                               th:onclick="'updatePosition('+${position.id}+');'"
+                        />
                         <input type="hidden" th:checked="${position.manager}" th:id="originManager+${position.id}"
                                th:unless="${isUser}"/>
                     </td>
