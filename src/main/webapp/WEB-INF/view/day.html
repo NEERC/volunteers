@@ -54,12 +54,12 @@
                         <input type="text" class="form-control"
                                th:placeholder="#{volunteers.day.search}"/>
                     </th>
-                    <th class="col-md-2">
+                    <th class="col-md-1">
                         <label th:text="#{volunteers.day.positions.wish}">Positions</label>
                         <input type="text" class="form-control"
                                th:placeholder="#{volunteers.day.search}"/>
                     </th>
-                    <th class="col-md-2">
+                    <th class="col-md-1">
                         <label th:text="#{volunteers.day.comments}">Comments</label>
                         <input type="text" class="form-control"
                                th:placeholder="#{volunteers.day.search}"/>
@@ -204,6 +204,7 @@
                 success: function (data) {
                     if (data.status === "OK") {
                         console.log("success");
+                        updateSelectors(id, data.result.position,  data.result.hall);
                     } else {
                         alert(data.result);
                     }
@@ -227,11 +228,20 @@
                 success: function (data) {
                     if (data.status === "OK") {
                         console.log("success");
+                        updateSelectors(id, data.result.position,  data.result.hall);
                     } else {
                         alert(data.result);
                     }
                 }
             })
+        }
+
+        function updateSelectors(id, position, hall) {
+            console.log(id, position, hall);
+
+            //todo: update selectors
+            // $('hall'+id + 'option[value='+hall.id+']').attr("selected", "selected");
+            // $('position'+id + 'option[value='+position.id+']').attr("selected", "selected");
         }
 
         function copyEvent() {

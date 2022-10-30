@@ -19,13 +19,13 @@
             <th th:text="#{volunteers.position.order}" class="text-center" th:unless="${isUser}">Order</th>
             <th th:text="#{volunteers.position.inForm}" class="text-center" th:unless="${isUser}">In form</th>
             <th th:text="#{volunteers.position.manager}" class="text-center" th:unless="${isUser}">Manager</th>
+            <th th:text="#{volunteers.position.default.hall}" class="text-center" th:unless="${isUser}">Default Hall</th>
             <th th:unless="${isUser}"></th>
             </thead>
             <tbody>
             <th:block th:each="position : ${positions}">
                 <tr th:id="${position.id}">
                     <td>
-
                         <label th:if="${isUser}" th:text="${position.name}" th:for="position+${position.id}">
                         </label>
                         <input th:unless="${isUser}" type="text" class="form-control" th:value="${position.name}"
@@ -76,6 +76,17 @@
                                th:id="'manager'+${position.id}" th:onblur="'updatePosition('+${position.id}+');'"/>
                         <input type="hidden" th:checked="${position.manager}" th:id="originManager+${position.id}"
                                th:unless="${isUser}"/>
+                    </td>
+                    <td th:unless="${isUser}">
+                        <select class="form-control" th:id="'default-hall-'+${position.id}"
+                        th:onchange="'updatePosition('+${position.id}+');'">
+                            <th:block th:each="hall:${halls}">
+                                <option th:value="${hall.id}" th:selected="${position.defaultHall != null and position.defaultHall.id == hall.id}"
+                                        th:text="${hall.name}"></option>
+                            </th:block>
+                            <option value="-1" th:selected="${position.defaultHall == null}" th:text="#{volunteers.position.default.hall.no}"></option>
+                        </select>
+
                     </td>
                     <td th:unless="${isUser}">
                         <a th:unless="${position.def}"
@@ -161,6 +172,16 @@
                             </div>
                             <span class="help-block" th:if="${#fields.hasErrors('forUser')}">Error</span>
                         </div>
+                        <div class="form-group"
+                             th:class="${#fields.hasErrors('forUser')? 'has-error form-group': 'form-group'}">
+                            <select class="form-control" th:id="defaultHallId" th:field="*{defaultHallId}">
+                                <option value="-1" th:selected="true" th:text="#{volunteers.position.default.hall.no}"></option>
+                                <th:block th:each="hall:${halls}">
+                                    <option th:value="${hall.id}"
+                                            th:text="${hall.name}"></option>
+                                </th:block>
+                            </select>
+                        </div>
                     </div>
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <div class="modal-footer">
@@ -240,6 +261,7 @@
                                     '<input type="checkbox"' + checked + ' value="' + data.result.id + '" id="manager' + data.result.id + '" onblur="updatePosition(' + data.result.id + ');"/>' +
                                     '<input type="hidden"' + checked + ' value="' + data.result.id + '" id="originManager' + data.result.id + '"/>' +
                                     '</td>' +
+                                    '<td></td>' + //todo: add select for halls
                                     '<td>' +
                                     '<a class="btn btn-default" role="button" onclick="deletePosition(' + data.result.id + '); return false;">' + note + '</a>' +
                                     '</td>' +
@@ -291,7 +313,8 @@
                 'value': $('#value' + id).val(),
                 'order': $('#order' + id).val(),
                 'forUser': !!$('#inForm' + id).prop('checked'),
-                'manager': !!$('#manager' + id).prop('checked')
+                'manager': !!$('#manager' + id).prop('checked'),
+                'defaultHallId': $('#default-hall-'+id).val(),
             };
             data[_csrf_param_name] = _csrf_token;
             $.ajax({
@@ -306,8 +329,8 @@
                         $("#originCurName" + id).val($("#curName" + id).val());
                         $("#originValue" + id).val($("#value" + id).val());
                         $("#originOrder" + id).val($("#order" + id).val());
-                        $("#originInForm" + id).prop('checked', $('#inForm').prop('checked'))
-                        $("#originManager" + id).prop('checked', $('#manager').prop('checked'))
+                        $("#originInForm" + id).prop('checked', $('#inForm').prop('checked'));
+                        $("#originManager" + id).prop('checked', $('#manager').prop('checked'));
                     }
                     else {
                         $("#name" + id).val($("#originName" + id).val());
