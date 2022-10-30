@@ -85,10 +85,11 @@ public class YearServiceImpl implements YearService {
             }
         }
         if (positionValue == null) {
-            positionValue = new PositionValue(messageSource.getMessage("volunteers.reserve.position", null, "Reserve", locale),
+            positionValue = new PositionValue(
+                    messageSource.getMessage("volunteers.reserve.position", null, "Reserve", locale),
                     messageSource.getMessage("volunteers.reserve.position", null, "Reserve", locale),
                     messageSource.getMessage("volunteers.reserve.position.cur", null, "Reserve", locale),
-                    true, 0, year, 0L, false);
+                    true, 0, year, 0L, false, false, null);
             positionValueRepository.save(positionValue);
         }
         return positionValue;

@@ -17,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.expression.Maps;
 import org.thymeleaf.expression.Strings;
 import org.thymeleaf.spring.support.Layout;
 import ru.ifmo.neerc.volunteers.entity.*;
@@ -115,7 +116,8 @@ public class AdminController {
             JsonResponse<PositionValue> response = new JsonResponse<>();
             final User user = userService.getUserByAuthentication(authentication);
             final Year year = user.getYear();
-            final PositionValue positionValue = new PositionValue(positionForm, year);
+            final Hall defaultHall = Optional.ofNullable(positionForm.getDefaultHallId()).map(hallRepository::findOne).orElse(null);
+            final PositionValue positionValue = new PositionValue(positionForm, year, defaultHall);
             positionValueRepository.save(positionValue);
             response.setStatus(Status.OK);
             response.setResult(positionValue);
@@ -134,7 +136,8 @@ public class AdminController {
         }
         try {
             PositionValue positionValue = positionValueRepository.findOne(id);
-            positionValue.setFields(positionForm);
+            final Hall defaultHall = Optional.ofNullable(positionForm.getDefaultHallId()).map(hallRepository::findOne).orElse(null);
+            positionValue.setFields(positionForm, defaultHall);
             positionValueRepository.save(positionValue);
             response.setStatus(Status.OK);
         } catch (Exception e) {
@@ -411,7 +414,7 @@ public class AdminController {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public @ResponseBody
     JsonResponse save(@RequestParam final long userId, @RequestParam final long hallId, @RequestParam final long positionId) {
-        JsonResponse<String> response = new JsonResponse<>();
+        JsonResponse<Object> response = new JsonResponse<>();
         try {
             UserDay user = userEventRepository.findOne(userId);
             PositionValue positionValue = positionId == -1 ? user.getPosition() : positionValueRepository.findOne(positionId);
@@ -423,12 +426,19 @@ public class AdminController {
             }
             if (!user.getPosition().equals(positionValue)) {
                 user.setPosition(positionValue);
+                if (positionValue.getDefaultHall() != null) {
+                    user.setHall(positionValue.getDefaultHall());
+                }
                 isChanged = true;
             }
             if (isChanged) {
                 userEventRepository.save(user);
             }
             response.setStatus(Status.OK);
+            final Map<String, Object> result = new HashMap<>();
+            result.put("position", user.getPosition());
+            result.put("hall", user.getHall());
+            response.setResult(result);
         } catch (Exception e) {
             response.setResult(e.getMessage());
             response.setStatus(Status.FAIL);
