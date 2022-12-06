@@ -1,8 +1,39 @@
 package ru.ifmo.neerc.volunteers.controller;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
+import org.docx4j.XmlUtils;
+import org.docx4j.model.datastorage.migration.VariablePrepare;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
+import org.docx4j.wml.Document;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.util.Pair;
@@ -15,17 +46,47 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.thymeleaf.expression.Maps;
-import org.thymeleaf.expression.Strings;
 import org.thymeleaf.spring.support.Layout;
-import ru.ifmo.neerc.volunteers.entity.*;
-import ru.ifmo.neerc.volunteers.form.*;
+import ru.ifmo.neerc.volunteers.entity.ApplicationForm;
+import ru.ifmo.neerc.volunteers.entity.AssBoundary;
+import ru.ifmo.neerc.volunteers.entity.Assessment;
+import ru.ifmo.neerc.volunteers.entity.Attendance;
+import ru.ifmo.neerc.volunteers.entity.Day;
+import ru.ifmo.neerc.volunteers.entity.Hall;
+import ru.ifmo.neerc.volunteers.entity.Medal;
+import ru.ifmo.neerc.volunteers.entity.PositionValue;
+import ru.ifmo.neerc.volunteers.entity.User;
+import ru.ifmo.neerc.volunteers.entity.UserDay;
+import ru.ifmo.neerc.volunteers.entity.Year;
+import ru.ifmo.neerc.volunteers.form.HallForm;
+import ru.ifmo.neerc.volunteers.form.MailForm;
+import ru.ifmo.neerc.volunteers.form.MedalForm;
+import ru.ifmo.neerc.volunteers.form.PositionForm;
+import ru.ifmo.neerc.volunteers.form.UserEditForm;
 import ru.ifmo.neerc.volunteers.modal.AssessmentsJson;
 import ru.ifmo.neerc.volunteers.modal.JsonResponse;
 import ru.ifmo.neerc.volunteers.modal.Status;
-import ru.ifmo.neerc.volunteers.repository.*;
+import ru.ifmo.neerc.volunteers.repository.ApplicationFormRepository;
+import ru.ifmo.neerc.volunteers.repository.AssBoundaryRepository;
+import ru.ifmo.neerc.volunteers.repository.DayRepository;
+import ru.ifmo.neerc.volunteers.repository.HallRepository;
+import ru.ifmo.neerc.volunteers.repository.MedalRepository;
+import ru.ifmo.neerc.volunteers.repository.PositionValueRepository;
+import ru.ifmo.neerc.volunteers.repository.RoleRepository;
+import ru.ifmo.neerc.volunteers.repository.UserEventAssessmentRepository;
+import ru.ifmo.neerc.volunteers.repository.UserEventRepository;
+import ru.ifmo.neerc.volunteers.repository.UserRepository;
+import ru.ifmo.neerc.volunteers.repository.YearRepository;
 import ru.ifmo.neerc.volunteers.service.Utils;
 import ru.ifmo.neerc.volunteers.service.day.DayService;
 import ru.ifmo.neerc.volunteers.service.experience.ExperienceService;
@@ -33,17 +94,6 @@ import ru.ifmo.neerc.volunteers.service.mail.EmailService;
 import ru.ifmo.neerc.volunteers.service.token.TokenService;
 import ru.ifmo.neerc.volunteers.service.user.UserService;
 import ru.ifmo.neerc.volunteers.service.year.YearService;
-
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Created by Lapenok Akesej on 25.02.2017.
@@ -101,8 +151,7 @@ public class AdminController {
 
     @PostMapping("/position/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public @ResponseBody
-    JsonResponse addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, final Authentication authentication) {
+    public @ResponseBody JsonResponse addPosition(@Valid @ModelAttribute("newPosition") final PositionForm positionForm, final BindingResult result, final Authentication authentication) {
 
         if (result.hasErrors()) {
             JsonResponse<List<ObjectError>> response = new JsonResponse<>();
@@ -115,7 +164,8 @@ public class AdminController {
             JsonResponse<PositionValue> response = new JsonResponse<>();
             final User user = userService.getUserByAuthentication(authentication);
             final Year year = user.getYear();
-            final Hall defaultHall = Optional.ofNullable(positionForm.getDefaultHallId()).map(hallRepository::findOne).orElse(null);
+            final Hall defaultHall =
+                    Optional.ofNullable(positionForm.getDefaultHallId()).map(hallRepository::findOne).orElse(null);
             final PositionValue positionValue = new PositionValue(positionForm, year, defaultHall);
             positionValueRepository.save(positionValue);
             response.setStatus(Status.OK);
@@ -125,8 +175,7 @@ public class AdminController {
     }
 
     @PostMapping("/position/edit")
-    public @ResponseBody
-    JsonResponse<Exception> setCurName(@Valid @ModelAttribute("position") final PositionForm positionForm, final BindingResult result, @RequestParam long id) {
+    public @ResponseBody JsonResponse<Exception> setCurName(@Valid @ModelAttribute("position") final PositionForm positionForm, final BindingResult result, @RequestParam long id) {
         JsonResponse<Exception> response = new JsonResponse<>();
         if (result.hasErrors()) {
             response.setStatus(Status.FAIL);
@@ -135,7 +184,8 @@ public class AdminController {
         }
         try {
             PositionValue positionValue = positionValueRepository.findOne(id);
-            final Hall defaultHall = Optional.ofNullable(positionForm.getDefaultHallId()).map(hallRepository::findOne).orElse(null);
+            final Hall defaultHall =
+                    Optional.ofNullable(positionForm.getDefaultHallId()).map(hallRepository::findOne).orElse(null);
             positionValue.setFields(positionForm, defaultHall);
             positionValueRepository.save(positionValue);
             response.setStatus(Status.OK);
@@ -148,8 +198,7 @@ public class AdminController {
 
     @PostMapping("/position/delete")
     //@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public @ResponseBody
-    JsonResponse deletePosition(@RequestParam final long id) {
+    public @ResponseBody JsonResponse deletePosition(@RequestParam final long id) {
         final PositionValue position = positionValueRepository.findOne(id);
         JsonResponse<String> result = new JsonResponse<>();
         if (position != null && !position.isDef()) {
@@ -159,7 +208,8 @@ public class AdminController {
                 result.setResult("");
             } catch (final Exception e) {
                 result.setStatus(Status.FAIL);
-                result.setResult(messageSource.getMessage("volunteers.position.error.delete", new Object[]{position.getName()}, "Error to delete position", locale));
+                result.setResult(messageSource.getMessage("volunteers.position.error.delete",
+                        new Object[]{position.getName()}, "Error to delete position", locale));
             }
         } else {
             result.setStatus(Status.FAIL);
@@ -170,8 +220,7 @@ public class AdminController {
 
     @PostMapping("/hall/delete")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public @ResponseBody
-    JsonResponse deleteHall(@RequestParam final long id) {
+    public @ResponseBody JsonResponse deleteHall(@RequestParam final long id) {
         JsonResponse<String> response = new JsonResponse<>();
         try {
             if (!hallRepository.findOne(id).isDef()) {
@@ -183,7 +232,8 @@ public class AdminController {
         } catch (final Exception e) {
             final Hall hall = hallRepository.findOne(id);
             response.setStatus(Status.FAIL);
-            response.setResult(messageSource.getMessage("volunteers.hall.error.delete", new Object[]{hall.getName()}, "Error to delete hall", locale));
+            response.setResult(messageSource.getMessage("volunteers.hall.error.delete", new Object[]{hall.getName()},
+                    "Error to delete hall", locale));
         }
         return response;
     }
@@ -196,8 +246,9 @@ public class AdminController {
     }
 
     @PostMapping("hall/edit")
-    public @ResponseBody
-    JsonResponse editHall(@RequestParam final long id, @Valid @ModelAttribute("hall") final HallForm hallForm, final BindingResult result) {
+    public @ResponseBody JsonResponse editHall(@RequestParam final long id,
+                                               @Valid @ModelAttribute("hall") final HallForm hallForm,
+                                               final BindingResult result) {
         JsonResponse<String> response = new JsonResponse<>();
         if (result.hasErrors()) {
             response.setResult("Invalid form");
@@ -217,8 +268,8 @@ public class AdminController {
 
     @PostMapping("/hall/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public @ResponseBody
-    JsonResponse addHall(@Valid @ModelAttribute("newHall") final HallForm hall, final BindingResult result, final Authentication authentication) {
+    public @ResponseBody JsonResponse addHall(@Valid @ModelAttribute("newHall") final HallForm hall,
+                                              final BindingResult result, final Authentication authentication) {
 
         if (result.hasErrors()) {
             JsonResponse<List<ObjectError>> response = new JsonResponse<>();
@@ -238,7 +289,8 @@ public class AdminController {
 
     @PostMapping("/year/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addYear(@Valid @ModelAttribute("newYear") final Year year, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
+    public String addYear(@Valid @ModelAttribute("newYear") final Year year, final BindingResult result,
+                          final RedirectAttributes attributes, final Authentication authentication) {
         final Year yearOld = userService.getUserByAuthentication(authentication).getYear();
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.newYear", result);
@@ -253,29 +305,25 @@ public class AdminController {
         yearRepository.save(year);
         Set<User> admins = new HashSet<>(userRepository.findByRole(roleRepository.findByName("ROLE_ADMIN")));
         final Set<ApplicationForm> oldUsers = yearOld.getUsers();
-        final Set<ApplicationForm> newUsers = oldUsers.stream()
-                .filter(it -> admins.contains(it.getUser()))
-                .map(it -> ApplicationForm.createNewUsers(it, year)).collect(Collectors.toSet());
+        final Set<ApplicationForm> newUsers =
+                oldUsers.stream().filter(it -> admins.contains(it.getUser())).map(it -> ApplicationForm.createNewUsers(it, year)).collect(Collectors.toSet());
         applicationFormRepository.save(newUsers);
 
         final Set<Hall> oldHalls = yearOld.getHalls();
-        final Set<Hall> newHalls = oldHalls.stream()
-                .filter(it -> !it.isDef())
-                .map(it -> Hall.createNewHall(it, year)).collect(Collectors.toSet());
+        final Set<Hall> newHalls =
+                oldHalls.stream().filter(it -> !it.isDef()).map(it -> Hall.createNewHall(it, year)).collect(Collectors.toSet());
         hallRepository.save(newHalls);
 
         final Set<PositionValue> oldPositions = yearOld.getPositionValues();
-        final Set<PositionValue> newPositions = oldPositions.stream()
-                .filter(it -> !it.isDef())
-                .map(it -> PositionValue.copyPosition(it, year)).collect(Collectors.toSet());
+        final Set<PositionValue> newPositions =
+                oldPositions.stream().filter(it -> !it.isDef()).map(it -> PositionValue.copyPosition(it, year)).collect(Collectors.toSet());
         positionValueRepository.save(newPositions);
         return "redirect:/admin/year/" + year.getId();
     }
 
     @PostMapping("/year/close")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public @ResponseBody
-    JsonResponse closeYear(@RequestParam final long id, @RequestParam final boolean isOpen) {
+    public @ResponseBody JsonResponse closeYear(@RequestParam final long id, @RequestParam final boolean isOpen) {
         JsonResponse<String> response = new JsonResponse<>();
         try {
             final Year year = yearRepository.findOne(id);
@@ -309,8 +357,8 @@ public class AdminController {
 
     @PostMapping("/day/edit")
     @PreAuthorize("hasRole('ADMIN')")
-    public @ResponseBody
-    JsonResponse<Day> saveEvent(@Valid @ModelAttribute final Day day, final BindingResult result, final Authentication authentication) {
+    public @ResponseBody JsonResponse<Day> saveEvent(@Valid @ModelAttribute final Day day, final BindingResult result
+            , final Authentication authentication) {
         JsonResponse<Day> response = new JsonResponse<>();
         final User user = userService.getUserByAuthentication(authentication);
         Year year = day.getYear();
@@ -337,7 +385,8 @@ public class AdminController {
     @PostMapping("/day/add")
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String addEvent(@Valid @ModelAttribute("newDay") final Day dayForm, final BindingResult result, final RedirectAttributes attributes, final Authentication authentication) {
+    public String addEvent(@Valid @ModelAttribute("newDay") final Day dayForm, final BindingResult result,
+                           final RedirectAttributes attributes, final Authentication authentication) {
         JsonResponse<Day> response = saveEvent(dayForm, result, authentication);
         if (response.getStatus() == Status.FAIL) {
             if (response.getResult() != null) {
@@ -370,7 +419,8 @@ public class AdminController {
     @GetMapping("day/{id}")
     @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForDay(authentication, #id)")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public String event(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
+    public String event(@PathVariable(value = "id") final long id, final Model model,
+                        final Authentication authentication) {
         final User user = userService.getUserByAuthentication(authentication);
 
         final Day currentDay = dayRepository.findOne(id);
@@ -392,24 +442,23 @@ public class AdminController {
     }
 
     private Map<Attendance, String> getAttendanceMap() {
-        return new HashMap<>(Arrays.stream(Attendance.values())
-                .collect(Collectors.toMap(Function.identity(), attendance -> messageSource.getMessage("volunteers.attendance." + attendance.name().toLowerCase(), null, attendance.name(), locale))));
+        return new HashMap<>(Arrays.stream(Attendance.values()).collect(Collectors.toMap(Function.identity(),
+                attendance -> messageSource.getMessage("volunteers" + ".attendance." + attendance.name().toLowerCase(), null, attendance.name(), locale))));
     }
 
     @GetMapping("/day/{id}/edit")
     @PreAuthorize("hasRole('ADMIN')")
-    public String editEvent(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
+    public String editEvent(@PathVariable(value = "id") final long id, final Model model,
+                            final Authentication authentication) {
         final User user = userService.getUserByAuthentication(authentication);
         final Day day = dayRepository.findOne(id);
         final Year year = day.getYear();
         utils.setModelForAdmin(model, year);
         model.addAttribute("day", day);
         model.addAttribute("users", day.getUsers());
-        final Map<UserDay, Map<Year, Set<Pair<Hall, PositionValue>>>> exp = day.getUsers().stream().collect(Collectors.toMap(Function.identity(),
-                u -> u.getUserYear().getUser().getApplicationForms().stream().
-                        filter(uy -> !uy.getYear().equals(user.getYear())).
-                        collect(Collectors.toMap(ApplicationForm::getYear,
-                                uy -> uy.getUserDays().stream().map(ud -> Pair.of(ud.getHall(), ud.getPosition())).collect(Collectors.toSet())))));
+        final Map<UserDay, Map<Year, Set<Pair<Hall, PositionValue>>>> exp =
+                day.getUsers().stream().collect(Collectors.toMap(Function.identity(),
+                        u -> u.getUserYear().getUser().getApplicationForms().stream().filter(uy -> !uy.getYear().equals(user.getYear())).collect(Collectors.toMap(ApplicationForm::getYear, uy -> uy.getUserDays().stream().map(ud -> Pair.of(ud.getHall(), ud.getPosition())).collect(Collectors.toSet())))));
         model.addAttribute("exp", exp);
         return "day";
     }
@@ -417,12 +466,13 @@ public class AdminController {
     @PostMapping("/day/save")
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public @ResponseBody
-    JsonResponse save(@RequestParam final long userId, @RequestParam final long hallId, @RequestParam final long positionId) {
+    public @ResponseBody JsonResponse save(@RequestParam final long userId, @RequestParam final long hallId,
+                                           @RequestParam final long positionId) {
         JsonResponse<Object> response = new JsonResponse<>();
         try {
             UserDay user = userEventRepository.findOne(userId);
-            PositionValue positionValue = positionId == -1 ? user.getPosition() : positionValueRepository.findOne(positionId);
+            PositionValue positionValue = positionId == -1 ? user.getPosition() :
+                    positionValueRepository.findOne(positionId);
             Hall hall = hallId == -1 ? user.getHall() : hallRepository.findOne(hallId);
             boolean isChanged = false;
             if (!user.getHall().equals(hall)) {
@@ -453,8 +503,8 @@ public class AdminController {
 
     @PostMapping("/day/copy")
     @PreAuthorize("hasRole('ADMIN')")
-    public @ResponseBody
-    JsonResponse copy(@RequestParam final long eventId, @RequestParam final long baseEventId, @RequestParam(required = false, name = "halls[]") final List<Long> halls) {
+    public @ResponseBody JsonResponse copy(@RequestParam final long eventId, @RequestParam final long baseEventId,
+                                           @RequestParam(required = false, name = "halls[]") final List<Long> halls) {
         try {
             final Day day = dayRepository.findOne(eventId);
             final Day baseDay = dayRepository.findOne(baseEventId);
@@ -499,7 +549,8 @@ public class AdminController {
 
     @GetMapping("/day/{id}/attendance")
     @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForDay(authentication, #id)")
-    public String attendance(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
+    public String attendance(@PathVariable(value = "id") final long id, final Model model,
+                             final Authentication authentication) {
         event(id, model, authentication);
         model.addAttribute("attendances", Attendance.values());
         model.addAttribute("attendance", true);
@@ -508,11 +559,13 @@ public class AdminController {
 
     @GetMapping("/day/{id}/assessments")
     @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForDay(authentication, #id)")
-    public String assessments(@PathVariable(value = "id") final long id, final Model model, final Authentication authentication) {
+    public String assessments(@PathVariable(value = "id") final long id, final Model model,
+                              final Authentication authentication) {
         event(id, model, authentication);
         final Day day = dayRepository.findOne(id);
         model.addAttribute("assessment", true);
-        model.addAttribute("assessments", day.getUsers().stream().map(UserDay::getAssessments).flatMap(Collection::stream).collect(Collectors.toSet()));
+        model.addAttribute("assessments",
+                day.getUsers().stream().map(UserDay::getAssessments).flatMap(Collection::stream).collect(Collectors.toSet()));
         if (!model.containsAttribute("newAssessment")) {
             model.addAttribute("newAssessment", new Assessment());
         }
@@ -522,9 +575,7 @@ public class AdminController {
     @PostMapping("/day/assessments")
     @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForUserDay(authentication, #userId)")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public @ResponseBody
-    JsonResponse setAssessments(@Valid @ModelAttribute("newAssessment") final Assessment assessment,
-                                final BindingResult result, @RequestParam final long userId, final Authentication authentication) {
+    public @ResponseBody JsonResponse setAssessments(@Valid @ModelAttribute("newAssessment") final Assessment assessment, final BindingResult result, @RequestParam final long userId, final Authentication authentication) {
 
         try {
             if (result.hasErrors()) {
@@ -535,8 +586,9 @@ public class AdminController {
             }
             UserDay user = userEventRepository.findOne(userId);
             assessment.setUser(user);
-            if (assessment.getAuthor() == null)
+            if (assessment.getAuthor() == null) {
                 assessment.setAuthor(userService.getUserByAuthentication(authentication));
+            }
             userEventAssessmentRepository.save(assessment);
             JsonResponse<AssessmentsJson> response = new JsonResponse<>();
             response.setStatus(Status.OK);
@@ -554,8 +606,7 @@ public class AdminController {
     @PostMapping("/day/attendance")
     @PreAuthorize("hasRole('ADMIN') or @dayService.isManagerForUserDay(authentication, #id)")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public @ResponseBody
-    JsonResponse setAttendance(@RequestParam final long id, @RequestParam final String value) {
+    public @ResponseBody JsonResponse setAttendance(@RequestParam final long id, @RequestParam final String value) {
         JsonResponse<String> response = new JsonResponse<>();
         try {
             UserDay user = userEventRepository.findOne(id);
@@ -581,8 +632,8 @@ public class AdminController {
 
     @PostMapping("/medals/add")
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public @ResponseBody
-    JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final MedalForm medalForm, final BindingResult result) {
+    public @ResponseBody JsonResponse addMedals(@Valid @ModelAttribute("newMedal") final MedalForm medalForm,
+                                                final BindingResult result) {
         try {
             if (result.hasErrors()) {
                 JsonResponse<List<ObjectError>> response = new JsonResponse<>();
@@ -605,8 +656,7 @@ public class AdminController {
     }
 
     @PostMapping("/medals/delete")
-    public @ResponseBody
-    JsonResponse deleteMedal(@RequestParam("id") final long id) {
+    public @ResponseBody JsonResponse deleteMedal(@RequestParam("id") final long id) {
         JsonResponse<String> response = new JsonResponse<>();
         try {
             medalRepository.delete(id);
@@ -619,8 +669,8 @@ public class AdminController {
     }
 
     @PostMapping("/medals/edit")
-    public @ResponseBody
-    JsonResponse updateMedal(@Valid @ModelAttribute("medal") final MedalForm medalForm, final BindingResult result, @RequestParam("id") final long id) {
+    public @ResponseBody JsonResponse updateMedal(@Valid @ModelAttribute("medal") final MedalForm medalForm,
+                                                  final BindingResult result, @RequestParam("id") final long id) {
         JsonResponse<String> response = new JsonResponse<>();
         if (result.hasErrors()) {
             response.setStatus(Status.FAIL);
@@ -650,8 +700,8 @@ public class AdminController {
                 experienceService.getAssessments(year);
         Map<ApplicationForm, Double> experience = experienceService.getExperience(year);
         Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(experience);
-        List<ApplicationForm> applicationForms = experienceService.getSortedApplicationForms(
-                assessments.getFirst(), medals);
+        List<ApplicationForm> applicationForms = experienceService.getSortedApplicationForms(assessments.getFirst(),
+                medals);
 
         final Collection<AssBoundary> bounds = assBoundaryRepository.findByYear(year);
 
@@ -661,8 +711,8 @@ public class AdminController {
         model.addAttribute("experience", experience);
         model.addAttribute("medals", medals);
         model.addAttribute("halls", experienceService.getHalls(year));
-        model.addAttribute("bounds", bounds.stream().map(it -> Double.toString(it.getValue()))
-                .collect(Collectors.joining(";")));
+        model.addAttribute("bounds",
+                bounds.stream().map(it -> Double.toString(it.getValue())).collect(Collectors.joining(";")));
 
         return "results";
     }
@@ -674,14 +724,26 @@ public class AdminController {
         response.setHeader("Content-Disposition", "attachment; filename=\"results.csv\"");
         try (PrintWriter writer = response.getWriter()) {
             writer.println("user,medal,experience");
-
             final Year year = userService.getUserByAuthentication(authentication).getYear();
             Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> assessments =
                     experienceService.getAssessments(year);
+
+            printResultIntoFile(year, it -> {
+                if (assessments.getFirst().get(it.getLeft()) <= 0) {
+                    return;
+                }
+                writer.print(it.getLeft().getUser().getBadgeName());
+                writer.print(",");
+                writer.print(it.getMiddle().getName());
+                writer.print(",");
+                writer.println(it.getRight());
+            });
+
+
             final Map<ApplicationForm, Double> experience = experienceService.getExperience(year);
             final Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(experience);
-            final List<ApplicationForm> applicationForms = experienceService.getSortedApplicationForms(
-                    assessments.getFirst(), medals);
+            final List<ApplicationForm> applicationForms =
+                    experienceService.getSortedApplicationForms(assessments.getFirst(), medals);
 
             for (ApplicationForm user : applicationForms) {
                 if (assessments.getFirst().get(user) <= 0.0) {
@@ -693,6 +755,80 @@ public class AdminController {
                 writer.print(",");
                 writer.println(experience.get(user));
             }
+        }
+    }
+
+    @GetMapping("/results/docx")
+    public void getResultsAsCertificate(final HttpServletResponse response, final Authentication authentication,
+                                        @RequestParam("place") final String place) throws Exception {
+        final Year year = userService.getUserByAuthentication(authentication).getYear();
+        Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> assessments =
+                experienceService.getAssessments(year);
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"certificates.docx\"");
+        try (OutputStream stream = response.getOutputStream()) {
+            final WordprocessingMLPackage templatePackage =
+                    WordprocessingMLPackage.load(getClass().getClassLoader()
+                                    .getResourceAsStream("templates/volunteer-certificate-template.docx")
+                    );
+            VariablePrepare.prepare(templatePackage);
+            final MainDocumentPart mainTemplateDocumentPart = templatePackage.getMainDocumentPart();
+
+            final Map<String, String> variables = new HashMap<>();
+            variables.put("place", place);
+
+            final AtomicReference<WordprocessingMLPackage> resultPackageReference = new AtomicReference<>();
+            final AtomicReference<MainDocumentPart> resultMainDocumentPartReference = new AtomicReference<>();
+
+            printResultIntoFile(year, it -> {
+                if (assessments.getFirst().get(it.getLeft()) <= 0) {
+                    return;
+                }
+                variables.put("volunteer", it.getLeft().getUser().getBadgeName());
+                variables.put("award", it.getMiddle().getName());
+
+                try {
+                    Document page = (Document) XmlUtils.unwrap(
+                                    XmlUtils.unmarshallFromTemplate(
+                                            XmlUtils.marshaltoString(
+                                                    mainTemplateDocumentPart.getJaxbElement(), true, false
+                                            ), variables)
+                    );
+                    if (resultMainDocumentPartReference.get() == null) {
+                        resultPackageReference.set(WordprocessingMLPackage.load(getClass().getClassLoader().getResourceAsStream("templates/volunteer-certificate-template.docx")));
+                        resultMainDocumentPartReference.set(resultPackageReference.get().getMainDocumentPart());
+
+                        resultMainDocumentPartReference.get().setJaxbElement(page);
+                    } else {
+                        final List<Object> pageContent = new ArrayList<>(page.getContent());
+                        for (int i = 0; i < pageContent.size(); i++) {
+                            resultMainDocumentPartReference.get().addObject(XmlUtils.deepCopy(pageContent.get(i)));
+                        }
+                    }
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+            });
+
+            if (resultPackageReference.get() != null) {
+                resultPackageReference.get().save(stream);
+            }
+        }
+    }
+
+    private void printResultIntoFile(final Year year, Consumer<Triple<ApplicationForm, Medal, Double>> printer) {
+        Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> assessments =
+                experienceService.getAssessments(year);
+        final Map<ApplicationForm, Double> experience = experienceService.getExperience(year);
+        final Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(experience);
+        final List<ApplicationForm> applicationForms =
+                experienceService.getSortedApplicationForms(assessments.getFirst(), medals);
+
+        for (ApplicationForm user : applicationForms) {
+            printer.accept(Triple.of(user, medals.get(user), experience.get(user)));
         }
     }
 
@@ -729,19 +865,15 @@ public class AdminController {
         final Year year = userService.getUserByAuthentication(authentication).getYear();
         assBoundaryRepository.delete(assBoundaryRepository.findByYear(year));
 
-        final Collection<AssBoundary> parsedBounds = Arrays.stream(bounds.split(";"))
-                .map(StringUtils::deleteWhitespace)
-                .filter(this::isNumber)
-                .map(value -> new AssBoundary(Double.parseDouble(value), year)).collect(Collectors.toList());
+        final Collection<AssBoundary> parsedBounds =
+                Arrays.stream(bounds.split(";")).map(StringUtils::deleteWhitespace).filter(this::isNumber).map(value -> new AssBoundary(Double.parseDouble(value), year)).collect(Collectors.toList());
 
         assBoundaryRepository.save(parsedBounds);
 
         final JsonResponse<String> result = new JsonResponse<>();
         result.setStatus(Status.OK);
-        result.setResult(
-                parsedBounds.stream().map(it -> Double.toString(it.getValue()))
-                        .collect(Collectors.joining(";"))
-        );
+        result.setResult(parsedBounds.stream().map(it -> Double.toString(it.getValue())).collect(Collectors.joining(
+                ";")));
 
         return result;
     }
@@ -773,13 +905,13 @@ public class AdminController {
 
 
     @GetMapping("/results/user/{id}")
-    public String detailedResultUser(@PathVariable final long id, final Model model, final Authentication authentication) {
+    public String detailedResultUser(@PathVariable final long id, final Model model,
+                                     final Authentication authentication) {
         ApplicationForm applicationForm = applicationFormRepository.findOne(id);
         Map<Attendance, String> attendanceComments = getAttendanceMap();
-        Map<Long, Pair<Double, String>> attendance = applicationForm.getUserDays().stream().collect(Collectors.toMap(
-                UserDay::getId,
-                d -> Pair.of(d.calcAttendanceScore(), attendanceComments.get(d.getAttendance()))
-        ));
+        Map<Long, Pair<Double, String>> attendance =
+                applicationForm.getUserDays().stream().collect(Collectors.toMap(UserDay::getId,
+                        d -> Pair.of(d.calcAttendanceScore(), attendanceComments.get(d.getAttendance()))));
 
         utils.setModelForAdmin(model, userService.getUserByAuthentication(authentication).getYear());
         model.addAttribute("assessmentattendance", attendance);
@@ -795,14 +927,15 @@ public class AdminController {
         String file = year.getCalendar();
         model.addAttribute("file", file);
         URL url = new URL(request.getRequestURL().toString());
-        String baseUrl = url.getProtocol() + "://" + url.getHost() + (url.getPort() == 80 || url.getPort() < 0 ? "" : ":" + url.getPort());
+        String baseUrl = url.getProtocol() + "://" + url.getHost() + (url.getPort() == 80 || url.getPort() < 0 ? "" :
+                ":" + url.getPort());
         model.addAttribute("baseUrl", baseUrl);
         return "events";
     }
 
     @PostMapping("/events")
-    public @ResponseBody
-    JsonResponse editEvents(@RequestParam("file") final String file, Authentication authentication) {
+    public @ResponseBody JsonResponse editEvents(@RequestParam("file") final String file,
+                                                 Authentication authentication) {
         Year year = userService.getUserByAuthentication(authentication).getYear();
         JsonResponse response = new JsonResponse();
         year.setCalendar(file);
@@ -820,7 +953,8 @@ public class AdminController {
     }
 
     @PostMapping("/email")
-    public String sendEmail(@Valid @ModelAttribute("mailform") final MailForm mailForm, final BindingResult result, Authentication authentication, final Model model) throws MessagingException {
+    public String sendEmail(@Valid @ModelAttribute("mailform") final MailForm mailForm, final BindingResult result,
+                            Authentication authentication, final Model model) throws MessagingException {
         User user = userService.getUserByAuthentication(authentication);
         if (result.hasErrors()) {
             utils.setModelForAdmin(model, user.getYear());
@@ -870,7 +1004,9 @@ public class AdminController {
     }
 
     @PutMapping("/users/{id}")
-    public String editUser(@PathVariable final long id, @Valid @ModelAttribute final UserEditForm editForm, final BindingResult result, final RedirectAttributes attributes, final Model model, final Authentication authentication) {
+    public String editUser(@PathVariable final long id, @Valid @ModelAttribute final UserEditForm editForm,
+                           final BindingResult result, final RedirectAttributes attributes, final Model model,
+                           final Authentication authentication) {
         if (result.hasErrors()) {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.editForm", result);
             attributes.addFlashAttribute("editForm", editForm);
@@ -897,11 +1033,7 @@ public class AdminController {
             day.getUsers().forEach(u -> {
                 User user = u.getUserYear().getUser();
                 String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '★');
-                writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," +
-                        u.getPosition().getEngName() + "," + u.getPosition().getCurName() + ",\""
-                        + user.getFirstName() + "\n" + user.getLastName() + "\",\"" +
-                        user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"," +
-                        medals.get(u.getUserYear()).getName() + "," + stars + "\n");
+                writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," + u.getPosition().getEngName() + "," + u.getPosition().getCurName() + ",\"" + user.getFirstName() + "\n" + user.getLastName() + "\",\"" + user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"," + medals.get(u.getUserYear()).getName() + "," + stars + "\n");
             });
             writer.flush();
         }
@@ -917,8 +1049,7 @@ public class AdminController {
     }
 
     @PostMapping("/default")
-    public @ResponseBody
-    JsonResponse<String> setDefaultYear(Authentication authentication) {
+    public @ResponseBody JsonResponse<String> setDefaultYear(Authentication authentication) {
         Year year = userService.getUserByAuthentication(authentication).getYear();
         JsonResponse<String> result = new JsonResponse<>();
         try {

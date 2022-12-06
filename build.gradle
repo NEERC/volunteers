@@ -35,6 +35,9 @@ repositories {
 	maven {
 		url("https://plugins.gradle.org/m2/")
 	}
+	maven {
+		url("https://repo.e-iceblue.com/nexus/content/groups/public/")
+	}
 }
 
 springBoot {
@@ -53,6 +56,11 @@ dependencies {
 	compile('org.springframework.security.oauth:spring-security-oauth2')
 	compile('org.thymeleaf.extras:thymeleaf-extras-springsecurity4')
 	compile('org.decimal4j:decimal4j:1.0.3')
+	implementation('org.docx4j:docx4j:6.1.2') {
+		exclude module: 'log4j'
+		exclude module: 'slf4j-log4j12'
+		exclude module: 'log4j-over-slf4j'
+	}
 
 	compile('org.mnode.ical4j:ical4j:1.0.5')
 	compile('net.sf.biweekly:biweekly:0.6.1')

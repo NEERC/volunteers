@@ -16,6 +16,13 @@
                    th:value="${bounds}" id="boundsInput"/>
         </form>
     </div>
+        <form th:action="@{'/admin/results/docx/'}" method="get" class="form-horizontal col-sm-offset-2 col-sm-8" target="_blank">
+            <div class="form-group">
+                <input class="form-control" type="text" th:placeholder="#{volunteers.result.certificate.place}"
+                       name="place"/>
+                <button type="submit" class="btn btn-primary" th:text="#{volunteers.result.certificate.get}">Generate</button>
+            </div>
+        </form>
     <table class="table table-hover table-fixed" id="results">
         <thead>
         <th></th>
