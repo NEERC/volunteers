@@ -28,9 +28,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.docx4j.Docx4J;
 import org.docx4j.XmlUtils;
 import org.docx4j.model.datastorage.migration.VariablePrepare;
-import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
 import org.docx4j.wml.Document;
@@ -840,7 +840,7 @@ public class AdminController {
 
         try (PrintWriter writer = response.getWriter()) {
 
-            writer.println("name,isu_number");
+            writer.println("name,isu_number,group");
             final Year year = userService.getUserByAuthentication(authentication).getYear();
             Pair<Map<ApplicationForm, Double>, Map<ApplicationForm, List<String>>> assessments =
                     experienceService.getAssessments(year);
@@ -852,7 +852,9 @@ public class AdminController {
                 if (StringUtils.isNotBlank(entry.getKey().getUser().getItmoId())) {
                     writer.print(entry.getKey().getUser().getBadgeNameCyr());
                     writer.print(",");
-                    writer.println(entry.getKey().getUser().getItmoId());
+                    writer.print(entry.getKey().getUser().getItmoId());
+                    writer.print(",");
+                    writer.println(entry.getKey().getGroup());
                 }
             }
         }
