@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1028,14 +1029,16 @@ public class AdminController {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"file.csv\"");
         try (PrintWriter writer = response.getWriter()) {
-            writer.write("Team,TeamCur,Role,RoleCur,Name,NameCyr,Medal,Stars\n");
+            writer.write("team,role,name,surname,teamCur,roleCur,nameCyr,surnameCur,medal,teamNumber\n");
             Day day = dayRepository.findOne(id);
             Map<ApplicationForm, Double> exp = experienceService.getExperienceExceptCurrentYear(day.getYear());
             Map<ApplicationForm, Medal> medals = experienceService.getNewMedals(exp);
-            day.getUsers().forEach(u -> {
+            day.getUsers().stream().sorted(Comparator.comparingLong(user -> user.getPosition().getOrd())).forEach(u -> {
                 User user = u.getUserYear().getUser();
                 String stars = new String(new char[(int) medals.get(u.getUserYear()).getStars()]).replace('\0', '★');
-                writer.write(u.getHall().getName() + "," + u.getHall().getCurName() + "," + u.getPosition().getEngName() + "," + u.getPosition().getCurName() + ",\"" + user.getFirstName() + "\n" + user.getLastName() + "\",\"" + user.getFirstNameCyr() + "\n" + user.getLastNameCyr() + "\"," + medals.get(u.getUserYear()).getName() + "," + stars + "\n");
+                writer.write("\"" + u.getHall().getName() + "\",\"" + u.getPosition().getEngName() + "\"," + user.getFirstName() + "," + user.getLastName() +
+                        ",\"" + u.getHall().getCurName() + "\",\"" + u.getPosition().getCurName() + "\"," + user.getFirstNameCyr() + "," + user.getLastNameCyr() + "," +
+                        medals.get(u.getUserYear()).getName() + "," + stars + "\n");
             });
             writer.flush();
         }
