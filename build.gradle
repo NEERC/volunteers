@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.1.RELEASE'
+		springBootVersion = '1.5.8.RELEASE'
 	}
 	repositories {
 		maven {
@@ -115,6 +115,7 @@ task copyfonts(type:Sync) {
 	nodeExt.with {
 		version = '9.9.0'
 		npmVersion = '4.0.0'
+		distBaseUrl = 'https://direct.nodejs.org/dist/'
 		download = true
 	}
 
